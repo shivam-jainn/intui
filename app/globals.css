@@ -1,0 +1,25 @@
+/* Apply these styles in your global CSS file or within a <style jsx global> tag if using Next.js */
+
+html, body {
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    overflow: hidden; /* Prevents overflow unless explicitly specified */
+  }
+  
+  body {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    width: 100vw;
+    min-height: 100vh;
+    box-sizing: border-box;
+    font-family: Arial, sans-serif; /* Or any preferred font */
+  }
+  
+  #root, #__next {
+    height: 100%; /* Ensures full height for Next.js root div */
+    display: flex;
+    flex-direction: column;
+  }
+  
