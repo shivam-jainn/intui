@@ -15,7 +15,7 @@ enum Difficulty {
 
 model Question {
   id          Int            @id @default(autoincrement())
-  name        String         @db.VarChar(160)
+  name        String         @db.VarChar(160) @unique
   difficulty  Difficulty
   description String
   topics      QuestionTopic[]
