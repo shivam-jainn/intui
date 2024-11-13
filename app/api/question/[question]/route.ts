@@ -10,8 +10,17 @@ export async function GET(
   const questionObject = await prisma.question.findUnique({
     where:{
       name:question
+    },
+    include:{
+      topics:{
+        include:{
+          topic:true
+        }
+      }
     }
   });
+
+  console.log(questionObject);
 
   return NextResponse.json(questionObject);
 }
