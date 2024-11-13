@@ -13,7 +13,7 @@ export default function QuestionPanel({
     difficulty: string;
     companies: string[];
     description: string;
-    topics: string[];
+    topics: any[];
 }) {
     const [tab, setTab] = useState<string>('description');
 
@@ -55,8 +55,8 @@ export default function QuestionPanel({
                     <Accordion.Item key="topics" value="topics">
                         <Accordion.Control>Topics</Accordion.Control>
                         <Accordion.Panel>
-                            {topics.map((topic, index) => (
-                                <Badge key={index}>{topic}</Badge>
+                            {topics.map((element, index) => (
+                                <Badge key={index}>{element.topic.name}</Badge>
                             ))}
                         </Accordion.Panel>
                     </Accordion.Item>
