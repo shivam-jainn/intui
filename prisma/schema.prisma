@@ -1,0 +1,53 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum Difficulty {
+  Easy
+  Medium
+  Hard
+}
+
+model Question {
+  id          Int            @id @default(autoincrement())
+  name        String         @db.VarChar(160) @unique
+  difficulty  Difficulty
+  description String
+  topics      QuestionTopic[]
+  companies   QuestionCompany[]
+}
+
+model Topic {
+  id         Int            @id @default(autoincrement())
+  name       String         @unique @db.VarChar(150)
+  questions  QuestionTopic[]
+}
+
+model Company {
+  id         Int            @id @default(autoincrement())
+  name       String         @unique @db.VarChar(150)
+  questions  QuestionCompany[]
+}
+
+model QuestionTopic {
+  questionId Int
+  topicId    Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  topic      Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, topicId]) // Composite primary key
+}
+
+model QuestionCompany {
+  questionId Int
+  companyId  Int
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+
+  @@id([questionId, companyId]) // Composite primary key
+}
