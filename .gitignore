@@ -132,3 +132,7 @@ dist
 .DS_Store
 
 .terraform
+
+
+# infra creds
+infra/credentials

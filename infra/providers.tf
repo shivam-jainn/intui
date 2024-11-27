@@ -1,3 +1,10 @@
+provider "google" {
+    project = var.project
+    region = var.region["us-central"]
+    zone = var.zone["us-central1-c"]
+    credentials = "./credentials/gcp.json"
+}
+
 provider "aws" {
 
   access_key                  = "test"
@@ -13,16 +20,5 @@ provider "aws" {
  
   endpoints {
     s3             = "http://localhost:4566"
-  }
-}
-
-
-
-resource "aws_s3_bucket" "intui-bucket" {
-  bucket = "intui-bucket"
-
-  tags = {
-    Name        = "Intui"
-    Environment = "Development"
   }
 }
