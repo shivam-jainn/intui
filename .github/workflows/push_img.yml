@@ -5,7 +5,7 @@ on:
     branches:
       - master
     paths:
-      - /images
+      - images/*
 
 jobs:
   build-and-push:
