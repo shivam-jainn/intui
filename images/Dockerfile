@@ -21,7 +21,7 @@ WORKDIR /app
 
 COPY --from=builder /app/execserver .
 
-COPY ./execserver/.env .env
+# COPY ./execserver/.env .env
 
 EXPOSE 8080
 
