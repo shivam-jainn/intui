@@ -14,11 +14,6 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v3
         
-      - name: List directory structure
-        run: |
-          echo "Current working directory: $(pwd)"
-          ls -R
-
       - name: Set up Docker
         uses: docker/setup-buildx-action@v2
 
@@ -26,16 +21,31 @@ jobs:
         uses: google-github-actions/auth@v2
         with:
           credentials_json: ${{ secrets.GCP_CREDENTIALS }}
+          token_format: 'access_token'  # Add this line
 
+      - name: Set up Cloud SDK
+        uses: google-github-actions/setup-gcloud@v1
+        
       - name: Configure Docker for Artifact Registry
         run: |
-          gcloud auth configure-docker ${{secrets.gcp_region}}-docker.pkg.dev
+          gcloud auth configure-docker ${{secrets.gcp_region}}-docker.pkg.dev --quiet
 
       - name: Build and push Docker image
         working-directory: ./images
+        env:
+          IMAGE_NAME: ${{ secrets.gcp_region }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest
         run: |
+          # Verify repository exists
+          gcloud artifacts repositories describe ${{ secrets.ARTIFACT_REPOSITORY_ID }} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --location=${{ secrets.gcp_region }} || \
+          gcloud artifacts repositories create ${{ secrets.ARTIFACT_REPOSITORY_ID }} \
+            --project=${{ secrets.GCP_PROJECT_ID }} \
+            --location=${{ secrets.gcp_region }} \
+            --repository-format=docker
+
           docker build \
             --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
             --build-arg REDIS_PORT=${{ secrets.REDIS_PORT }} \
-            -t ${{ secrets.gcp_region }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest .
-          docker push ${{ secrets.gcp_region }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest
+            -t ${IMAGE_NAME} .
+          docker push ${IMAGE_NAME}
