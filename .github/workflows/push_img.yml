@@ -32,7 +32,7 @@ jobs:
           gcloud auth configure-docker ${{secrets.gcp_region}}-docker.pkg.dev
 
       - name: Build and push Docker image
-        working-directory: ./images
+        working-directory: ${GITHUB_WORKSPACE}/images
         run: |
           docker build -t ${{secrets.gcp_region}}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest .
           docker push ${{secrets.gcp_region}}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest
