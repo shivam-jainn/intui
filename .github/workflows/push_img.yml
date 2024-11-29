@@ -34,5 +34,8 @@ jobs:
       - name: Build and push Docker image
         working-directory: ./images
         run: |
-          docker build -t ${{secrets.gcp_region}}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest .
-          docker push ${{secrets.gcp_region}}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest
+          docker build \
+            --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
+            --build-arg REDIS_PORT=${{ secrets.REDIS_PORT }} \
+            -t ${{ secrets.gcp_region }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest .
+          docker push ${{ secrets.gcp_region }}-docker.pkg.dev/${{ secrets.GCP_PROJECT_ID }}/${{ secrets.ARTIFACT_REPOSITORY_ID }}/executor-image:latest
