@@ -1,27 +1,35 @@
+# Build stage
 FROM golang:alpine AS builder
-
 WORKDIR /app
 
-RUN apk update && apk add --no-cache gcc g++ make
+# Install build dependencies
+RUN apk add --no-cache gcc g++ make
 
+# Download dependencies first (better layer caching)
 COPY ./execserver/go.mod ./execserver/go.sum ./
-
 RUN go mod download
 
+# Copy source and build
 COPY ./execserver .
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o execserver .
 
-RUN go build -o execserver .
-
+# Runtime stage
 FROM alpine:latest
 
-RUN apk update && \
-    apk add --no-cache nodejs npm python3 py3-pip openjdk17 g++ gcc
+# Install runtime dependencies in a single layer
+RUN apk add --no-cache \
+    nodejs \
+    npm \
+    python3 \
+    py3-pip \
+    openjdk17 \
+    g++ \
+    gcc \
 
 WORKDIR /app
 
+# Copy only the binary from builder
 COPY --from=builder /app/execserver .
-
-# COPY ./execserver/.env .env
 
 EXPOSE 8080
 

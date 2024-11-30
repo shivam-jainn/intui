@@ -1,7 +1,6 @@
 package main
 
 import (
-	"execserver/clients"
 	"execserver/controllers"
 	"log"
 
@@ -11,11 +10,9 @@ import (
 func main() {
 	app := fiber.New()
 
-	clients.InitRedis()
-
 	app.Get("/health", controllers.HealthCheck)
 
-	app.Post("/execute", controllers.ProcessJob)
+	app.Post("/execute", controllers.ExecuteCode)
 
 	log.Fatal(app.Listen(":8080"))
 }
