@@ -1,0 +1,46 @@
+{
+  "name": "Bruno API collections",
+  "version": "1",
+  "items": [
+    {
+      "type": "folder",
+      "name": "Executor",
+      "items": [
+        {
+          "type": "http",
+          "name": "/execute endpoint",
+          "seq": 1,
+          "request": {
+            "url": "http://localhost:8080/execute",
+            "method": "POST",
+            "headers": [],
+            "params": [],
+            "body": {
+              "mode": "json",
+              "json": "{\n  \"questionName\": \"oK\",\n  \"userCode\": \"print('hello')\",\n  \"language\": \"python\"\n}",
+              "formUrlEncoded": [],
+              "multipartForm": []
+            },
+            "script": {},
+            "vars": {},
+            "assertions": [],
+            "tests": "",
+            "auth": {
+              "mode": "none"
+            }
+          }
+        }
+      ]
+    }
+  ],
+  "environments": [],
+  "brunoConfig": {
+    "version": "1",
+    "name": "Bruno API collections",
+    "type": "collection",
+    "ignore": [
+      "node_modules",
+      ".git"
+    ]
+  }
+}
