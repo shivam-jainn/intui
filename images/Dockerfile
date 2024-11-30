@@ -24,7 +24,7 @@ RUN apk add --no-cache \
     py3-pip \
     openjdk17 \
     g++ \
-    gcc \
+    gcc
 
 WORKDIR /app
 
