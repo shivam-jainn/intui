@@ -9,7 +9,8 @@ variable "region" {
     type = map(string)
     description = "Different regional mapping"
     default = {
-      "us-central" = "us-central1"
+      "us-central" = "us-central1",
+      "us-east1" = "us-east1"
     }
 }
 
@@ -32,7 +33,7 @@ variable "artifact_repository_id" {
 variable "exec_image_name" {
   type = string
   description = "Executor image name"
-  default = "executor"
+  default = "executor-image"
 }
 
 

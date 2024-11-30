@@ -5,7 +5,7 @@ resource "google_cloud_run_service" "my_service" {
   template {
     spec {
       containers {
-        image = "us-central1-docker.pkg.dev/${var.project}/${var.artifact_repository_id}/${var.exec_image_name}:${var.image_tag["latest"]}"
+        image = "us-east1-docker.pkg.dev/${var.project}/${var.artifact_repository_id}/${var.exec_image_name}:${var.image_tag["latest"]}"
         resources {
           limits = {
             memory = "512Mi"
