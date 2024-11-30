@@ -44,8 +44,5 @@ jobs:
             --location=${{ secrets.gcp_region }} \
             --repository-format=docker
 
-          docker build \
-            --build-arg REDIS_HOST=${{ secrets.REDIS_HOST }} \
-            --build-arg REDIS_PORT=${{ secrets.REDIS_PORT }} \
-            -t ${IMAGE_NAME} .
+          docker build -t ${IMAGE_NAME} .
           docker push ${IMAGE_NAME}
