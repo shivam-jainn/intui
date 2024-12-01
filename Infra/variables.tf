@@ -25,3 +25,35 @@ variable "zone" {
       "us-east1-c" = "us-east1-c",
     }
 }
+
+
+
+variable "artifact_repository_id" {
+  type = string
+  description = "Repo id for artifact creation"
+}
+
+variable "exec_image_name" {
+  type = string
+  description = "Executor image name"
+}
+
+
+variable "image_tag" {
+  type = map(string)
+  description = "Tag for executor image "
+  default = {
+    "latest" = "latest"
+    "pi" = "rpi"
+  }
+}
+
+variable "cloud_run_service_name-executor" {
+  type = string
+  description = "executor service name"
+}
+
+variable "account-email-invoker" {
+  type = string
+  description = "email account for invoker"
+}
