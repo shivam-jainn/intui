@@ -1,7 +1,6 @@
 variable "project" {
     type = string
     description = "GCP projects value"
-    default = "intui-443016"
 }
 
 
