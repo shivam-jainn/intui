@@ -1,2 +1,6 @@
 credentials
 environments
+modules/*/*.lock.hcl
+modules/*/*.tfstate
+modules/*/*.tfstate*
+
