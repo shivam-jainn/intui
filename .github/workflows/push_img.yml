@@ -6,6 +6,8 @@ on:
       - master
     paths:
       - images/*
+  
+  workflow_dispatch:
 
 jobs:
   build-and-push:
