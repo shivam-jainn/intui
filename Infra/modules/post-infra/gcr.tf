@@ -1,12 +1,12 @@
 resource "google_cloud_run_v2_service" "executor" {
   name     = var.cloud_run_service_name-executor
-  location = var.location["us-east1"]
+  location = var.region["us-east1"]
   deletion_protection = false
   ingress = "INGRESS_TRAFFIC_ALL"
 
   template {
     containers {
-      image = "${var.location["us-east1"]}-docker.pkg.dev/${var.project}/${var.artifact_repository_id}/${var.exec_image_name}:${var.image_tag["latest"]}"
+      image = "${var.region["us-east1"]}-docker.pkg.dev/${var.project}/${var.artifact_repository_id}/${var.exec_image_name}:${var.image_tag["latest"]}"
       resources {
         limits = {
           cpu    = "1"
