@@ -1,7 +1,6 @@
 variable "project" {
     type = string
     description = "GCP projects value"
-    default = "intui-443016"
 }
 
 
@@ -21,19 +20,22 @@ variable "zone" {
       "us-central1-a" = "us-central1-a",
       "us-central1-b" = "us-central1-b",
       "us-central1-c" = "us-central1-c",
+      "us-east1-a" = "us-east1-a",
+      "us-east1-b" = "us-east1-b",
+      "us-east1-c" = "us-east1-c",
     }
 }
+
+
 
 variable "artifact_repository_id" {
   type = string
   description = "Repo id for artifact creation"
-  default = "exec-arti-repo"
 }
 
 variable "exec_image_name" {
   type = string
   description = "Executor image name"
-  default = "executor-image"
 }
 
 
@@ -44,4 +46,14 @@ variable "image_tag" {
     "latest" = "latest"
     "pi" = "rpi"
   }
+}
+
+variable "cloud_run_service_name-executor" {
+  type = string
+  description = "executor service name"
+}
+
+variable "account-email-invoker" {
+  type = string
+  description = "email account for invoker"
 }
