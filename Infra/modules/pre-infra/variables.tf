@@ -57,3 +57,13 @@ variable "account-email-invoker" {
   type = string
   description = "email account for invoker"
 }
+
+variable "website_uri" {
+  type = list(string)
+  description = "Website uri"
+}
+
+variable "bucket_name" {
+  type = string
+  description = "Storage bucket name"
+}
