@@ -1,14 +1,12 @@
-import { getFileFromStorage } from "@/lib/storage/Upload";
+import { storage } from "../clients";
 
 export async function getDescAndDriver(question_name : string){
 
-    const bucketName = 'intui-bucket';
+    const desc_key =  "description-"+question_name;
+    const driver_key =  "driver-"+question_name;
 
-    const desc_key = bucketName + "-" + question_name;
-    const driver_key = bucketName + "-" + question_name;
+    const question_description = await storage.download(desc_key);
+    const driver_code = await storage.download(driver_key);
 
-    const question_description = await getFileFromStorage(desc_key);
-    const driver_code = await getFileFromStorage(driver_key);
-    
     return {question_description,driver_code}
 } 
