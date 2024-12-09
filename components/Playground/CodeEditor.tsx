@@ -6,28 +6,28 @@ import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
 import { oneDark } from '@codemirror/theme-one-dark';
 import './CodeEditor.css';
-import { Stack , Container, Select , Button } from '@mantine/core';
-import { FaChevronDown } from "react-icons/fa6";
+import { Stack, Container, Select, Button, Card } from '@mantine/core';
 import { GrPowerReset } from "react-icons/gr";
 import { useAtom } from 'jotai';
 import { langAtom } from '@/contexts/LanguageContext';
 import { Language } from '@/lib/common/types/playground.types';
 import { useLocalStorage } from '@mantine/hooks';
 import { getDriver } from '@/lib/common/playground/desc_and_driver';
+import RunAndSubmissionBar from './RunAndSubmissionBar';
 
 interface CodeEditorProps {
   questionName: string;
 }
 
-const CodeEditor = ({ 
+const CodeEditor = ({
   questionName
 }: CodeEditorProps) => {
-  const [language,setLanguage] = useAtom<Language>(langAtom);
-  const [initialCode,setInitialCode] = useState("");
+  const [language, setLanguage] = useAtom<Language>(langAtom);
+  const [initialCode, setInitialCode] = useState("");
 
-  async function setDriverCode(){
+  async function setDriverCode() {
     console.log(language);
-    const {driver_code} = await getDriver(decodeURIComponent(questionName),language)
+    const { driver_code } = await getDriver(decodeURIComponent(questionName), language)
     setStoredCode(driver_code);
     setInitialCode(driver_code);
   }
@@ -38,11 +38,11 @@ const CodeEditor = ({
     };
     fetchDriverCode();
   }, [questionName, language]);
-  
 
-  const [storedCode,setStoredCode] = useLocalStorage({
+
+  const [storedCode, setStoredCode] = useLocalStorage({
     key: `${questionName}-code`,
-    defaultValue : ""
+    defaultValue: ""
   })
 
 
@@ -54,9 +54,9 @@ const CodeEditor = ({
     switch (language) {
       case 'python':
         return python();
-      
-        case 'cpp':
-          return cpp();
+
+      case 'cpp':
+        return cpp();
     }
   };
 
@@ -64,50 +64,53 @@ const CodeEditor = ({
     { value: "cpp", label: "C++" },
     { value: "python", label: "Python" },
   ];
-  
-  function resetCode(){
+
+  function resetCode() {
     setStoredCode(initialCode);
   }
 
   return (
-    <Stack h='100%'>
-   
-   <Container w="100%"  pt="0.5rem" pb="0.5rem">
-  <Container
-    style={{
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "space-between",
-      borderRadius: "0.5rem",
-    }}
-    bg="gray"
-    w="98%"
-    py="sm"
-    px="lg"
-  >
-   <Select
-      placeholder="Select Language"
-      data={languageOptions}
-      value={language}
-      onChange={(value) => setLanguage(value as Language)}
-      comboboxProps={{
-        position: "bottom",
-        middlewares: { flip: false, shift: false },
-        offset: 0,
+
+    <div style={{
+      display:'flex',
+      flexDirection: 'column',
+      height:'100%'
+    }}>
+      
+
+      <Card w="100%" style={{
+        display: "flex",
+        flexDirection: 'row',
+        alignItems: "center",
+        justifyContent: "space-between",
       }}
-    />
+        bg="gray"
+      >
+        <Select
+          placeholder="Select Language"
+          data={languageOptions}
+          value={language}
+          onChange={(value) => setLanguage(value as Language)}
+
+        />
+
+<Button onClick={resetCode}>
+          <GrPowerReset />
+        </Button>
 
 
-    <Button style={{ height: "30px",minWidth: "50px" }} onClick={resetCode}> 
-      <GrPowerReset />
-    </Button>
-  </Container>
-</Container>
+      <div style={{display:'flex',flexDirection:'row',gap:'5px'}}>
 
-    <div className="code-editor-container">
+        <Button variant='secondary'>Run</Button>
+        <Button>Submit</Button>
+      </div>
+      </Card>
+
+      <div style={{
+        flexGrow: 1
+      }}>
       <CodeMirror
         value={storedCode}
-        height='100vh'
         extensions={[getLanguageExtension()]}
         onChange={handleChange}
         theme={oneDark}
@@ -135,9 +138,10 @@ const CodeEditor = ({
           completionKeymap: true,
           lintKeymap: true,
         }}
+        minHeight='100%'
       />
+      </div>
     </div>
-    </Stack>
   );
 };
 
