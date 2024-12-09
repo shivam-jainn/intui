@@ -7,7 +7,7 @@ export default function TestCard() {
     const [tab, setTab] = useState<string>('testcases');
     const testcases = [
             {
-                "output" : "1"
+                "output" : "1",
                 "value" : "[1,2,3]",
             }        
     ];
