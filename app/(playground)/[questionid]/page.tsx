@@ -5,7 +5,7 @@ import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import QuestionPanel from "@/components/Playground/QuestionPanel";
 import { getDesc } from "@/lib/common/playground/desc_and_driver";
 import CodeEditor from "@/components/Playground/CodeEditor";
-import RunAndSubmissionBar from "@/components/Playground/RunAndSubmissionBar";
+import RunAndSubmissionBar from "@/components/Playground/TestCard";
 
 interface QuestionData {
   name: string;
