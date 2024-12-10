@@ -1,6 +1,7 @@
 "use client";
 import { Stack, Title, Group, Badge, Container, SegmentedControl, Accordion, Text } from '@mantine/core';
 import React, { useState } from 'react';
+import Markdown from 'react-markdown';
 
 export default function QuestionPanel({
     questionTitle,
@@ -33,7 +34,9 @@ export default function QuestionPanel({
             {
                 tab === 'description' ?
 
-            <>
+            <div style={{
+                overflowY : "auto"
+            }}>
             <Stack style={{ padding: '1rem', display: 'flex', flexDirection: 'column', gap: '2rem' }} w="100%">
                 <Title order={1}>{questionTitle}</Title>
 
@@ -46,8 +49,8 @@ export default function QuestionPanel({
                         </Badge>
                     ))}
                 </Group>
-
-              <Text>{description}</Text>
+                     
+        <Markdown>{description}</Markdown>
             </Stack>
 
             <Stack>
@@ -62,7 +65,7 @@ export default function QuestionPanel({
                     </Accordion.Item>
                 </Accordion>
             </Stack>
-            </>
+            </div>
 
             :
 

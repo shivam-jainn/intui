@@ -1,6 +1,7 @@
 {
     "conventionalCommits.scopes": [
         "Infra",
-        "lib/storage"
+        "lib/storage",
+        "Playground"
     ]
 }

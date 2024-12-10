@@ -4,9 +4,11 @@ import { StorageService } from "../storage-services";
 export class GcpStorage implements StorageService {
   private storage: Storage;
   private bucketName: string;
-
-  constructor(config: any,bucketName:string) {
-    this.storage = new Storage(config);
+  
+  constructor(config: any,bucketName:string,_credentials:Record<string,string>) {
+    const _config = {...config,"credentials":_credentials};
+    console.log(_config)
+    this.storage = new Storage(_config);
     this.bucketName = bucketName;
   }
 
@@ -14,14 +16,15 @@ export class GcpStorage implements StorageService {
     const bucket = this.storage.bucket(this.bucketName);
     const fileUpload = bucket.file(path);
 
-    await fileUpload.save(file);
+    console.log(fileUpload);
+    // await fileUpload.save(file);
     return `gcp://${this.bucketName}/${path}`;
   }
 
   async download(path: string): Promise<Buffer> {
     const bucket = this.storage.bucket(this.bucketName);
     const fileDownload = bucket.file(path);
-
+    console.log(fileDownload);
     const [content] = await fileDownload.download();
     return content;
   }
