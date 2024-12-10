@@ -31,6 +31,8 @@ export default function TestCard() {
                 
             />
 
+{
+    tab === "testcases" ? 
             <div style={{
                 display:'flex',
                 flexDirection:'column',
@@ -53,6 +55,15 @@ export default function TestCard() {
                     {testcases[Number(testcase)].value}
                 </div>
             </div>
+    
+    : 
+
+    <div>
+        noice
+    </div>
+}
+
+
 
         </Card>
     )
