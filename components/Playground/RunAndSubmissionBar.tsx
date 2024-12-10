@@ -20,7 +20,6 @@ export default function TestCard() {
     return (
         <Card display="flex" style={{
             gap:'1rem',
-            height: '100%'
         }} >
             <SegmentedControl
                 value={tab}
