@@ -1,6 +1,6 @@
 "use client";
 import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
-import { Card, SegmentedControl, Text, Box, Stack, Code } from '@mantine/core';
+import { Card, SegmentedControl, Text, Box, Stack, Code, Badge } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import React, { useState, useEffect } from 'react';
 
@@ -11,24 +11,29 @@ export default function TestCard() {
   const [isResultDataAvailable, setIsResultDataAvailable] = useState<boolean>(false);
 
   useEffect(() => {
-    setIsResultDataAvailable(resultData && Array.isArray(resultData.output));
+    const hasValidResults = resultData?.results?.length > 0;
+    setIsResultDataAvailable(hasValidResults);
+    
+    // Reset test case selection when results change
+    if (hasValidResults) {
+      setTestCase('0');
+    }
+
+    console.log(resultData);
   }, [resultData]);
 
   const testcases = [
-    {
-      output: "1",
-      value: "[1,2,3]",
-    },
-    {
-      output: "4",
-      value: "[5,2,3]",
-    }
+    { output: "1", value: "[1,2,3]" },
+    { output: "4", value: "[5,2,3]" }
   ];
 
   function changeTab(tabName: "testcases" | "results") {
-    if (tabName === "results" && !isResultDataAvailable) return; // Prevent switching to "results" if resultData is not available
+    if (tabName === "results" && !isResultDataAvailable) return;
     setTab(tabName);
   }
+
+  const currentResult = resultData?.results?.[Number(testcase)] || {};
+  const isSuccess = currentResult.output === true;
 
   return (
     <Card withBorder radius="md">
@@ -38,7 +43,11 @@ export default function TestCard() {
           onChange={(value) => changeTab(value as "testcases" | "results")}
           data={[
             { label: 'Test Cases', value: 'testcases' },
-            { label: 'Results', value: 'results', disabled: !isResultDataAvailable }, // Disable "Results" tab if resultData is not available
+            { 
+              label: 'Results', 
+              value: 'results', 
+              disabled: !isResultDataAvailable 
+            },
           ]}
           size="sm"
           color="blue"
@@ -58,60 +67,69 @@ export default function TestCard() {
               color="blue"
             />
             <Text size="sm" weight={500} color="dimmed">Input:</Text>
-            <Code block 
-                  sx={(theme) => ({
-                    backgroundColor: theme.colors.dark[8],
-                    color: theme.colors.gray[0],
-                    padding: theme.spacing.md
-                  })}>
-              {testcases[Number(testcase)].value}
+            <Code block sx={codeBlockStyle}>
+              {testcases[Number(testcase)]?.value || "No input available"}
             </Code>
           </Stack>
         ) : (
           <Stack spacing="xs">
-            <SegmentedControl
-              value={testcase}
-              onChange={setTestCase}
-              data={resultData.output.map((_, index: number) => ({
-                label: `Case ${index}`,
-                value: `${index}`
-              }))}
-              size="xs"
-              color="blue"
-            />
-            
-            <Box>
-              <Text size="sm" weight={500} color="dimmed">Your Output:</Text>
-              <Code block 
-                    sx={(theme) => ({
-                      backgroundColor: 
-                        resultData.output[Number(testcase)].result === 
-                        resultData.output[Number(testcase)].expected
-                          ? theme.fn.rgba(theme.colors.green[9], 0.15)
-                          : theme.fn.rgba(theme.colors.red[9], 0.15),
-                      color: theme.colors.gray[0],
-                      padding: theme.spacing.md,
-                      marginTop: theme.spacing.xs
-                    })}>
-                {resultData.output[Number(testcase)].result}
-              </Code>
-            </Box>
+            {resultData?.results?.length > 0 ? (
+              <>
+                <SegmentedControl
+                  value={testcase}
+                  onChange={setTestCase}
+                  data={resultData.results.map((_, index: number) => ({
+                    label: `Case ${index}`,
+                    value: `${index}`
+                  }))}
+                  size="xs"
+                  color="blue"
+                />
 
-            <Box>
-              <Text size="sm" weight={500} color="dimmed">Expected Output:</Text>
-              <Code block 
-                    sx={(theme) => ({
-                      backgroundColor: theme.colors.dark[8],
-                      color: theme.colors.gray[0],
-                      padding: theme.spacing.md,
-                      marginTop: theme.spacing.xs
-                    })}>
-                {resultData.output[Number(testcase)].expected}
-              </Code>
-            </Box>
+                <Box>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Text size="sm" weight={500} color="dimmed">Your Output:</Text>
+                    <Badge 
+                      color={isSuccess ? "green" : "red"}
+                      variant="filled"
+                    >
+                      {isSuccess ? "Passed" : "Failed"}
+                    </Badge>
+                  </div>
+                  <Code block sx={{
+                    ...codeBlockStyle,
+                    backgroundColor: isSuccess 
+                      ? 'rgba(34, 139, 34, 0.15)' 
+                      : 'rgba(255, 0, 0, 0.15)'
+                  }}>
+                    {currentResult.result ?? "No output"}
+                  </Code>
+                </Box>
+
+                <Box>
+                  <Text size="sm" weight={500} color="dimmed">Expected Output:</Text>
+                  <Code block sx={codeBlockStyle}>
+                    {currentResult.expected ?? "No expected output"}
+                  </Code>
+                </Box>
+              </>
+            ) : (
+              <Text size="sm" color="dimmed">
+                No test results available
+              </Text>
+            )}
           </Stack>
         )}
       </Stack>
     </Card>
   );
 }
+
+const codeBlockStyle = (theme: any) => ({
+  backgroundColor: theme.colors.dark[8],
+  color: theme.colors.gray[0],
+  padding: theme.spacing.md,
+  marginTop: theme.spacing.xs,
+  whiteSpace: 'pre-wrap',
+  wordBreak: 'break-word'
+});

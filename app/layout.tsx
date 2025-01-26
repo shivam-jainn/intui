@@ -5,6 +5,7 @@ import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { Navbar } from '@/components/Navbar/Navbar';
 import { theme } from '../theme';
 import './globals.css';
+import TanstackQueryProvider from './TanstackQueryProvider';
 
 export const metadata = {
   title: 'Mantine Next.js template',
@@ -24,8 +25,10 @@ export default function RootLayout({ children }: { children: any }) {
       </head>
       <body>
         <MantineProvider theme={theme}>
-          <Navbar />
-          {children}
+          <TanstackQueryProvider>
+            <Navbar />
+            {children}
+          </TanstackQueryProvider>
         </MantineProvider>
       </body>
     </html>
