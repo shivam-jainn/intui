@@ -6,14 +6,14 @@ import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
 import { oneDark } from '@codemirror/theme-one-dark';
 import './CodeEditor.css';
-import { Stack, Container, Select, Button, Card } from '@mantine/core';
+import { Select, Button, Card } from '@mantine/core';
 import { GrPowerReset } from "react-icons/gr";
 import { useAtom } from 'jotai';
 import { langAtom } from '@/contexts/LanguageContext';
 import { Language } from '@/lib/common/types/playground.types';
 import { useLocalStorage } from '@mantine/hooks';
 import { getDriver } from '@/lib/common/playground/desc_and_driver';
-import RunAndSubmissionBar from './RunAndSubmissionBar';
+import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
 
 interface CodeEditorProps {
   questionName: string;
@@ -24,6 +24,9 @@ const CodeEditor = ({
 }: CodeEditorProps) => {
   const [language, setLanguage] = useAtom<Language>(langAtom);
   const [initialCode, setInitialCode] = useState("");
+  const [isLoading,setIsLoading] = useState<boolean>(false);
+  const [testTab,setTestTab] = useAtom(resultAtom);
+  const [_,setResultData] = useAtom(resultDataAtom);
 
   async function setDriverCode() {
     console.log(language);
@@ -69,6 +72,65 @@ const CodeEditor = ({
     setStoredCode(initialCode);
   }
 
+  async function handleRunCode(){
+
+    setIsLoading(true);
+
+    const requestBody = {
+      question_name : questionName,
+      code : storedCode,
+      language: language
+    }
+
+    const response = await fetch('/api/execution',{
+      method : "POST",
+      body : JSON.stringify(requestBody)
+    })
+
+    // const {status,message} = await response.json();
+    const data = await response.json();
+    setResultData(data);
+    console.log(data)
+    // if(process.env.NODE_ENV === "development") console.log(message);
+    // if(process.env.NODE_ENV === "development") console.log(status);
+
+    setTestTab("results");
+
+
+
+    setIsLoading(false);
+
+  }
+
+  async function handleSubmission(){
+
+    setIsLoading(true);
+
+    const requestBody = {
+      question_name : questionName,
+      code : storedCode,
+      language: language
+    }
+
+    const response = await fetch('/api/execution/submission',{
+      method : "POST",
+      body : JSON.stringify(requestBody)
+    })
+
+    // const {status,message} = await response.json();
+    const data = await response.json();
+    setResultData(data);
+    // if(process.env.NODE_ENV === "development") console.log(message);
+    // if(process.env.NODE_ENV === "development") console.log(status);
+
+    setTestTab("results");
+
+
+
+    setIsLoading(false);
+
+  }
+
   return (
 
     <div style={{
@@ -84,7 +146,6 @@ const CodeEditor = ({
         alignItems: "center",
         justifyContent: "space-between",
       }}
-        bg="gray"
       >
         <Select
           placeholder="Select Language"
@@ -101,8 +162,8 @@ const CodeEditor = ({
 
       <div style={{display:'flex',flexDirection:'row',gap:'5px'}}>
 
-        <Button variant='secondary'>Run</Button>
-        <Button>Submit</Button>
+        <Button variant='secondary' onClick={handleRunCode} loading={isLoading}>Run</Button>
+        <Button onClick={handleSubmission}>Submit</Button>
       </div>
       </Card>
 
