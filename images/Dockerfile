@@ -5,12 +5,10 @@ WORKDIR /app
 # Install build dependencies
 RUN apk add --no-cache gcc g++ make
 
-# Download dependencies first (better layer caching)
-COPY ./execserver/go.mod ./execserver/go.sum ./
-RUN go mod download
 
 # Copy source and build
 COPY ./execserver .
+RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o execserver .
 
 # Runtime stage
