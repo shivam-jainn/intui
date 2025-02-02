@@ -17,22 +17,6 @@ services:
     ports:
       - "5432:5432"
 
-  localstack:
-    image: localstack/localstack:latest
-    container_name: intui
-    ports:
-      - "4566:4566"  # LocalStack edge port for all AWS services
-    environment:
-      - SERVICES=s3
-      - DEBUG=1
-      - AWS_DEFAULT_REGION=us-east-1
-      - AWS_ACCESS_KEY_ID=test
-      - AWS_SECRET_ACCESS_KEY=test
-      - DATA_DIR=/data/localstack  # Set to custom persistent directory
-    volumes:
-      - localstack_data:/var/lib/localstack
-      - ./localstack_persist:/data/localstack  # Persistent directory outside /tmp
-      - "$XDG_RUNTIME_DIR/podman/podman.sock:/var/run/docker.sock"  # Point to Podman’s Docker-compatible socket
 volumes:
   data:
   postgres_data:
