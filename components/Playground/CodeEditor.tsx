@@ -91,8 +91,8 @@ const CodeEditor = ({
     const data = await response.json();
     setResultData(data);
     console.log(data)
-    // if(process.env.NODE_ENV === "development") console.log(message);
-    // if(process.env.NODE_ENV === "development") console.log(status);
+    // if(process.env.ENV_MODE === "development") console.log(message);
+    // if(process.env.ENV_MODE === "development") console.log(status);
 
     setTestTab("results");
 
@@ -120,8 +120,8 @@ const CodeEditor = ({
     // const {status,message} = await response.json();
     const data = await response.json();
     setResultData(data);
-    // if(process.env.NODE_ENV === "development") console.log(message);
-    // if(process.env.NODE_ENV === "development") console.log(status);
+    // if(process.env.ENV_MODE === "development") console.log(message);
+    // if(process.env.ENV_MODE === "development") console.log(status);
 
     setTestTab("results");
 

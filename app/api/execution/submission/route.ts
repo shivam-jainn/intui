@@ -41,7 +41,7 @@ export async function POST(req: NextRequest) {
   };
 
   try {
-    const response = await fetch(process.env.NODE_ENV === "development"?local_executor_url:gcr_url, {
+    const response = await fetch(process.env.ENV_MODE === "development"?local_executor_url:gcr_url, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
@@ -51,7 +51,7 @@ export async function POST(req: NextRequest) {
 
     const data = await response.json();
 
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.ENV_MODE === "development") {
       console.log(data);
     }
 
@@ -70,7 +70,7 @@ export async function POST(req: NextRequest) {
       { status: response.status }
     );
   } catch (error: any) {
-    if (process.env.NODE_ENV === "development") {
+    if (process.env.ENV_MODE === "development") {
       console.error("Execution error:", error.message);
     }
     return NextResponse.json(
