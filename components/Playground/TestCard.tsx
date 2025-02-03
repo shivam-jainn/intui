@@ -7,7 +7,7 @@ import React, { useState, useEffect } from 'react';
 export default function TestCard() {
   const [tab, setTab] = useAtom(resultAtom);
   const [testcase, setTestCase] = useState<string>('0');
-  const resultData = useAtomValue(resultDataAtom);
+  const resultData:any = useAtomValue(resultDataAtom);
   const [isResultDataAvailable, setIsResultDataAvailable] = useState<boolean>(false);
 
   useEffect(() => {
@@ -37,7 +37,7 @@ export default function TestCard() {
 
   return (
     <Card withBorder radius="md">
-      <Stack spacing="md">
+      <Stack >
         <SegmentedControl
           value={tab}
           onChange={(value) => changeTab(value as "testcases" | "results")}
@@ -55,7 +55,7 @@ export default function TestCard() {
         />
 
         {tab === "testcases" ? (
-          <Stack spacing="xs">
+          <Stack>
             <SegmentedControl
               value={testcase}
               onChange={setTestCase}
@@ -66,19 +66,19 @@ export default function TestCard() {
               size="xs"
               color="blue"
             />
-            <Text size="sm" weight={500} color="dimmed">Input:</Text>
-            <Code block sx={codeBlockStyle}>
+            <Text size="sm" fw={500}>Input:</Text>
+            <Code block style={codeBlockStyle}>
               {testcases[Number(testcase)]?.value || "No input available"}
             </Code>
           </Stack>
         ) : (
-          <Stack spacing="xs">
+          <Stack>
             {resultData?.results?.length > 0 ? (
               <>
                 <SegmentedControl
                   value={testcase}
                   onChange={setTestCase}
-                  data={resultData.results.map((_, index: number) => ({
+                  data={resultData.results.map((_:any, index: number) => ({
                     label: `Case ${index}`,
                     value: `${index}`
                   }))}
@@ -88,7 +88,7 @@ export default function TestCard() {
 
                 <Box>
                   <div className="flex items-center gap-2 mb-1">
-                    <Text size="sm" weight={500} color="dimmed">Your Output:</Text>
+                    <Text size="sm" fw={500} color="dimmed">Your Output:</Text>
                     <Badge 
                       color={isSuccess ? "green" : "red"}
                       variant="filled"
@@ -96,7 +96,7 @@ export default function TestCard() {
                       {isSuccess ? "Passed" : "Failed"}
                     </Badge>
                   </div>
-                  <Code block sx={{
+                  <Code block style={{
                     ...codeBlockStyle,
                     backgroundColor: isSuccess 
                       ? 'rgba(34, 139, 34, 0.15)' 
@@ -107,8 +107,8 @@ export default function TestCard() {
                 </Box>
 
                 <Box>
-                  <Text size="sm" weight={500} color="dimmed">Expected Output:</Text>
-                  <Code block sx={codeBlockStyle}>
+                  <Text size="sm" fw={500} color="dimmed">Expected Output:</Text>
+                  <Code block style={codeBlockStyle}>
                     {currentResult.expected ?? "No expected output"}
                   </Code>
                 </Box>
