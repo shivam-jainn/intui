@@ -31,6 +31,7 @@ import {
 import { useDisclosure } from '@mantine/hooks';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
+import { useRouter } from 'next/navigation';
 
 const mockdata = [
   {
@@ -69,7 +70,7 @@ export function Navbar() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
-
+  const router = useRouter();
   const links = mockdata.map((item) => (
     <UnstyledButton className={classes.subLink} key={item.title}>
       <Group wrap="nowrap" align="flex-start">
@@ -151,8 +152,12 @@ export function Navbar() {
           </Group>
 
           <Group visibleFrom="sm">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            <Button variant="default" onClick={()=>{
+              router.push('/signin')
+            }}>Log in</Button>
+            <Button onClick={()=>{
+              router.push('/signup')
+            }}>Sign up</Button>
           </Group>
 
           <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
@@ -196,8 +201,14 @@ export function Navbar() {
           <Divider my="sm" />
 
           <Group justify="center" grow pb="xl" px="md">
-            <Button variant="default">Log in</Button>
-            <Button>Sign up</Button>
+            <Button variant="default" onClick={()=>{
+              router.push('/signin')
+            }}>Log in</Button>
+            <Button 
+            onClick={()=>{
+                router.push('/signup')
+              }}
+            >Sign up</Button>
           </Group>
         </ScrollArea>
       </Drawer>

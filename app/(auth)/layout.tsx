@@ -8,7 +8,7 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     <div className={classes.wrapper}>
       <Paper className={classes.form} radius={0} p={30}>
         <Title order={2} className={classes.title} ta="center" mt="md" mb={50}>
-          Welcome to Mantine Auth!
+          Welcome to Intui !
         </Title>
         
         {children} {/* Login or Signup Form will be injected here */}
