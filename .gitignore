@@ -137,3 +137,5 @@ dist
 # infra creds
 infra/credentials
 question_data
+
+the-intui-*.json
