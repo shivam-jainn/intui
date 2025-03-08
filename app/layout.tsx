@@ -9,8 +9,8 @@ import '@mantine/dates/styles.css';
 import TanstackQueryProvider from './TanstackQueryProvider';
 
 export const metadata = {
-  title: 'Mantine Next.js template',
-  description: 'I am using Mantine with Next.js!',
+  title: 'Intui',
+  description: 'Your rubber duck for your interview prep',
 };
 
 export default function RootLayout({ children }: { children: any }) {
