@@ -5,6 +5,7 @@ import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { Navbar } from '@/components/Navbar/Navbar';
 import { theme } from '../theme';
 import './globals.css';
+import '@mantine/dates/styles.css';
 import TanstackQueryProvider from './TanstackQueryProvider';
 
 export const metadata = {

@@ -14,24 +14,27 @@ enum Difficulty {
 }
 
 model Question {
-  id          Int            @id @default(autoincrement())
-  name        String         @db.VarChar(160) @unique
+  id          Int               @id @default(autoincrement())
+  name        String            @unique @db.VarChar(160)
   difficulty  Difficulty
   description String
   topics      QuestionTopic[]
   companies   QuestionCompany[]
+  User        User?             @relation(fields: [userId], references: [id])
+  userId      String?
+  Submission  Submission[]
 }
 
 model Topic {
-  id         Int            @id @default(autoincrement())
-  name       String         @unique @db.VarChar(150)
-  questions  QuestionTopic[]
+  id        Int             @id @default(autoincrement())
+  name      String          @unique @db.VarChar(150)
+  questions QuestionTopic[]
 }
 
 model Company {
-  id         Int            @id @default(autoincrement())
-  name       String         @unique @db.VarChar(150)
-  questions  QuestionCompany[]
+  id        Int               @id @default(autoincrement())
+  name      String            @unique @db.VarChar(150)
+  questions QuestionCompany[]
 }
 
 model QuestionTopic {
@@ -47,7 +50,84 @@ model QuestionCompany {
   questionId Int
   companyId  Int
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  company    Company   @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@id([questionId, companyId]) // Composite primary key
+}
+
+model User {
+  id            String       @id
+  name          String
+  email         String
+  emailVerified Boolean
+  image         String?
+  createdAt     DateTime
+  updatedAt     DateTime
+  sessions      Session[]
+  accounts      Account[]
+  questions     Question[]
+  Submission    Submission[]
+
+  @@unique([email])
+  @@map("user")
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String
+  createdAt DateTime
+  updatedAt DateTime
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([token])
+  @@map("session")
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime
+  updatedAt             DateTime
+
+  @@map("account")
+}
+
+model Verification {
+  id         String    @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime?
+  updatedAt  DateTime?
+
+  @@map("verification")
+}
+
+model Submission {
+  id         Int      @id @default(autoincrement())
+  questionId Int
+  userId     String
+  code       String   @db.Text
+  language   String
+  status     String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("submission")
 }
