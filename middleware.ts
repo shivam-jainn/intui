@@ -1,22 +1,28 @@
+import { createAuthClient } from "better-auth/client";
 import { NextRequest, NextResponse } from "next/server";
 
-export function middleware(req: NextRequest) {
-  const token = req.cookies.get("token")?.value; // Ensure safe access
+const client = createAuthClient()
 
-  const publicPaths = ["/", "/signup", "/signin"];
-  const isPublicPath = publicPaths.includes(req.nextUrl.pathname);
+export async function middleware(request: NextRequest) {
+  const { data: session } = await client.getSession({
+    fetchOptions: {
+      headers: {
+        cookie: request.headers.get("cookie") || "",
+      },
+    }
+  });
 
-  // Allow static files and images
-  const isStaticFile = req.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|otf|eot)$/i);
+  const publicPaths = ["/", "/signin", "/signup"];
+  const isPublicPath = publicPaths.includes(request.nextUrl.pathname);
+  const isStaticFile = request.nextUrl.pathname.match(/\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|otf|eot)$/i);
 
-  if (!token && !isPublicPath && !isStaticFile) {
-    return NextResponse.redirect(new URL("/signin", req.url));
+  if (!session && !isPublicPath && !isStaticFile) {
+    return NextResponse.redirect(new URL("/signin", request.url));
   }
 
   return NextResponse.next();
 }
 
-// Apply middleware to all routes except static files, images, API routes, and Next.js assets
 export const config = {
   matcher: ["/((?!_next/static|_next/image|api).*)"],
 };
