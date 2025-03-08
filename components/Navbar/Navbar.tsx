@@ -101,13 +101,12 @@ export function Navbar() {
             <a href="/" className={classes.link}>
               Home
             </a>
-         
-            <a href="#" className={classes.link}>
-              Learn
+
+           
+            <a href="/questions" className={classes.link}>
+              Questions
             </a>
-            <a href="#" className={classes.link}>
-              Academy
-            </a>
+          
           </Group>
 
           <Group visibleFrom="sm">
