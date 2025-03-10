@@ -6,7 +6,6 @@ import { useSession } from '@/lib/auth-client';
 
 export default function Page() {
   const { data : session } = useSession();
-  console.log(session);
   return (
     <div style={{ overflow: 'auto' }}>
       {session!==null ? <Home /> : <Landing />}
