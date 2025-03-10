@@ -11,10 +11,10 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
           Welcome to Intui !
         </Title>
         
-        {children} {/* Login or Signup Form will be injected here */}
         
         <SocialSignIn /> 
         
+        {children} {/* Login or Signup Form will be injected here */}
        
       </Paper>
     </div>

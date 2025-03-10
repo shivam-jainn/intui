@@ -23,7 +23,7 @@ export default function SocialSignIn() {
         fullWidth 
         mt="md" 
         size="md" 
-        variant="outline" 
+        radius="md"
         onClick={() => onSignInSocial("github")}
       >
         Sign in with GitHub
@@ -33,7 +33,7 @@ export default function SocialSignIn() {
         fullWidth 
         mt="md" 
         size="md" 
-        variant="outline" 
+        radius="md"
         onClick={() => onSignInSocial("google")}
       >
         Sign in with Google
