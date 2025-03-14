@@ -15,7 +15,6 @@ import {
   Collapse
 } from '@mantine/core';
 import { IconLock, IconUser, IconMessage } from '@tabler/icons-react';
-import { GrLock } from 'react-icons/gr';
 
 export default function StoryMode() {
   const [selectedEpisode, setSelectedEpisode] = useState<number | null>(null);
@@ -192,7 +191,6 @@ export default function StoryMode() {
       </div>
 
       {/* Story Dialog Modal */}
-      // Inside the modal, add safety checks:
 <Modal
   opened={dialogueOpen}
   onClose={() => setDialogueOpen(false)}
@@ -229,7 +227,7 @@ export default function StoryMode() {
                   {challenge.description}
                 </Text>
               </div>
-              {challenge.unlocked ? <GrLock size={20} /> : <IconLock size={20} />}
+              {challenge.unlocked ? "" : <IconLock size={20} />}
             </Group>
 
             {challenge.unlocked && (
