@@ -15,6 +15,6 @@ export async function GET(
       }
     }
   });
-
+  console.log("questionObject : ", questionObject);
   return NextResponse.json(questionObject);
 }
