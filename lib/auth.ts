@@ -1,12 +1,10 @@
 import { betterAuth } from "better-auth";
 import { prismaAdapter } from "better-auth/adapters/prisma";
-import { PrismaClient } from "@prisma/client";
- 
-const prisma = new PrismaClient();
+import { prisma } from "@/prisma/db"; 
 
 export const auth = betterAuth({
     database: prismaAdapter(prisma, {
-        provider: "postgresql", // or "mysql", "postgresql", ...etc
+        provider: "postgresql",
     }),
     emailAndPassword: {  
         enabled: true
@@ -15,6 +13,10 @@ export const auth = betterAuth({
        github: { 
         clientId: process.env.GITHUB_CLIENT_ID as string, 
         clientSecret: process.env.GITHUB_CLIENT_SECRET as string, 
-       } 
+       },
+       google: {
+         clientId: process.env.GOOGLE_CLIENT_ID as string,
+         clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
+       }
     }, 
 });
