@@ -1,7 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const sessionToken = request.cookies.get('better-auth.session_token')?.value;
+  const cookieName =
+  process.env.NODE_ENV === "production"
+    ? "__Secure-better-auth.session_token"
+    : "better-auth.session_token";
+
+  const sessionToken = request.cookies.get(cookieName)?.value;
+
   console.log("sessionToken : ", sessionToken);
   
   const publicPaths = ["/", "/signin", "/signup"];
