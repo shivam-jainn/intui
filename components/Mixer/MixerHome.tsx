@@ -248,7 +248,7 @@ export default function StoryMode() {
   ) : (
     <Text>No episode selected.</Text>
   )}
-</Modal>;
+</Modal>
 
     </Container>
   );
