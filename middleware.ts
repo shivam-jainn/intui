@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
+  // short-circuit when auth is disabled via env (useful for local dev)
+  if (process.env.AUTH_ENABLED === "false") {
+    return NextResponse.next();
+  }
+
   const cookieName =
   process.env.NODE_ENV === "production"
     ? "__Secure-better-auth.session_token"

@@ -1,11 +1,11 @@
 "use client";
 import { Button } from "@mantine/core";
-import { authClient } from "@/lib/auth-client";
+import { signIn } from "@/lib/auth-client";
 
 export default function SocialSignIn() {
   async function onSignInSocial(provider: "github" | "google" | "facebook") {
     try {
-      const { data, error } = await authClient.signIn.social({
+      const { data, error } = await signIn.social({
         provider,
         callbackURL: "/",
       });
