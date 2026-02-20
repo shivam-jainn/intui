@@ -1,7 +1,18 @@
 "use client";
 import React, { useEffect, useState } from "react";
-import { Table, Badge } from "@mantine/core";
+import { Table, Badge, Group, Text } from "@mantine/core";
 import { useRouter } from "next/navigation";
+
+const statusColor: Record<string, string> = {
+  TODO: "gray",
+  IN_PROGRESS: "blue",
+  DONE: "teal",
+};
+const statusLabel: Record<string, string> = {
+  TODO: "To Do",
+  IN_PROGRESS: "In Progress",
+  DONE: "Done",
+};
 
 export default function Page() {
   const [data, setData] = useState([]);
@@ -40,6 +51,11 @@ export default function Page() {
         {q.difficulty}
       </td>
       <td style={{ textAlign: "center", padding: "12px" }}>
+        <Badge color={statusColor[q.status ?? "TODO"]} variant="light" radius="sm">
+          {statusLabel[q.status ?? "TODO"]}
+        </Badge>
+      </td>
+      <td style={{ textAlign: "center", padding: "12px" }}>
         {q.topics.map((topic: any) => (
           <Badge key={topic.topic.name} color="blue" variant="light" mx={4} radius="sm">
             {topic.topic.name}
@@ -66,6 +82,7 @@ export default function Page() {
             <th style={{ textAlign: "center", padding: "12px" }}>ID</th>
             <th style={{ textAlign: "center", padding: "12px" }}>Name</th>
             <th style={{ textAlign: "center", padding: "12px" }}>Difficulty</th>
+            <th style={{ textAlign: "center", padding: "12px" }}>Status</th>
             <th style={{ textAlign: "center", padding: "12px" }}>Topics</th>
           </tr>
         </thead>

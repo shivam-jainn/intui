@@ -1,18 +1,45 @@
-"use client";
-import { Stack, Title, Group, Badge, Container, SegmentedControl, Accordion, Text, Box } from '@mantine/core';
-import React, { useState } from 'react';
+'use client';
+
+import {
+  Accordion,
+  Badge,
+  Box,
+  Card,
+  Group,
+  Loader,
+  SegmentedControl,
+  Select,
+  Stack,
+  Text,
+  Title,
+} from '@mantine/core';
+import React, { useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
+import './QuestionPanel.css';
 
 type MarkdownComponentsType = {
   [key: string]: React.FC<any>;
 };
 
-const MarkdownComponents: MarkdownComponentsType = {
+type Submission = {
+  id: number;
+  language: string;
+  status: string;
+  createdAt: string;
+};
+
+const statusColor: Record<string, string> = {
+  TODO: 'gray',
+  IN_PROGRESS: 'blue',
+  DONE: 'teal',
+};
+
+const markdownComponents: MarkdownComponentsType = {
   h1: ({ children }: { children: React.ReactNode }) => (
     <Box mb="md">
       <Title order={1}>{children}</Title>
@@ -40,7 +67,11 @@ const MarkdownComponents: MarkdownComponentsType = {
       mt="xs"
       p="md"
       bg="dark.8"
-      style={{ borderRadius: 'var(--mantine-radius-sm)', overflowX: 'auto', color: 'white' }}
+      style={{
+        borderRadius: 'var(--mantine-radius-sm)',
+        overflowX: 'auto',
+        color: 'white',
+      }}
     >
       {children}
     </Box>
@@ -53,12 +84,17 @@ const MarkdownComponents: MarkdownComponentsType = {
           px={4}
           bg="dark.6"
           color="white"
-          style={{ borderRadius: 'var(--mantine-radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}
+          style={{
+            borderRadius: 'var(--mantine-radius-sm)',
+            fontSize: '0.9em',
+            fontFamily: 'monospace',
+          }}
         >
           {children}
         </Box>
       );
     }
+
     return <code>{children}</code>;
   },
   hr: () => (
@@ -76,14 +112,80 @@ export default function QuestionPanel({
   companies,
   description,
   topics,
+  status: initialStatus,
 }: {
   questionTitle: string;
   difficulty: string;
-  companies: string[];
+  companies: { company: { name: string } }[];
   description: string;
-  topics: any[];
+  topics: { topic: { name: string } }[];
+  status?: string;
 }) {
   const [tab, setTab] = useState<string>('description');
+  const [status, setStatus] = useState<string>(initialStatus ?? 'TODO');
+  const [updating, setUpdating] = useState(false);
+
+  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  const [submissionLoading, setSubmissionLoading] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  const getSubmissionBadgeColor = (submissionStatus: string) => {
+    switch (submissionStatus) {
+      case 'ACCEPTED':
+        return 'green';
+      case 'WRONG_ANSWER':
+        return 'red';
+      default:
+        return 'gray';
+    }
+  };
+
+  async function fetchSubmissions() {
+    setSubmissionLoading(true);
+    setSubmissionError(null);
+
+    try {
+      const response = await fetch(
+        `/api/question/${encodeURIComponent(questionTitle)}/submissions`
+      );
+
+      if (!response.ok) {
+        throw new Error('Failed to fetch submissions');
+      }
+
+      const data = await response.json();
+      setSubmissions(Array.isArray(data) ? data : []);
+    } catch {
+      setSubmissionError('Failed to load submissions. Please try again.');
+    } finally {
+      setSubmissionLoading(false);
+    }
+  }
+
+  async function handleStatusChange(newStatus: string | null) {
+    if (!newStatus || newStatus === status) {
+      return;
+    }
+
+    setStatus(newStatus);
+    setUpdating(true);
+
+    try {
+      await fetch(`/api/question/${encodeURIComponent(questionTitle)}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ status: newStatus }),
+      });
+    } finally {
+      setUpdating(false);
+    }
+  }
+
+  useEffect(() => {
+    if (tab === 'submission') {
+      fetchSubmissions();
+    }
+  }, [tab, questionTitle]);
 
   return (
     <Stack h="100%" style={{ minHeight: '100vh' }}>
@@ -99,43 +201,37 @@ export default function QuestionPanel({
               ]}
             />
 
-            <Title order={1}>{questionTitle}</Title>
-
-            <Group align="flex-start" gap="xs">
+            <Group align="center" gap="xs" mb="xs">
               <Badge size="lg">{difficulty}</Badge>
-              {companies.map((company, index) => (
-                <Badge key={index} color="orange" size="lg">
-                  {company}
+              <Select
+                size="xs"
+                value={status}
+                onChange={handleStatusChange}
+                disabled={updating}
+                data={[
+                  { value: 'TODO', label: 'To Do' },
+                  { value: 'IN_PROGRESS', label: 'In Progress' },
+                  { value: 'DONE', label: 'Done' },
+                ]}
+                styles={{
+                  input: {
+                    borderColor: `var(--mantine-color-${statusColor[status]}-6)`,
+                    color: `var(--mantine-color-${statusColor[status]}-6)`,
+                    fontWeight: 600,
+                  },
+                }}
+                w={130}
+              />
+              {companies.map((companyData, index) => (
+                <Badge key={index} color="orange" size="lg" variant="dot">
+                  {companyData.company.name}
                 </Badge>
               ))}
             </Group>
 
-            <Box
-              style={(theme) => ({
-                '& .math, & .math-display': {
-                  padding: '0.5rem 0',
-                  overflowX: 'auto',
-                },
-                '& ul, & ol': {
-                  paddingLeft: '1.5rem',
-                  margin: '0.5rem 0',
-                },
-                '& li': {
-                  margin: '0.25rem 0',
-                },
-                '& strong': {
-                  color: theme.white,
-                },
-                '& blockquote': {
-                  borderLeft: '4px solid ' + theme.colors.blue[6],
-                  paddingLeft: '1rem',
-                  margin: '1rem 0',
-                  color: theme.colors.gray[3],
-                },
-              })}
-            >
+            <Box className="question-panel-markdown">
               <Markdown
-                components={MarkdownComponents}
+                components={markdownComponents}
                 remarkPlugins={[remarkMath, remarkGfm]}
                 rehypePlugins={[rehypeKatex, rehypeRaw]}
               >
@@ -149,8 +245,8 @@ export default function QuestionPanel({
                   <Accordion.Control>Topics</Accordion.Control>
                   <Accordion.Panel>
                     <Group>
-                      {topics.map((element, index) => (
-                        <Badge key={index}>{element.topic.name}</Badge>
+                      {topics.map((topicData, index) => (
+                        <Badge key={index}>{topicData.topic.name}</Badge>
                       ))}
                     </Group>
                   </Accordion.Panel>
@@ -160,7 +256,7 @@ export default function QuestionPanel({
           </Stack>
         </Box>
       ) : (
-        <Stack>
+        <Stack p="md" py="xl">
           <SegmentedControl
             value={tab}
             onChange={setTab}
@@ -169,7 +265,34 @@ export default function QuestionPanel({
               { label: 'Submission', value: 'submission' },
             ]}
           />
-          TODO : Submission
+
+          {submissionLoading ? (
+            <Group justify="center" py="xl">
+              <Loader size="sm" />
+            </Group>
+          ) : submissionError ? (
+            <Text c="red">{submissionError}</Text>
+          ) : submissions.length === 0 ? (
+            <Text c="dimmed">No submissions yet. Click Submit to create one.</Text>
+          ) : (
+            <Stack>
+              {submissions.map((submission) => (
+                <Card withBorder radius="md" key={submission.id}>
+                  <Group justify="space-between" align="center">
+                    <Group gap="xs">
+                      <Badge color={getSubmissionBadgeColor(submission.status)}>
+                        {submission.status}
+                      </Badge>
+                      <Badge variant="light">{submission.language.toUpperCase()}</Badge>
+                    </Group>
+                    <Text size="sm" c="dimmed">
+                      {new Date(submission.createdAt).toLocaleString()}
+                    </Text>
+                  </Group>
+                </Card>
+              ))}
+            </Stack>
+          )}
         </Stack>
       )}
     </Stack>

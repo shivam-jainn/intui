@@ -8,6 +8,8 @@ import {
   IconCoin,
   IconFingerprint,
   IconNotification,
+  IconMoonStars,
+  IconSun,
 } from '@tabler/icons-react';
 import {
   Anchor,
@@ -28,6 +30,8 @@ import {
   ThemeIcon,
   UnstyledButton,
   useMantineTheme,
+  ActionIcon,
+  useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Intui from './Intui';
@@ -105,6 +109,7 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const router = useRouter();
   const { data, isPending } = useSession();
 
@@ -141,6 +146,9 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
             <a href="/" className={classes.link}>
               Home
             </a>
+            <a href="/projects" className={classes.link}>
+              Projects
+            </a>
             <a href="/questions" className={classes.link}>
               Questions
             </a>
@@ -159,6 +167,18 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
             ) : (
               <Profile avatar={currentSession.user.image} />
             )}
+            <ActionIcon
+              variant="default"
+              onClick={() => toggleColorScheme()}
+              size="lg"
+              ml="md"
+            >
+              {colorScheme === 'dark' ? (
+                <IconSun size={18} />
+              ) : (
+                <IconMoonStars size={18} />
+              )}
+            </ActionIcon>
           </Group>
 
           <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
@@ -180,6 +200,9 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           <a href="/" className={classes.link}>
             Home
           </a>
+          <a href="/projects" className={classes.link}>
+            Projects
+          </a>
           <UnstyledButton className={classes.link} onClick={toggleLinks}>
             <Center inline>
               <Box component="span" mr={5}>
@@ -197,6 +220,16 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           </a>
 
           <Divider my="sm" />
+
+          <Group position="center" mb="sm">
+            <ActionIcon
+              variant="default"
+              onClick={() => toggleColorScheme()}
+              size="lg"
+            >
+              {colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoonStars size={18} />}
+            </ActionIcon>
+          </Group>
 
           <UserNav router={router} />
         </ScrollArea>

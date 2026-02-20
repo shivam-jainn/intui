@@ -29,7 +29,6 @@ const CodeEditor = ({
   const [_,setResultData] = useAtom(resultDataAtom);
 
   async function setDriverCode() {
-    console.log(language);
     const { driver_code } = await getDriver(decodeURIComponent(questionName), language)
     setStoredCode(driver_code);
     setInitialCode(driver_code);
@@ -90,7 +89,6 @@ const CodeEditor = ({
     // const {status,message} = await response.json();
     const data = await response.json();
     setResultData(data);
-    console.log(data)
     // if(process.env.ENV_MODE === "development") console.log(message);
     // if(process.env.ENV_MODE === "development") console.log(status);
 

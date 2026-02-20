@@ -33,6 +33,7 @@ export async function POST(req: NextRequest) {
   const gcr_url = `${process.env.GCR_Host}/execute`;
   const local_executor_url = `http://127.0.0.1:8080/execute`;
   const url = process.env.ENV_MODE === "development" ? local_executor_url : gcr_url;
+  console.log("Executor URL:", url);
 
   const requestBody = {
     questionName: question_name,
@@ -40,7 +41,9 @@ export async function POST(req: NextRequest) {
     language: language,
     isSubmission: false,
   };
-  
+
+  console.log(requestBody);
+
   try {
     let headers: Record<string, string> = {
       "Content-Type": "application/json",
@@ -65,14 +68,27 @@ export async function POST(req: NextRequest) {
       console.log("Headers done ...");
     }
 
-    const response = await fetch(url, {
-      method: "POST",
-      headers,
-      body: JSON.stringify(requestBody),
-    });
+    let response;
+    try {
+      response = await fetch(url, {
+        method: "POST",
+        headers,
+        body: JSON.stringify(requestBody),
+      });
+    } catch (fetchErr: any) {
+      console.error("Fetch to executor failed", { url, error: fetchErr });
+      throw fetchErr; // fall through to outer catch
+    }
 
-    const data = await response.json();
-    console.log(data)
+    let data;
+    try {
+      data = await response.json();
+    } catch (parseErr) {
+      console.error("Failed to parse executor response", { status: response.status, responseText: await response.text(), parseErr });
+      throw parseErr;
+    }
+
+    console.log("Executor response data:", data);
     if (!response.ok) {
       throw new Error(
         `Execution Error: ${data?.error || "Unknown error"} (HTTP ${response.status})`
@@ -84,7 +100,13 @@ export async function POST(req: NextRequest) {
       { status: response.status }
     );
   } catch (error: any) {
-    console.error("Execution error:", error.message);
+    // provide as much debugging info as possible
+    console.error("Execution error caught in POST handler", {
+      message: error?.message,
+      stack: error?.stack,
+      url,
+      requestBody,
+    });
     return NextResponse.json(
       { message: "Some error occurred. Please try again later." },
       { status: 500 }

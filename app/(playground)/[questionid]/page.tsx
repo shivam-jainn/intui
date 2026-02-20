@@ -11,18 +11,15 @@ interface QuestionData {
   name: string;
   difficulty: string;
   description: string;
-  companies?: string[];
-  topics?: string[];
+  status?: string;
+  companies?: { company: { name: string } }[];
+  topics?: { topic: { name: string } }[];
 }
 
 export default function Page({ params }: { params: { questionid: string } }) {
   const [questionData, setQuestionData] = useState<QuestionData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-
-  const handleCodeChange = (code: string) => {
-    console.log("Code changed:", code);
-  };
 
   async function fetchQuestion() {
     try {
@@ -66,28 +63,37 @@ export default function Page({ params }: { params: { questionid: string } }) {
   }
 
   return (
-    <PanelGroup direction="horizontal">
-      <Panel>
-        <QuestionPanel
-          questionTitle={questionData.name}
-          difficulty={questionData.difficulty}
-          description={questionData.description}
-          companies={questionData.companies || []}
-          topics={questionData.topics || []}
-        />
-      </Panel>
-      <PanelResizeHandle style={{ width: "0.5rem" }} />
-     <Panel>
-      <PanelGroup direction="vertical">
-        <Panel minSize={50}>
-          <CodeEditor questionName={params.questionid} />
+    <div style={{ height: "100%", minHeight: 0 }}>
+      <PanelGroup direction="horizontal" style={{ height: "100%", minHeight: 0 }}>
+        <Panel>
+          <div style={{ height: "100%", minHeight: 0, overflow: "hidden" }}>
+            <QuestionPanel
+              questionTitle={questionData.name}
+              difficulty={questionData.difficulty}
+              description={questionData.description}
+              companies={questionData.companies || []}
+              topics={questionData.topics || []}
+              status={questionData.status}
+            />
+          </div>
         </Panel>
-        <PanelResizeHandle style={{ height: "0.5rem" }} />
-        <Panel defaultSize={30} minSize={20} maxSize={40}>
-          <RunAndSubmissionBar />
+        <PanelResizeHandle style={{ width: "0.5rem" }} />
+        <Panel>
+          <PanelGroup direction="vertical" style={{ height: "100%", minHeight: 0 }}>
+            <Panel minSize={50}>
+              <div style={{ height: "100%", minHeight: 0, overflow: "hidden" }}>
+                <CodeEditor questionName={params.questionid} />
+              </div>
+            </Panel>
+            <PanelResizeHandle style={{ height: "0.5rem" }} />
+            <Panel defaultSize={30} minSize={20} maxSize={40}>
+              <div style={{ height: "100%", minHeight: 0, overflow: "hidden" }}>
+                <RunAndSubmissionBar />
+              </div>
+            </Panel>
+          </PanelGroup>
         </Panel>
       </PanelGroup>
-     </Panel>
-    </PanelGroup>
+    </div>
   );
 }
