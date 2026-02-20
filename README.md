@@ -1,37 +1,34 @@
-# Mantine Next.js template
+# Intui — LeetCode‑style coding playground (portfolio)
 
-This is a template for [Next.js](https://nextjs.org/) app router + [Mantine](https://mantine.dev/).
-If you want to use pages router instead, see [next-pages-template](https://github.com/mantinedev/next-pages-template).
+A compact showcase of a LeetCode-style coding playground — built as a personal portfolio project to demonstrate full‑stack skills ,devops and system design choices.
 
-## Features
+---
 
-This template comes with the following features:
+## Short project highlights
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Jest](https://jestjs.io/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
+- In-browser editor with language switch (Python / C++).
+- Execution server compiles/runs test drivers and returns structured results on Google Cloud Run.
+- Questions list, problem view, and submission history (DB-backed).
+- Focused UX designed for interview walkthroughs and demos.
 
-## npm scripts
+---
 
-### Build and dev scripts
+## Tech stack
 
-- `dev` – start dev server
-- `build` – bundle application for production
-- `analyze` – analyzes application bundle with [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer)
+- Frontend: `Next.js`, `React`, `TypeScript`, `Mantine`, `CodeMirror`
+- Backend / infra: `Go` execserver, `Prisma` + `Postgres`, Docker
+- Tooling: `Storybook`, `Jest`, `pnpm`
+- Infra : `Terraform` , `Google Cloud Run`
+---
 
-### Testing scripts
+## Demo (for README)
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `jest` – runs jest tests
-- `jest:watch` – starts jest watch
-- `test` – runs `jest`, `prettier:check`, `lint` and `typecheck` scripts
+![Playground demo](/assets/gifs/demo.gif)
 
-### Other scripts
+> Put demo GIFs in `public/assets/gifs/` (presentation-only).
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+## License
+
+All Rights Reserved.
+
+
