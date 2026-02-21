@@ -4,9 +4,10 @@ import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
+import { githubLight } from '@uiw/codemirror-theme-github';
 import { oneDark } from '@codemirror/theme-one-dark';
 import './CodeEditor.css';
-import { Select, Button, Card } from '@mantine/core';
+import { Select, Button, useMantineColorScheme } from '@mantine/core';
 import { GrPowerReset } from 'react-icons/gr';
 import { useAtom } from 'jotai';
 import { useLocalStorage } from '@mantine/hooks';
@@ -17,16 +18,19 @@ import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
 
 interface CodeEditorProps {
   questionName: string;
+  onSubmissionComplete?: () => void;
 }
 
 const CodeEditor = ({
   questionName,
+  onSubmissionComplete,
 }: CodeEditorProps) => {
   const [language, setLanguage] = useAtom<Language>(langAtom);
   const [initialCode, setInitialCode] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [, setTestTab] = useAtom(resultAtom);
   const [, setResultData] = useAtom<any>(resultDataAtom);
+  const { colorScheme } = useMantineColorScheme();
 
   async function setDriverCode() {
     const { driver_code } = await getDriver(decodeURIComponent(questionName), language);
@@ -235,6 +239,15 @@ const CodeEditor = ({
 
       setResultData(finalData);
       setTestTab('results');
+
+      // If this was a submission flow, notify parent to refresh question data
+      if (endpoint.includes('/submission')) {
+        try {
+          onSubmissionComplete?.();
+        } catch {
+          // ignore
+        }
+      }
     } catch (error) {
       setResultData({
         message: 'Failed to process execution request',
@@ -286,35 +299,46 @@ const CodeEditor = ({
       display: 'flex',
       flexDirection: 'column',
       height: '100%',
+      backgroundColor: 'var(--mantine-color-body)',
     }}>
 
-      <Card
-        w="100%"
+      <div
         style={{
-        display: 'flex',
-        flexDirection: 'row',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-      }}
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: '8px 16px',
+          backgroundColor: 'var(--mantine-color-body)',
+          borderBottom: '1px solid var(--mantine-color-default-border)',
+        }}
       >
         <Select
           placeholder="Select Language"
           data={languageOptions}
           value={language}
           onChange={(value) => setLanguage(value as Language)}
-
+          size="sm"
+          styles={{
+            input: {
+              backgroundColor: 'var(--mantine-color-default)',
+              border: '1px solid var(--mantine-color-default-border)',
+            },
+          }}
         />
 
-<Button onClick={resetCode}>
-          <GrPowerReset />
-</Button>
-
-      <div style={{ display: 'flex', flexDirection: 'row', gap: '5px' }}>
-
-        <Button variant="secondary" onClick={handleRunCode} loading={isLoading}>Run</Button>
-        <Button onClick={handleSubmission}>Submit</Button>
+        <div style={{ display: 'flex', flexDirection: 'row', gap: '8px' }}>
+          <Button variant="default" size="sm" onClick={resetCode} px="xs">
+            <GrPowerReset />
+          </Button>
+          <Button variant="filled" size="sm" onClick={handleRunCode} loading={isLoading}>
+            Run
+          </Button>
+          <Button variant="filled" size="sm" onClick={handleSubmission}>
+            Submit
+          </Button>
+        </div>
       </div>
-      </Card>
 
       <div style={{
         flexGrow: 1,
@@ -323,7 +347,7 @@ const CodeEditor = ({
         value={storedCode}
         extensions={[getLanguageExtension()]}
         onChange={handleChange}
-        theme={oneDark}
+        theme={colorScheme === 'dark' ? oneDark : githubLight}
         basicSetup={{
           lineNumbers: true,
           highlightActiveLineGutter: true,
@@ -348,7 +372,7 @@ const CodeEditor = ({
           completionKeymap: true,
           lintKeymap: true,
         }}
-        minHeight="100%"
+        height="100%"
       />
       </div>
     </div>

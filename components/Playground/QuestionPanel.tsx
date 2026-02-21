@@ -41,36 +41,39 @@ const statusColor: Record<string, string> = {
 
 const markdownComponents: MarkdownComponentsType = {
   h1: ({ children }: { children: React.ReactNode }) => (
-    <Box mb="md">
-      <Title order={1}>{children}</Title>
+    <Box mb="lg">
+      <Title order={1} size="h2" fw={700} c="var(--mantine-color-text)">{children}</Title>
     </Box>
   ),
   h2: ({ children }: { children: React.ReactNode }) => (
-    <Box mb="md" mt="lg">
-      <Title order={2}>{children}</Title>
+    <Box mb="md" mt="xl">
+      <Title order={2} size="h3" fw={600} c="var(--mantine-color-text)">{children}</Title>
     </Box>
   ),
   h3: ({ children }: { children: React.ReactNode }) => (
-    <Box mb="sm" mt="md">
-      <Title order={3}>{children}</Title>
+    <Box mb="sm" mt="lg">
+      <Title order={3} size="h4" fw={600} c="var(--mantine-color-text)">{children}</Title>
     </Box>
   ),
   p: ({ children }: { children: React.ReactNode }) => (
-    <Box mb="xs">
-      <Text>{children}</Text>
+    <Box mb="md">
+      <Text size="md" c="var(--mantine-color-text)" lh={1.6}>{children}</Text>
     </Box>
   ),
   pre: ({ children }: { children: React.ReactNode }) => (
     <Box
       component="pre"
-      mb="xs"
+      mb="md"
       mt="xs"
       p="md"
-      bg="dark.8"
+      bg="var(--mantine-color-default)"
       style={{
-        borderRadius: 'var(--mantine-radius-sm)',
+        borderRadius: 'var(--mantine-radius-md)',
         overflowX: 'auto',
-        color: 'white',
+        color: 'var(--mantine-color-text)',
+        border: '1px solid var(--mantine-color-default-border)',
+        fontSize: '0.9em',
+        lineHeight: 1.5,
       }}
     >
       {children}
@@ -81,13 +84,15 @@ const markdownComponents: MarkdownComponentsType = {
       return (
         <Box
           component="code"
-          px={4}
-          bg="dark.6"
-          color="white"
+          px={6}
+          py={2}
+          bg="var(--mantine-color-default)"
+          color="var(--mantine-color-text)"
           style={{
             borderRadius: 'var(--mantine-radius-sm)',
-            fontSize: '0.9em',
+            fontSize: '0.85em',
             fontFamily: 'monospace',
+            border: '1px solid var(--mantine-color-default-border)',
           }}
         >
           {children}
@@ -188,7 +193,7 @@ export default function QuestionPanel({
   }, [tab, questionTitle]);
 
   return (
-    <Stack h="100%" style={{ minHeight: '100vh' }}>
+    <Stack h="100%" style={{ minHeight: '100vh' }} bg="var(--mantine-color-body)">
       {tab === 'description' ? (
         <Box style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto' }}>
           <Stack p="md" py="xl">
@@ -199,10 +204,28 @@ export default function QuestionPanel({
                 { label: 'Description', value: 'description' },
                 { label: 'Submission', value: 'submission' },
               ]}
+              mb="md"
+              bg="var(--mantine-color-default)"
+              styles={{
+                root: {
+                  backgroundColor: 'var(--mantine-color-default)',
+                },
+                control: {
+                  border: 'none',
+                },
+                label: {
+                  color: 'var(--mantine-color-text)',
+                  '&[data-active]': {
+                    color: 'var(--mantine-color-text)',
+                  },
+                },
+              }}
             />
 
             <Group align="center" gap="xs" mb="xs">
-              <Badge size="lg">{difficulty}</Badge>
+              <Badge size="lg" color="blue" variant="filled">
+                {difficulty}
+              </Badge>
               <Select
                 size="xs"
                 value={status}
@@ -218,13 +241,14 @@ export default function QuestionPanel({
                     borderColor: `var(--mantine-color-${statusColor[status]}-6)`,
                     color: `var(--mantine-color-${statusColor[status]}-6)`,
                     fontWeight: 600,
+                    backgroundColor: 'var(--mantine-color-default)',
                   },
                 }}
                 w={130}
               />
               {companies.map((companyData, index) => (
-                <Badge key={index} color="orange" size="lg" variant="dot">
-                  {companyData.company.name}
+                <Badge key={index} color="var(--mantine-color-default)" size="lg" variant="filled" leftSection={<Box w={8} h={8} bg="orange" style={{ borderRadius: '50%' }} />}>
+                  <Text size="xs" c="var(--mantine-color-text)">{companyData.company.name}</Text>
                 </Badge>
               ))}
             </Group>
@@ -240,13 +264,15 @@ export default function QuestionPanel({
             </Box>
 
             <Box pb="xl" mb="xl">
-              <Accordion defaultValue="topics" chevronPosition="right">
-                <Accordion.Item value="topics">
-                  <Accordion.Control>Topics</Accordion.Control>
+              <Accordion defaultValue="topics" chevronPosition="right" variant="separated">
+                <Accordion.Item value="topics" style={{ backgroundColor: 'var(--mantine-color-default)', border: '1px solid var(--mantine-color-default-border)' }}>
+                  <Accordion.Control style={{ color: 'var(--mantine-color-text)' }}>Topics</Accordion.Control>
                   <Accordion.Panel>
                     <Group>
                       {topics.map((topicData, index) => (
-                        <Badge key={index}>{topicData.topic.name}</Badge>
+                        <Badge key={index} color="var(--mantine-color-default-hover)" variant="filled">
+                          <Text size="xs" c="var(--mantine-color-text)">{topicData.topic.name}</Text>
+                        </Badge>
                       ))}
                     </Group>
                   </Accordion.Panel>
@@ -264,6 +290,22 @@ export default function QuestionPanel({
               { label: 'Description', value: 'description' },
               { label: 'Submission', value: 'submission' },
             ]}
+            mb="md"
+            bg="var(--mantine-color-default)"
+            styles={{
+              root: {
+                backgroundColor: 'var(--mantine-color-default)',
+              },
+              control: {
+                border: 'none',
+              },
+              label: {
+                color: 'var(--mantine-color-text)',
+                '&[data-active]': {
+                  color: 'var(--mantine-color-text)',
+                },
+              },
+            }}
           />
 
           {submissionLoading ? (
@@ -273,19 +315,19 @@ export default function QuestionPanel({
           ) : submissionError ? (
             <Text c="red">{submissionError}</Text>
           ) : submissions.length === 0 ? (
-            <Text c="dimmed">No submissions yet. Click Submit to create one.</Text>
+            <Text c="var(--mantine-color-text)">No submissions yet. Click Submit to create one.</Text>
           ) : (
             <Stack>
               {submissions.map((submission) => (
-                <Card withBorder radius="md" key={submission.id}>
+                <Card withBorder radius="md" key={submission.id} bg="var(--mantine-color-default)" style={{ borderColor: 'var(--mantine-color-default-border)' }}>
                   <Group justify="space-between" align="center">
                     <Group gap="xs">
                       <Badge color={getSubmissionBadgeColor(submission.status)}>
                         {submission.status}
                       </Badge>
-                      <Badge variant="light">{submission.language.toUpperCase()}</Badge>
+                      <Badge variant="light" color="gray">{submission.language.toUpperCase()}</Badge>
                     </Group>
-                    <Text size="sm" c="dimmed">
+                    <Text size="sm" c="var(--mantine-color-text)">
                       {new Date(submission.createdAt).toLocaleString()}
                     </Text>
                   </Group>

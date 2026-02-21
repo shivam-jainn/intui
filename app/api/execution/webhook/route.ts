@@ -82,7 +82,7 @@ export async function POST(req: NextRequest) {
       if (question) {
         const accepted = isAccepted(payload.result);
 
-        // Only create a DB submission if a userId was provided and the
+        // Create a DB submission only if a userId was provided and the
         // corresponding user exists. When auth is disabled there may be no
         // matching user, so skip DB writes in that case.
         if (payload.userId) {
@@ -97,11 +97,14 @@ export async function POST(req: NextRequest) {
                 status: accepted ? 'ACCEPTED' : 'WRONG_ANSWER',
               },
             });
-
-            if (accepted) {
-              await prisma.question.update({ where: { id: question.id }, data: { status: 'DONE' } });
-            }
           }
+        }
+
+        // If accepted, mark the question DONE regardless of whether a
+        // submission row was created (ensures dev/anonymous submissions close
+        // the ticket as requested).
+        if (accepted) {
+          await prisma.question.update({ where: { id: question.id }, data: { status: 'DONE' } });
         }
 
         // mark persisted in in-memory store even if DB write was skipped

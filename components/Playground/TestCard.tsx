@@ -53,10 +53,12 @@ export default function TestCard() {
       withBorder
       radius="md"
       h="100%"
+      bg="var(--mantine-color-body)"
       style={{
         overflow: 'hidden',
         display: 'flex',
         flexDirection: 'column',
+        border: 'none',
       }}
     >
       <Stack style={{ minHeight: 0, flex: 1 }}>
@@ -74,6 +76,21 @@ export default function TestCard() {
           size="sm"
           color="blue"
           fullWidth
+          bg="var(--mantine-color-default)"
+          styles={{
+            root: {
+              backgroundColor: 'var(--mantine-color-default)',
+            },
+            control: {
+              border: 'none',
+            },
+            label: {
+              color: 'var(--mantine-color-text)',
+              '&[data-active]': {
+                color: 'var(--mantine-color-text)',
+              },
+            },
+          }}
         />
         <Box style={tabBodyStyle}>
           {tab === 'testcases' ? (
@@ -87,10 +104,25 @@ export default function TestCard() {
                 }))}
                 size="xs"
                 color="blue"
+                bg="transparent"
+                styles={{
+                  root: {
+                    backgroundColor: 'transparent',
+                  },
+                  control: {
+                    border: 'none',
+                  },
+                  label: {
+                    color: 'var(--mantine-color-text)',
+                    '&[data-active]': {
+                      color: 'var(--mantine-color-text)',
+                    },
+                  },
+                }}
               />
-              <Text size="sm" fw={500}>Input:</Text>
+              <Text size="sm" fw={500} c="var(--mantine-color-text)">Input:</Text>
               <Box style={scrollContainerStyle}>
-                <Code block style={codeBlockStyle}>
+                <Code block style={{ ...codeBlockStyle, border: '1px solid var(--mantine-color-default-border)' }}>
                   {testcases[Number(testcase)]?.value || 'No input available'}
                 </Code>
               </Box>
@@ -108,16 +140,33 @@ export default function TestCard() {
                     }))}
                     size="xs"
                     color="blue"
+                    bg="transparent"
+                    styles={{
+                      root: {
+                        backgroundColor: 'transparent',
+                      },
+                      control: {
+                        border: 'none',
+                      },
+                      label: {
+                        color: 'var(--mantine-color-text)',
+                        '&[data-active]': {
+                          color: 'var(--mantine-color-text)',
+                        },
+                      },
+                    }}
                   />
 
                   <Box>
-                    <div className="flex items-center gap-2 mb-1">
-                      <Text size="sm" fw={500} color="dimmed">Your Output:</Text>
+                    <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginBottom: '8px' }}>
+                      <Text size="sm" fw={500} c="var(--mantine-color-text)">Your Output:</Text>
                       <Badge
                         color={isSuccess ? 'green' : 'red'}
                         variant="filled"
+                        size="lg"
+                        style={{ alignSelf: 'flex-start' }}
                       >
-                        {isSuccess ? 'Passed' : 'Failed'}
+                        {isSuccess ? 'PASSED' : 'FAILED'}
                       </Badge>
                     </div>
                     <Box style={scrollContainerStyle}>
@@ -128,6 +177,8 @@ export default function TestCard() {
                         backgroundColor: isSuccess
                           ? 'rgba(34, 139, 34, 0.15)'
                           : 'rgba(255, 0, 0, 0.15)',
+                        color: isSuccess ? 'var(--mantine-color-green-text)' : 'var(--mantine-color-red-text)',
+                        border: '1px solid var(--mantine-color-default-border)',
                       }}>
                         <Box style={scrollContentStyle}>
                           {actualOutput ?? 'No output'}
@@ -137,9 +188,9 @@ export default function TestCard() {
                   </Box>
 
                   <Box>
-                    <Text size="sm" fw={500} color="dimmed">Expected Output:</Text>
+                    <Text size="sm" fw={500} c="var(--mantine-color-text)">Expected Output:</Text>
                     <Box style={scrollContainerStyle}>
-                      <Code block style={codeBlockStyle}>
+                      <Code block style={{ ...codeBlockStyle, border: '1px solid var(--mantine-color-default-border)' }}>
                         {expectedOutput ?? 'No expected output'}
                       </Code>
                     </Box>
@@ -147,7 +198,7 @@ export default function TestCard() {
                 </>
               ) : (
                 <Stack gap="xs">
-                  <Text size="sm" color="dimmed">
+                  <Text size="sm" c="var(--mantine-color-text)">
                     {resultData?.message || 'No test results available'}
                   </Text>
                   {resultData?.status && (
@@ -156,7 +207,7 @@ export default function TestCard() {
                     </Badge>
                   )}
                   {resultData?.error && (
-                    <Code block style={codeBlockStyle}>{String(resultData.error)}</Code>
+                    <Code block style={{ ...codeBlockStyle, color: 'var(--mantine-color-red-text)', border: '1px solid var(--mantine-color-default-border)' }}>{String(resultData.error)}</Code>
                   )}
                 </Stack>
               )}
@@ -168,11 +219,13 @@ export default function TestCard() {
   );
 }
 
-const codeBlockStyle = (theme: any) => ({
+const codeBlockStyle = {
   marginTop: 0,
   whiteSpace: 'pre-wrap',
   wordBreak: 'break-word',
-});
+  backgroundColor: 'var(--mantine-color-default)',
+  color: 'var(--mantine-color-text)',
+};
 
 const scrollContainerStyle = {
   marginTop: '8px',

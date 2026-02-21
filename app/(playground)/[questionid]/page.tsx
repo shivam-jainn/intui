@@ -63,7 +63,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
   }
 
   return (
-    <div style={{ height: '100%', minHeight: 0 }}>
+    <div style={{ height: '100%', minHeight: 0, backgroundColor: 'var(--mantine-color-body)' }}>
       <PanelGroup direction="horizontal" style={{ height: '100%', minHeight: 0 }}>
         <Panel>
           <div style={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
@@ -77,17 +77,17 @@ export default function Page({ params }: { params: { questionid: string } }) {
             />
           </div>
         </Panel>
-        <PanelResizeHandle style={{ width: '0.5rem' }} />
+        <PanelResizeHandle style={{ width: '4px', backgroundColor: 'var(--mantine-color-default-border)' }} />
         <Panel>
           <PanelGroup direction="vertical" style={{ height: '100%', minHeight: 0 }}>
             <Panel minSize={50}>
               <div style={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
-                <CodeEditor questionName={params.questionid} />
+                <CodeEditor questionName={params.questionid} onSubmissionComplete={fetchQuestion} />
               </div>
             </Panel>
-            <PanelResizeHandle style={{ height: '0.5rem' }} />
+            <PanelResizeHandle style={{ height: '4px', backgroundColor: 'var(--mantine-color-default-border)' }} />
             <Panel defaultSize={30} minSize={20} maxSize={40}>
-              <div style={{ height: '100%', minHeight: 0, overflow: 'hidden' }}>
+              <div style={{ height: '100%', minHeight: 0, overflow: 'hidden', backgroundColor: 'var(--mantine-color-body)' }}>
                 <RunAndSubmissionBar />
               </div>
             </Panel>
