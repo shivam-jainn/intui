@@ -1,82 +1,82 @@
-import { NextRequest, NextResponse } from "next/server";
-import { GoogleAuth } from "google-auth-library";
+import { NextRequest, NextResponse } from 'next/server';
+import { GoogleAuth } from 'google-auth-library';
 
 export async function POST(req: NextRequest) {
   const { question_name, code, language } = await req.json();
 
   if (!question_name) {
     return NextResponse.json(
-      { message: "Cannot run code without the question name" },
+      { message: 'Cannot run code without the question name' },
       { status: 400 }
     );
   }
   if (!language) {
     return NextResponse.json(
-      { message: "Cannot run code without any language selected" },
+      { message: 'Cannot run code without any language selected' },
       { status: 400 }
     );
   }
-  if (!code || typeof code !== "string" || code.length < 10) {
+  if (!code || typeof code !== 'string' || code.length < 10) {
     return NextResponse.json(
-      { message: "No valid code exists." },
+      { message: 'No valid code exists.' },
       { status: 400 }
     );
   }
   if (!process.env.GCR_Host) {
     return NextResponse.json(
-      { message: "Configuration error: GCR Host is not defined." },
+      { message: 'Configuration error: GCR Host is not defined.' },
       { status: 500 }
     );
   }
 
   // Use Cloud Run URL for production; local URL for development.
   const gcr_url = `${process.env.GCR_Host}/execute`;
-  const local_executor_url = `http://127.0.0.1:8080/execute`;
-  const url = process.env.ENV_MODE === "development" ? local_executor_url : gcr_url;
-  console.log("Executor URL:", url);
+  const local_executor_url = 'http://127.0.0.1:8080/execute';
+  const url = process.env.ENV_MODE === 'development' ? local_executor_url : gcr_url;
+  console.log('Executor URL:', url);
 
   const requestBody = {
     questionName: question_name,
     userCode: code,
-    language: language,
+    language,
     isSubmission: false,
   };
 
   console.log(requestBody);
 
   try {
-    let headers: Record<string, string> = {
-      "Content-Type": "application/json",
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
     };
 
-    if (process.env.ENV_MODE !== "development") {
-      console.log("Constructing headers ...");
+    if (process.env.ENV_MODE !== 'development') {
+      console.log('Constructing headers ...');
       // IMPORTANT: Set the target audience to the base Cloud Run URL (without tags)
       const targetAudience = process.env.GCR_Host;
 
       const auth = new GoogleAuth({
         credentials: {
           client_email: process.env.EXEC_CLIENT_EMAIL,
-          private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-        }      });
+          private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        } });
 
       // Use getIdTokenClient to obtain an ID token with the proper audience.
       const idTokenClient = await auth.getIdTokenClient(targetAudience);
       const idToken = await idTokenClient.idTokenProvider.fetchIdToken(targetAudience);
 
-      headers["Authorization"] = `Bearer ${idToken}`;
-      console.log("Headers done ...");
+      headers.Authorization = `Bearer ${idToken}`;
+      console.log('Headers done ...');
     }
 
     let response;
     try {
       response = await fetch(url, {
-        method: "POST",
+        method: 'POST',
         headers,
         body: JSON.stringify(requestBody),
       });
     } catch (fetchErr: any) {
-      console.error("Fetch to executor failed", { url, error: fetchErr });
+      console.error('Fetch to executor failed', { url, error: fetchErr });
       throw fetchErr; // fall through to outer catch
     }
 
@@ -84,14 +84,14 @@ export async function POST(req: NextRequest) {
     try {
       data = await response.json();
     } catch (parseErr) {
-      console.error("Failed to parse executor response", { status: response.status, responseText: await response.text(), parseErr });
+      console.error('Failed to parse executor response', { status: response.status, responseText: await response.text(), parseErr });
       throw parseErr;
     }
 
-    console.log("Executor response data:", data);
+    console.log('Executor response data:', data);
     if (!response.ok) {
       throw new Error(
-        `Execution Error: ${data?.error || "Unknown error"} (HTTP ${response.status})`
+        `Execution Error: ${data?.error || 'Unknown error'} (HTTP ${response.status})`
       );
     }
 
@@ -101,14 +101,14 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     // provide as much debugging info as possible
-    console.error("Execution error caught in POST handler", {
+    console.error('Execution error caught in POST handler', {
       message: error?.message,
       stack: error?.stack,
       url,
       requestBody,
     });
     return NextResponse.json(
-      { message: "Some error occurred. Please try again later." },
+      { message: 'Some error occurred. Please try again later.' },
       { status: 500 }
     );
   }

@@ -1,13 +1,13 @@
-import { Storage } from "@google-cloud/storage";
-import { StorageService } from "../storage-services";
+import { Storage } from '@google-cloud/storage';
+import { StorageService } from '../storage-services';
 
 export class GcpStorage implements StorageService {
   private storage: Storage;
   private bucketName: string;
-  
-  constructor(config: any,bucketName:string,_credentials:Record<string,string>) {
-    const _config = {...config,"credentials":_credentials};
-    console.log(_config)
+
+  constructor(config: any, bucketName:string, _credentials:Record<string, string>) {
+    const _config = { ...config, credentials: _credentials };
+    console.log(_config);
     this.storage = new Storage(_config);
     this.bucketName = bucketName;
   }

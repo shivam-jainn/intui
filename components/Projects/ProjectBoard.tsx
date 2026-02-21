@@ -106,7 +106,8 @@ function DraggableCard({
   const hasMoved = React.useRef(false);
 
   return (
-    <div
+    <button
+      type="button"
       ref={setNodeRef}
       style={{ opacity: isDragging ? 0 : 1 }}
       {...attributes}
@@ -129,7 +130,7 @@ function DraggableCard({
       }}
     >
       <IssueCard issue={issue} isDragging={false} onClick={() => onCardClick(issue)} />
-    </div>
+    </button>
   );
 }
 

@@ -1,8 +1,9 @@
-"use client";
-import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
+'use client';
+
 import { Card, SegmentedControl, Text, Box, Stack, Code, Badge } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import React, { useState, useEffect } from 'react';
+import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
 
 function formatForDisplay(value: any) {
   if (value === null || value === undefined) return null;
@@ -25,7 +26,7 @@ export default function TestCard() {
   useEffect(() => {
     const hasValidResults = resultData?.results?.length > 0;
     setIsResultDataAvailable(hasValidResults);
-    
+
     // Reset test case selection when results change
     if (hasValidResults) {
       setTestCase('0');
@@ -33,12 +34,12 @@ export default function TestCard() {
   }, [resultData]);
 
   const testcases = [
-    { output: "1", value: "[1,2,3]" },
-    { output: "4", value: "[5,2,3]" }
+    { output: '1', value: '[1,2,3]' },
+    { output: '4', value: '[5,2,3]' },
   ];
 
-  function changeTab(tabName: "testcases" | "results") {
-    if (tabName === "results" && !isResultDataAvailable) return;
+  function changeTab(tabName: 'testcases' | 'results') {
+    if (tabName === 'results' && !isResultDataAvailable) return;
     setTab(tabName);
   }
 
@@ -61,13 +62,13 @@ export default function TestCard() {
       <Stack style={{ minHeight: 0, flex: 1 }}>
         <SegmentedControl
           value={tab}
-          onChange={(value) => changeTab(value as "testcases" | "results")}
+          onChange={(value) => changeTab(value as 'testcases' | 'results')}
           data={[
             { label: 'Test Cases', value: 'testcases' },
-            { 
-              label: 'Results', 
-              value: 'results', 
-              disabled: !isResultDataAvailable 
+            {
+              label: 'Results',
+              value: 'results',
+              disabled: !isResultDataAvailable,
             },
           ]}
           size="sm"
@@ -75,14 +76,14 @@ export default function TestCard() {
           fullWidth
         />
         <Box style={tabBodyStyle}>
-          {tab === "testcases" ? (
+          {tab === 'testcases' ? (
             <Stack>
               <SegmentedControl
                 value={testcase}
                 onChange={setTestCase}
                 data={testcases.map((_, index) => ({
                   label: `Case ${index}`,
-                  value: `${index}`
+                  value: `${index}`,
                 }))}
                 size="xs"
                 color="blue"
@@ -90,7 +91,7 @@ export default function TestCard() {
               <Text size="sm" fw={500}>Input:</Text>
               <Box style={scrollContainerStyle}>
                 <Code block style={codeBlockStyle}>
-                  {testcases[Number(testcase)]?.value || "No input available"}
+                  {testcases[Number(testcase)]?.value || 'No input available'}
                 </Code>
               </Box>
             </Stack>
@@ -103,7 +104,7 @@ export default function TestCard() {
                     onChange={setTestCase}
                     data={resultData.results.map((_:any, index: number) => ({
                       label: `Case ${index}`,
-                      value: `${index}`
+                      value: `${index}`,
                     }))}
                     size="xs"
                     color="blue"
@@ -112,22 +113,24 @@ export default function TestCard() {
                   <Box>
                     <div className="flex items-center gap-2 mb-1">
                       <Text size="sm" fw={500} color="dimmed">Your Output:</Text>
-                      <Badge 
-                        color={isSuccess ? "green" : "red"}
+                      <Badge
+                        color={isSuccess ? 'green' : 'red'}
                         variant="filled"
                       >
-                        {isSuccess ? "Passed" : "Failed"}
+                        {isSuccess ? 'Passed' : 'Failed'}
                       </Badge>
                     </div>
                     <Box style={scrollContainerStyle}>
-                      <Code block style={{
+                      <Code
+                        block
+                        style={{
                         ...codeBlockStyle,
-                        backgroundColor: isSuccess 
-                          ? 'rgba(34, 139, 34, 0.15)' 
-                          : 'rgba(255, 0, 0, 0.15)'
+                        backgroundColor: isSuccess
+                          ? 'rgba(34, 139, 34, 0.15)'
+                          : 'rgba(255, 0, 0, 0.15)',
                       }}>
                         <Box style={scrollContentStyle}>
-                          {actualOutput ?? "No output"}
+                          {actualOutput ?? 'No output'}
                         </Box>
                       </Code>
                     </Box>
@@ -137,7 +140,7 @@ export default function TestCard() {
                     <Text size="sm" fw={500} color="dimmed">Expected Output:</Text>
                     <Box style={scrollContainerStyle}>
                       <Code block style={codeBlockStyle}>
-                        {expectedOutput ?? "No expected output"}
+                        {expectedOutput ?? 'No expected output'}
                       </Code>
                     </Box>
                   </Box>
@@ -158,19 +161,19 @@ export default function TestCard() {
 const codeBlockStyle = (theme: any) => ({
   marginTop: 0,
   whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word'
+  wordBreak: 'break-word',
 });
 
 const scrollContainerStyle = {
   marginTop: '8px',
   overflowY: 'auto' as const,
   overflowX: 'auto' as const,
-  borderRadius: '8px'
+  borderRadius: '8px',
 };
 
 const scrollContentStyle = {
   whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word'
+  wordBreak: 'break-word',
 };
 
 const tabBodyStyle = {

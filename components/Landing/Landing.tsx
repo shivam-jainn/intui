@@ -166,7 +166,7 @@ const Landing: React.FC = () => {
             <Text
               fw={800}
               size="3rem"
-              
+
             >
               Why Choose Intui?
             </Text>
@@ -176,7 +176,7 @@ const Landing: React.FC = () => {
           </Box>
 
           {/* Feature Cards */}
-          <Box 
+          <Box
             style={{
               display: 'grid',
               gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))',
@@ -198,9 +198,9 @@ const Landing: React.FC = () => {
                 },
               }}
             >
-              <Box 
-                mb="md" 
-                style={{ 
+              <Box
+                mb="md"
+                style={{
                   width: '60px',
                   height: '60px',
                   display: 'flex',
@@ -237,9 +237,9 @@ const Landing: React.FC = () => {
                 },
               }}
             >
-              <Box 
-                mb="md" 
-                style={{ 
+              <Box
+                mb="md"
+                style={{
                   width: '60px',
                   height: '60px',
                   display: 'flex',
@@ -276,9 +276,9 @@ const Landing: React.FC = () => {
                 },
               }}
             >
-              <Box 
-                mb="md" 
-                style={{ 
+              <Box
+                mb="md"
+                style={{
                   width: '60px',
                   height: '60px',
                   display: 'flex',
@@ -303,15 +303,15 @@ const Landing: React.FC = () => {
           </Box>
 
           {/* Safari Mockup */}
-          <Box 
-            style={{ 
-              maxWidth: '900px', 
+          <Box
+            style={{
+              maxWidth: '900px',
               margin: '0 auto',
               boxShadow: '0 20px 80px rgba(0,0,0,0.5)',
             }}
           >
             {/* Browser Window Header */}
-            <Box 
+            <Box
               style={{
                 background: 'linear-gradient(to bottom, #f2f2f2, #e5e5e5)',
                 borderTopLeftRadius: '8px',
@@ -328,10 +328,10 @@ const Landing: React.FC = () => {
                 <Box style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#ffbd2e' }}></Box>
                 <Box style={{ width: '12px', height: '12px', borderRadius: '50%', backgroundColor: '#27c93f' }}></Box>
               </Group>
-              
+
               {/* URL Bar */}
-              <Box 
-                ml="lg" 
+              <Box
+                ml="lg"
                 style={{
                   flex: 1,
                   backgroundColor: '#ffffff',
@@ -347,7 +347,7 @@ const Landing: React.FC = () => {
             </Box>
 
             {/* Browser Content */}
-            <Box 
+            <Box
               style={{
                 backgroundColor: '#1a1a1a',
                 borderBottomLeftRadius: '8px',

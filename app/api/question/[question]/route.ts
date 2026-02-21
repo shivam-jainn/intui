@@ -1,6 +1,6 @@
-import { prisma } from "@/prisma/db";
-import { NextRequest, NextResponse } from "next/server";
-import { IssueStatus } from "@prisma/client";
+import { NextRequest, NextResponse } from 'next/server';
+import { IssueStatus } from '@prisma/client';
+import { prisma } from '@/prisma/db';
 
 export async function GET(
   req: NextRequest,
@@ -19,7 +19,7 @@ export async function GET(
 
     return NextResponse.json(questionObject);
   } catch (error: any) {
-    console.warn("prisma: failed to fetch question — returning null. Reason:", (error && error.message) ? error.message.split('\n')[0] : error);
+    console.warn('prisma: failed to fetch question — returning null. Reason:', (error && error.message) ? error.message.split('\n')[0] : error);
     return NextResponse.json(null);
   }
 }
@@ -35,7 +35,7 @@ export async function PATCH(
 
     if (!status || !Object.values(IssueStatus).includes(status)) {
       return NextResponse.json(
-        { message: "Invalid status. Must be TODO, IN_PROGRESS, or DONE." },
+        { message: 'Invalid status. Must be TODO, IN_PROGRESS, or DONE.' },
         { status: 400 }
       );
     }
@@ -47,7 +47,7 @@ export async function PATCH(
 
     return NextResponse.json(updated);
   } catch (error: any) {
-    console.error("Failed to update question status:", error?.message);
-    return NextResponse.json({ message: "Failed to update status" }, { status: 500 });
+    console.error('Failed to update question status:', error?.message);
+    return NextResponse.json({ message: 'Failed to update status' }, { status: 500 });
   }
 }

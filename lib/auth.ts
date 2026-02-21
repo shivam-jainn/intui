@@ -1,13 +1,13 @@
-import { betterAuth } from "better-auth";
-import { prismaAdapter } from "better-auth/adapters/prisma";
-import { prisma } from "@/prisma/db"; 
+import { betterAuth } from 'better-auth';
+import { prismaAdapter } from 'better-auth/adapters/prisma';
+import { prisma } from '@/prisma/db';
 
-const AUTH_ENABLED = process.env.AUTH_ENABLED !== "false";
+const AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false';
 
 export const auth = AUTH_ENABLED
   ? betterAuth({
       database: prismaAdapter(prisma, {
-        provider: "postgresql",
+        provider: 'postgresql',
       }),
       advanced: {
         useSecureCookies: true,

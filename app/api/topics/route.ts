@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/prisma/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/prisma/db';
 
 // GET /api/topics — returns all topics with their question count
 export async function GET(req: NextRequest) {
@@ -19,7 +19,7 @@ export async function GET(req: NextRequest) {
           },
         },
       },
-      orderBy: { name: "asc" },
+      orderBy: { name: 'asc' },
     });
 
     // Annotate each topic with question counts per status
@@ -27,14 +27,14 @@ export async function GET(req: NextRequest) {
       id: t.id,
       name: t.name,
       questionCount: t.questions.length,
-      todo: t.questions.filter((q) => q.question.status === "TODO").length,
-      inProgress: t.questions.filter((q) => q.question.status === "IN_PROGRESS").length,
-      done: t.questions.filter((q) => q.question.status === "DONE").length,
+      todo: t.questions.filter((q) => q.question.status === 'TODO').length,
+      inProgress: t.questions.filter((q) => q.question.status === 'IN_PROGRESS').length,
+      done: t.questions.filter((q) => q.question.status === 'DONE').length,
     }));
 
     return NextResponse.json(enriched);
   } catch (error: any) {
-    console.warn("prisma: failed to fetch topics:", error?.message?.split("\n")[0]);
+    console.warn('prisma: failed to fetch topics:', error?.message?.split('\n')[0]);
     return NextResponse.json([]);
   }
 }

@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
 import {
   isServer,
   QueryClient,
   QueryClientProvider,
-} from "@tanstack/react-query";
+} from '@tanstack/react-query';
 
 function makeQueryClient() {
   return new QueryClient({
@@ -16,14 +16,13 @@ function makeQueryClient() {
   });
 }
 
-let browserQueryClient: QueryClient | undefined = undefined;
+let browserQueryClient: QueryClient | undefined;
 function getQueryClient() {
   if (isServer) {
     return makeQueryClient();
-  } else {
+  }
     if (!browserQueryClient) browserQueryClient = makeQueryClient();
     return browserQueryClient;
-  }
 }
 
 export default function TanstackQueryProvider({

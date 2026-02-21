@@ -34,18 +34,18 @@ import {
   useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
-import { useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
-import React from 'react';
 import Profile from './Profile';
 
 const mockdata = [
   {
     icon: IconCode,
     title: 'Open source',
-    description: "This Pokémon's cry is very loud and distracting",   
+    description: "This Pokémon's cry is very loud and distracting",
   },
   {
     icon: IconCoin,
@@ -89,12 +89,16 @@ function UserNav({ router }: { router: any }) {
     <>
       {data?.user == null ? (
         <Group justify="center" grow pb="xl" px="md">
-          <Button variant="default" onClick={() => {
-            router.push('/signin')
-          }}>Log in</Button>
+          <Button
+            variant="default"
+            onClick={() => {
+            router.push('/signin');
+          }}>Log in
+          </Button>
           <Button onClick={() => {
-            router.push('/signup')
-          }}>Sign up</Button>
+            router.push('/signup');
+          }}>Sign up
+          </Button>
         </Group>
       ) : (
         <Group justify="center" grow pb="xl" px="md">
@@ -157,12 +161,16 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           <Group visibleFrom="sm">
             {currentSession?.user == null ? (
               <>
-                <Button variant="default" onClick={() => {
-                  router.push('/signin')
-                }}>Log in</Button>
+                <Button
+                  variant="default"
+                  onClick={() => {
+                  router.push('/signin');
+                }}>Log in
+                </Button>
                 <Button onClick={() => {
-                  router.push('/signup')
-                }}>Sign up</Button>
+                  router.push('/signup');
+                }}>Sign up
+                </Button>
               </>
             ) : (
               <Profile avatar={currentSession.user.image} />

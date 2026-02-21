@@ -1,19 +1,20 @@
-"use server";
-import { Storage } from "@google-cloud/storage";
-import { Language, languageExtensions } from "../types/playground.types";
-import fs from "fs/promises";
-import path from "path";
+'use server';
+
+import { Storage } from '@google-cloud/storage';
+import fs from 'fs/promises';
+import path from 'path';
+import { Language, languageExtensions } from '../types/playground.types';
 
 // Initialize GCP Storage client
 const storage = new Storage({
   credentials: {
     type: process.env.GCP_TYPE,
     client_email: process.env.GCP_CLIENT_EMAIL,
-    private_key: process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+    private_key: process.env.GCP_PRIVATE_KEY?.replace(/\\n/g, '\n'),
     private_key_id: process.env.GCP_PRIVATE_KEY_ID,
     project_id: process.env.GCP_PROJECT_ID,
     client_id: process.env.GCP_CLIENT_ID,
-    universe_domain: process.env.GCP_UNIVERSE_DOMAIN,    
+    universe_domain: process.env.GCP_UNIVERSE_DOMAIN,
   },
 });
 
@@ -46,13 +47,13 @@ export async function getDesc(question_name: string) {
     const [fileBuffer] = await bucket.file(desc_key_path).download();
 
     // Convert Buffer to string
-    const question_description_str = fileBuffer.toString("utf8");
+    const question_description_str = fileBuffer.toString('utf8');
 
     return {
       question_description: question_description_str,
     };
   } catch (error) {
-    console.error("Error in getDesc:", error);
+    console.error('Error in getDesc:', error);
     throw new Error(`Failed to retrieve question description for ${question_name}`);
   }
 }
@@ -86,13 +87,13 @@ export async function getDriver(question_name: string, language: Language) {
     const [fileBuffer] = await bucket.file(driver_key_path).download();
 
     // Convert Buffer to string
-    const driver_code_str = fileBuffer.toString("utf8");
+    const driver_code_str = fileBuffer.toString('utf8');
 
     return {
       driver_code: driver_code_str,
     };
   } catch (error) {
-    console.error("Error in getDriver:", error);
+    console.error('Error in getDriver:', error);
     throw new Error(`Failed to retrieve driver code for ${question_name} in ${language}`);
   }
 }
