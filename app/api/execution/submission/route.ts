@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { prisma } from '@/prisma/db';
-import { auth } from '@/lib/auth';
+import { randomUUID } from 'crypto';
+import { auth } from '@/lib/auth/auth';
+import { pushMessage } from '@/lib/queues/rabbitmq';
+import { upsertExecutionResult } from '@/lib/queues/execution-results-store';
 
 export async function POST(req: NextRequest) {
   const { question_name, code, language } = await req.json();
@@ -26,90 +28,72 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.GCR_Host) {
+  const session = await auth.api.getSession({ headers: req.headers });
+
+  const AUTH_ENABLED = process.env.AUTH_ENABLED !== 'false';
+
+  // When auth is enabled the user must be signed in. When auth is disabled
+  // (local dev) allow submissions without a session.
+  if (AUTH_ENABLED && !session?.user?.id) {
     return NextResponse.json(
-      { message: 'Configuration error: GCR Host is not defined.' },
-      { status: 500 }
+      { message: 'You must be signed in to submit.' },
+      { status: 401 }
     );
   }
 
-  const gcr_url = `${process.env.GCR_Host}/execute`;
-  const local_executor_url = 'http://127.0.0.1:8080/execute';
+  const jobId = randomUUID();
+  const queueName = process.env.EXECUTION_QUEUE_NAME ?? 'execution_requests';
+  const defaultDevWebhookBase = 'http://host.docker.internal:3000';
+  const webappBaseUrl =
+    process.env.WEBAPP_INTERNAL_URL
+    ?? (process.env.NODE_ENV === 'development'
+      ? defaultDevWebhookBase
+      : req.nextUrl.origin);
+  const webhookToken = process.env.EXECUTION_WEBHOOK_TOKEN;
+
   const requestBody = {
+    jobId,
     questionName: question_name,
     userCode: code,
     language,
     isSubmission: true,
+    userId: session?.user?.id,
+    webhookUrl: `${webappBaseUrl}/api/execution/webhook`,
+    webhookToken,
+    enqueuedAt: new Date().toISOString(),
   };
 
+  upsertExecutionResult({
+    jobId,
+    questionName: question_name,
+    status: 'queued',
+    language,
+    userCode: code,
+    isSubmission: true,
+    userId: session?.user?.id,
+  });
+
   try {
-    const response = await fetch(process.env.ENV_MODE === 'development' ? local_executor_url : gcr_url, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(requestBody),
-    });
+    const enqueueResult = await pushMessage(queueName, requestBody);
 
-    const data = await response.json();
-
-    if (process.env.ENV_MODE === 'development') {
-      console.log(data);
-    }
-
-    if (!response.ok) {
-      const errorMessage = data?.error || 'Unknown error occurred';
-      throw new Error(`Execution Error: ${errorMessage} (HTTP ${response.status})`);
-    }
-
-    // Determine if all tests passed
-    const allPassed =
-      Array.isArray(data.results) &&
-      data.results.length > 0 &&
-      data.results.every((r: any) => r.passed === true);
-
-    // Persist submission if user is logged in
-    try {
-      const session = await auth.api.getSession({ headers: req.headers });
-      if (session?.user?.id) {
-        const question = await prisma.question.findUnique({ where: { name: question_name } });
-        if (question) {
-          await prisma.submission.create({
-            data: {
-              questionId: question.id,
-              userId: session.user.id,
-              code,
-              language,
-              status: allPassed ? 'ACCEPTED' : 'WRONG_ANSWER',
-            },
-          });
-
-          // Auto-close: mark question as DONE if all tests passed
-          if (allPassed) {
-            await prisma.question.update({
-              where: { id: question.id },
-              data: { status: 'DONE' },
-            });
-          }
-        }
-      }
-    } catch (dbErr: any) {
-      // Non-fatal — don't block the response
-      console.warn('Failed to persist submission:', dbErr?.message);
+    if (!enqueueResult.success) {
+      return NextResponse.json(
+        {
+          message: 'Failed to enqueue submission request.',
+          error:
+            process.env.NODE_ENV === 'development'
+              ? enqueueResult.error
+              : undefined,
+        },
+        { status: 500 }
+      );
     }
 
     return NextResponse.json(
-      {
-        message: data.message,
-        results: data.results,
-        timeTaken: data.timeTaken,
-        memoryUsed: data.memoryUsedKB,
-        accepted: allPassed,
-      },
-      { status: response.status }
+      { message: 'Submission request queued.', jobId, status: 'queued' },
+      { status: 201 }
     );
-  } catch (error: any) {
-    if (process.env.ENV_MODE === 'development') {
-      console.error('Execution error:', error.message);
-    }
+  } catch {
     return NextResponse.json(
       { message: 'Some error occurred. Please try again later.' },
       { status: 500 }

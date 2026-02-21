@@ -26,6 +26,12 @@ RUN apk add --no-cache \
 
 WORKDIR /app
 
+ENV PORT=8080
+ENV LOCAL_QUESTIONS_PATH=/app/questions
+ENV ENABLE_EXECUTION_CONSUMER=false
+ENV EXECUTION_QUEUE_NAME=execution_requests
+ENV EXECUTION_RESULT_QUEUE_NAME=execution_results
+
 # Copy only the binary from builder
 COPY --from=builder /app/execserver .
 
@@ -34,7 +40,9 @@ EXPOSE 8080
 # Development image: local questions are bundled, and mode defaults to development
 FROM runtime-base AS runtime-development
 ENV EXECUTOR_MODE=development
-ENV LOCAL_QUESTIONS_PATH=/app/questions
+ENV ENABLE_EXECUTION_CONSUMER=true
+ENV RABBITMQ_URL=amqp://rabbit:rabbit@host.docker.internal:5672/
+ENV EXECUTION_WEBHOOK_TOKEN=secret
 COPY questions /app/questions
 
 CMD ["./execserver"]

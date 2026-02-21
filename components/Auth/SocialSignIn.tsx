@@ -1,7 +1,7 @@
 'use client';
 
 import { Button } from '@mantine/core';
-import { signIn } from '@/lib/auth-client';
+import { signIn } from '@/lib/auth/auth-client';
 
 export default function SocialSignIn() {
   async function onSignInSocial(provider: 'github' | 'google' | 'facebook') {

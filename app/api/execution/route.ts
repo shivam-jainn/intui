@@ -1,5 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { GoogleAuth } from 'google-auth-library';
+import { randomUUID } from 'crypto';
+import { pushMessage } from '../../../lib/queues/rabbitmq';
+import { upsertExecutionResult } from '@/lib/queues/execution-results-store';
 
 export async function POST(req: NextRequest) {
   const { question_name, code, language } = await req.json();
@@ -22,91 +24,57 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (!process.env.GCR_Host) {
-    return NextResponse.json(
-      { message: 'Configuration error: GCR Host is not defined.' },
-      { status: 500 }
-    );
-  }
-
-  // Use Cloud Run URL for production; local URL for development.
-  const gcr_url = `${process.env.GCR_Host}/execute`;
-  const local_executor_url = 'http://127.0.0.1:8080/execute';
-  const url = process.env.ENV_MODE === 'development' ? local_executor_url : gcr_url;
-  console.log('Executor URL:', url);
+  const jobId = randomUUID();
+  const queueName = process.env.EXECUTION_QUEUE_NAME ?? 'execution_requests';
+  const defaultDevWebhookBase = 'http://host.docker.internal:3000';
+  const webappBaseUrl =
+    process.env.WEBAPP_INTERNAL_URL
+    ?? (process.env.NODE_ENV === 'development'
+      ? defaultDevWebhookBase
+      : req.nextUrl.origin);
+  const webhookToken = process.env.EXECUTION_WEBHOOK_TOKEN;
 
   const requestBody = {
+    jobId,
     questionName: question_name,
     userCode: code,
     language,
     isSubmission: false,
+    webhookUrl: `${webappBaseUrl}/api/execution/webhook`,
+    webhookToken,
+    enqueuedAt: new Date().toISOString(),
   };
 
-  console.log(requestBody);
+  upsertExecutionResult({
+    jobId,
+    questionName: question_name,
+    status: 'queued',
+    language,
+    userCode: code,
+    isSubmission: false,
+  });
 
   try {
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-    };
+    const enqueueResult = await pushMessage(queueName, requestBody);
 
-    if (process.env.ENV_MODE !== 'development') {
-      console.log('Constructing headers ...');
-      // IMPORTANT: Set the target audience to the base Cloud Run URL (without tags)
-      const targetAudience = process.env.GCR_Host;
-
-      const auth = new GoogleAuth({
-        credentials: {
-          client_email: process.env.EXEC_CLIENT_EMAIL,
-          private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-        } });
-
-      // Use getIdTokenClient to obtain an ID token with the proper audience.
-      const idTokenClient = await auth.getIdTokenClient(targetAudience);
-      const idToken = await idTokenClient.idTokenProvider.fetchIdToken(targetAudience);
-
-      headers.Authorization = `Bearer ${idToken}`;
-      console.log('Headers done ...');
-    }
-
-    let response;
-    try {
-      response = await fetch(url, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestBody),
-      });
-    } catch (fetchErr: any) {
-      console.error('Fetch to executor failed', { url, error: fetchErr });
-      throw fetchErr; // fall through to outer catch
-    }
-
-    let data;
-    try {
-      data = await response.json();
-    } catch (parseErr) {
-      console.error('Failed to parse executor response', { status: response.status, responseText: await response.text(), parseErr });
-      throw parseErr;
-    }
-
-    console.log('Executor response data:', data);
-    if (!response.ok) {
-      throw new Error(
-        `Execution Error: ${data?.error || 'Unknown error'} (HTTP ${response.status})`
+    if (!enqueueResult.success) {
+      return NextResponse.json(
+        {
+          message: 'Failed to enqueue execution request.',
+          error:
+            process.env.NODE_ENV === 'development'
+              ? enqueueResult.error
+              : undefined,
+        },
+        { status: 500 }
       );
     }
 
     return NextResponse.json(
-      { results: data.results },
-      { status: response.status }
+      { message: 'Execution request queued.', jobId, status: 'queued' },
+      { status: 201 }
     );
-  } catch (error: any) {
-    // provide as much debugging info as possible
-    console.error('Execution error caught in POST handler', {
-      message: error?.message,
-      stack: error?.stack,
-      url,
-      requestBody,
-    });
+  } catch {
     return NextResponse.json(
       { message: 'Some error occurred. Please try again later.' },
       { status: 500 }

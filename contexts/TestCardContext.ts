@@ -2,4 +2,4 @@ import { atom } from 'jotai';
 
 export const resultAtom = atom<'testcases' | 'results'>('testcases');
 
-export const resultDataAtom = atom(null);
+export const resultDataAtom = atom<any>(null);
