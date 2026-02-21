@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import React, { useState } from 'react';
 import {
   Container,
@@ -12,7 +13,7 @@ import {
   Modal,
   Timeline,
   Avatar,
-  Collapse
+  Collapse,
 } from '@mantine/core';
 import { IconLock, IconUser, IconMessage } from '@tabler/icons-react';
 
@@ -24,63 +25,62 @@ export default function StoryMode() {
   const episodes = [
     {
       id: 1,
-      title: "The Binary Breach",
-      status: "unlocked",
+      title: 'The Binary Breach',
+      status: 'unlocked',
       completion: 0,
-      brief: "A sophisticated hacker has breached the FBI database. Your team needs to trace the attack pattern and secure the system.",
-      characters: ["Agent Sarah Chen", "Director Roberts", "Unknown Hacker"],
+      brief: 'A sophisticated hacker has breached the FBI database. Your team needs to trace the attack pattern and secure the system.',
+      characters: ['Agent Sarah Chen', 'Director Roberts', 'Unknown Hacker'],
       currentScene: 0,
-      difficulty: "Medium",
+      difficulty: 'Medium',
       story: [
         {
-          character: "Director Roberts",
+          character: 'Director Roberts',
           dialogue: "Agent, we've detected an unusual pattern in our mainframe.",
-          avatar: "DR"
+          avatar: 'DR',
         },
         {
-          character: "Agent Sarah Chen",
+          character: 'Agent Sarah Chen',
           dialogue: "I'm seeing multiple entry points. This is no ordinary breach.",
-          avatar: "SC"
+          avatar: 'SC',
         },
         {
-          character: "Unknown Hacker",
-          dialogue: "Catch me if you can, agents... 😈",
-          avatar: "UH"
-        }
+          character: 'Unknown Hacker',
+          dialogue: 'Catch me if you can, agents... 😈',
+          avatar: 'UH',
+        },
       ],
       challenges: [
         {
-          id: "1.1",
-          title: "Trace the Entry Point",
-          description: "Implement a function to detect the first point of unauthorized access",
+          id: '1.1',
+          title: 'Trace the Entry Point',
+          description: 'Implement a function to detect the first point of unauthorized access',
           unlocked: true,
           completed: false,
-          leetcodeLink: "/problems/binary-search"
+          leetcodeLink: '/problems/binary-search',
         },
         {
-          id: "1.2",
-          title: "Decrypt the Message",
+          id: '1.2',
+          title: 'Decrypt the Message',
           description: "Break the hacker's encryption using pattern matching",
           unlocked: false,
           completed: false,
-          leetcodeLink: "/problems/valid-anagram"
-        }
-      ]
+          leetcodeLink: '/problems/valid-anagram',
+        },
+      ],
     },
     {
       id: 2,
-      title: "The Quantum Conspiracy",
-      status: "locked",
+      title: 'The Quantum Conspiracy',
+      status: 'locked',
       completion: 0,
-      brief: "A quantum computer is being used to break into government facilities worldwide. Your coding skills are needed to prevent global chaos.",
-      characters: ["Agent Mike Ross", "Dr. Quantum", "Mystery Syndicate"],
-      difficulty: "Hard",
-      locked: true
-    }
+      brief: 'A quantum computer is being used to break into government facilities worldwide. Your coding skills are needed to prevent global chaos.',
+      characters: ['Agent Mike Ross', 'Dr. Quantum', 'Mystery Syndicate'],
+      difficulty: 'Hard',
+      locked: true,
+    },
   ];
 
-  const renderDialogue = (episode: any) => {
-    return (
+  const renderDialogue = (episode: any) => (
       <Timeline active={episode.currentScene} bulletSize={24} lineWidth={2}>
         {episode.story.map((scene: any, index: number) => (
           <Timeline.Item
@@ -99,7 +99,6 @@ export default function StoryMode() {
         ))}
       </Timeline>
     );
-  };
 
   return (
     <Container size="xl" style={{ padding: '40px 20px' }}>
@@ -110,7 +109,7 @@ export default function StoryMode() {
           padding: '40px',
           borderRadius: '16px',
           marginBottom: '40px',
-          color: 'white'
+          color: 'white',
         }}
       >
         <Title order={1} style={{ fontSize: '44px', marginBottom: '20px' }}>
@@ -129,7 +128,7 @@ export default function StoryMode() {
             style={{
               border: '1px solid #2C2E33',
               position: 'relative',
-              opacity: episode.status === 'locked' ? 0.7 : 1
+              opacity: episode.status === 'locked' ? 0.7 : 1,
             }}
           >
             {episode.status === 'locked' && (
@@ -143,7 +142,7 @@ export default function StoryMode() {
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                zIndex: 1
+                zIndex: 1,
               }}>
                 <IconLock size={40} />
               </div>
@@ -175,7 +174,7 @@ export default function StoryMode() {
                   fullWidth
                   style={{
                     marginBottom: '10px',
-                    background: '#228BE6'
+                    background: '#228BE6',
                   }}
                   onClick={() => {
                     setSelectedEpisode(episode.id);
@@ -197,7 +196,7 @@ export default function StoryMode() {
   size="lg"
   title={
     <Title order={3}>
-      {episodes.find(e => e.id === selectedEpisode)?.title ?? "Unknown Case"}
+      {episodes.find(e => e.id === selectedEpisode)?.title ?? 'Unknown Case'}
     </Title>
   }
 >
@@ -205,7 +204,7 @@ export default function StoryMode() {
     <div>
       {renderDialogue(episodes.find(e => e.id === selectedEpisode)!)}
 
-      <Title order={4} style={{ marginTop: "20px", marginBottom: "15px" }}>
+      <Title order={4} style={{ marginTop: '20px', marginBottom: '15px' }}>
         Current Objectives
       </Title>
 
@@ -215,9 +214,9 @@ export default function StoryMode() {
           <Card
             key={challenge.id}
             style={{
-              marginBottom: "10px",
+              marginBottom: '10px',
               opacity: challenge.unlocked ? 1 : 0.7,
-              border: "1px solid #eee",
+              border: '1px solid #eee',
             }}
           >
             <Group>
@@ -227,14 +226,14 @@ export default function StoryMode() {
                   {challenge.description}
                 </Text>
               </div>
-              {challenge.unlocked ? "" : <IconLock size={20} />}
+              {challenge.unlocked ? '' : <IconLock size={20} />}
             </Group>
 
             {challenge.unlocked && (
               <Button
                 fullWidth
                 variant="light"
-                style={{ marginTop: "10px" }}
+                style={{ marginTop: '10px' }}
                 component="a"
                 href={`https://leetcode.com${challenge.leetcodeLink}`}
                 target="_blank"

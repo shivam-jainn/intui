@@ -1,12 +1,12 @@
 import '@mantine/core/styles.css';
 
 import React from 'react';
-import { ColorSchemeScript, MantineProvider } from '@mantine/core';
+import { ColorSchemeScript } from '@mantine/core';
 import { Navbar } from '@/components/Navbar/Navbar';
-import { theme } from '../theme';
 import './globals.css';
 import '@mantine/dates/styles.css';
 import TanstackQueryProvider from './TanstackQueryProvider';
+import { MantineProviders } from './MantineProviders';
 
 export const metadata = {
   title: 'Intui',
@@ -17,7 +17,7 @@ export default function RootLayout({ children }: { children: any }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
-        <ColorSchemeScript />
+        <ColorSchemeScript defaultColorScheme="dark" />
         <link rel="shortcut icon" href="/favicon.svg" />
         <meta
           name="viewport"
@@ -25,12 +25,12 @@ export default function RootLayout({ children }: { children: any }) {
         />
       </head>
       <body>
-        <MantineProvider theme={theme}>
+        <MantineProviders>
           <TanstackQueryProvider>
             <Navbar />
             {children}
           </TanstackQueryProvider>
-        </MantineProvider>
+        </MantineProviders>
       </body>
     </html>
   );

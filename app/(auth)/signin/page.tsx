@@ -1,5 +1,4 @@
 export default function LoginPage() {
- 
   return (
     <>
         <div>
@@ -11,7 +10,7 @@ export default function LoginPage() {
       <p>Don't Have an account yet?</p>
       <a href="/signup">Sign Up instead</a>
       </div>
-    </div>
- </>
+        </div>
+    </>
   );
 }

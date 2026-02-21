@@ -1,7 +1,19 @@
-"use client";
-import React, { useEffect, useState } from "react";
-import { Table, Badge } from "@mantine/core";
-import { useRouter } from "next/navigation";
+'use client';
+
+import React, { useEffect, useState } from 'react';
+import { Table, Badge, Group, Text } from '@mantine/core';
+import { useRouter } from 'next/navigation';
+
+const statusColor: Record<string, string> = {
+  TODO: 'gray',
+  IN_PROGRESS: 'blue',
+  DONE: 'teal',
+};
+const statusLabel: Record<string, string> = {
+  TODO: 'To Do',
+  IN_PROGRESS: 'In Progress',
+  DONE: 'Done',
+};
 
 export default function Page() {
   const [data, setData] = useState([]);
@@ -10,12 +22,12 @@ export default function Page() {
   async function fetchAllQuestions(page = 1) {
     try {
       const response = await fetch(`/api/questions?page=${page}`);
-      if (!response.ok) throw new Error("Failed to fetch questions");
+      if (!response.ok) throw new Error('Failed to fetch questions');
 
       const jsonData = await response.json();
       setData(jsonData);
     } catch (error) {
-      console.error("Error fetching questions:", error);
+      console.error('Error fetching questions:', error);
     }
   }
 
@@ -28,18 +40,23 @@ export default function Page() {
       key={q.id}
       onClick={() => router.push(`/${q.name}`)}
       style={{
-        cursor: "pointer",
-        transition: "background 0.2s ease-in-out",
+        cursor: 'pointer',
+        transition: 'background 0.2s ease-in-out',
       }}
-      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "#f5f5f5")}
-      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}
+      onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = '#f5f5f5')}
+      onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = 'transparent')}
     >
-      <td style={{ textAlign: "center", padding: "12px" }}>{q.id}</td>
-      <td style={{ textAlign: "center", padding: "12px", fontWeight: "bold" }}>{q.name}</td>
-      <td style={{ textAlign: "center", padding: "12px"}}>
+      <td style={{ textAlign: 'center', padding: '12px' }}>{q.id}</td>
+      <td style={{ textAlign: 'center', padding: '12px', fontWeight: 'bold' }}>{q.name}</td>
+      <td style={{ textAlign: 'center', padding: '12px' }}>
         {q.difficulty}
       </td>
-      <td style={{ textAlign: "center", padding: "12px" }}>
+      <td style={{ textAlign: 'center', padding: '12px' }}>
+        <Badge color={statusColor[q.status ?? 'TODO']} variant="light" radius="sm">
+          {statusLabel[q.status ?? 'TODO']}
+        </Badge>
+      </td>
+      <td style={{ textAlign: 'center', padding: '12px' }}>
         {q.topics.map((topic: any) => (
           <Badge key={topic.topic.name} color="blue" variant="light" mx={4} radius="sm">
             {topic.topic.name}
@@ -56,17 +73,18 @@ export default function Page() {
         verticalSpacing="md"
         horizontalSpacing="lg"
         style={{
-          borderRadius: "10px",
-          overflow: "hidden",
-          boxShadow: "0px 4px 10px rgba(0, 0, 0, 0.1)",
+          borderRadius: '10px',
+          overflow: 'hidden',
+          boxShadow: '0px 4px 10px rgba(0, 0, 0, 0.1)',
         }}
       >
-        <thead style={{ backgroundColor: "#f0f0f0" }}>
+        <thead style={{ backgroundColor: '#f0f0f0' }}>
           <tr>
-            <th style={{ textAlign: "center", padding: "12px" }}>ID</th>
-            <th style={{ textAlign: "center", padding: "12px" }}>Name</th>
-            <th style={{ textAlign: "center", padding: "12px" }}>Difficulty</th>
-            <th style={{ textAlign: "center", padding: "12px" }}>Topics</th>
+            <th style={{ textAlign: 'center', padding: '12px' }}>ID</th>
+            <th style={{ textAlign: 'center', padding: '12px' }}>Name</th>
+            <th style={{ textAlign: 'center', padding: '12px' }}>Difficulty</th>
+            <th style={{ textAlign: 'center', padding: '12px' }}>Status</th>
+            <th style={{ textAlign: 'center', padding: '12px' }}>Topics</th>
           </tr>
         </thead>
         <tbody>{tableRows}</tbody>

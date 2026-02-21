@@ -1,13 +1,14 @@
-"use client";
-import { Button } from "@mantine/core";
-import { signIn } from "@/lib/auth-client";
+'use client';
+
+import { Button } from '@mantine/core';
+import { signIn } from '@/lib/auth-client';
 
 export default function SocialSignIn() {
-  async function onSignInSocial(provider: "github" | "google" | "facebook") {
+  async function onSignInSocial(provider: 'github' | 'google' | 'facebook') {
     try {
       const { data, error } = await signIn.social({
         provider,
-        callbackURL: "/",
+        callbackURL: '/',
       });
 
       if (error) throw error;
@@ -19,22 +20,22 @@ export default function SocialSignIn() {
 
   return (
     <>
-      <Button 
-        fullWidth 
-        mt="md" 
-        size="md" 
+      <Button
+        fullWidth
+        mt="md"
+        size="md"
         radius="md"
-        onClick={() => onSignInSocial("github")}
+        onClick={() => onSignInSocial('github')}
       >
         Sign in with GitHub
       </Button>
-      
-      <Button 
-        fullWidth 
-        mt="md" 
-        size="md" 
+
+      <Button
+        fullWidth
+        mt="md"
+        size="md"
         radius="md"
-        onClick={() => onSignInSocial("google")}
+        onClick={() => onSignInSocial('google')}
       >
         Sign in with Google
       </Button>

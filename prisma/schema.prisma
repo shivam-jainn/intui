@@ -1,5 +1,6 @@
 generator client {
   provider = "prisma-client-js"
+  binaryTargets = ["native", "linux-arm64-openssl-3.0.x"]
 }
 
 datasource db {
@@ -13,11 +14,18 @@ enum Difficulty {
   Hard
 }
 
+enum IssueStatus {
+  TODO
+  IN_PROGRESS
+  DONE
+}
+
 model Question {
   id          Int               @id @default(autoincrement())
   name        String            @unique @db.VarChar(160)
   difficulty  Difficulty
   description String
+  status      IssueStatus       @default(TODO)
   topics      QuestionTopic[]
   companies   QuestionCompany[]
   User        User?             @relation(fields: [userId], references: [id])

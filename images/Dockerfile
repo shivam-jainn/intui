@@ -7,12 +7,12 @@ RUN apk add --no-cache gcc g++ make
 
 
 # Copy source and build
-COPY ./execserver .
+COPY images/execserver .
 RUN go mod tidy
 RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o execserver .
 
-# Runtime stage
-FROM alpine:latest
+# Runtime base stage
+FROM alpine:latest AS runtime-base
 
 # Install runtime dependencies in a single layer
 RUN apk add --no-cache \
@@ -31,4 +31,18 @@ COPY --from=builder /app/execserver .
 
 EXPOSE 8080
 
+# Development image: local questions are bundled, and mode defaults to development
+FROM runtime-base AS runtime-development
+ENV EXECUTOR_MODE=development
+ENV LOCAL_QUESTIONS_PATH=/app/questions
+COPY questions /app/questions
+
 CMD ["./execserver"]
+
+# Production image: mode defaults to production and expects GCS config at runtime
+FROM runtime-base AS runtime-production
+ENV EXECUTOR_MODE=production
+CMD ["./execserver"]
+
+# Default final image remains production
+FROM runtime-production

@@ -7,11 +7,11 @@ import { useEffect, useState } from 'react';
 import { oneDark } from '@codemirror/theme-one-dark';
 import './CodeEditor.css';
 import { Select, Button, Card } from '@mantine/core';
-import { GrPowerReset } from "react-icons/gr";
+import { GrPowerReset } from 'react-icons/gr';
 import { useAtom } from 'jotai';
+import { useLocalStorage } from '@mantine/hooks';
 import { langAtom } from '@/contexts/LanguageContext';
 import { Language } from '@/lib/common/types/playground.types';
-import { useLocalStorage } from '@mantine/hooks';
 import { getDriver } from '@/lib/common/playground/desc_and_driver';
 import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
 
@@ -20,17 +20,16 @@ interface CodeEditorProps {
 }
 
 const CodeEditor = ({
-  questionName
+  questionName,
 }: CodeEditorProps) => {
   const [language, setLanguage] = useAtom<Language>(langAtom);
-  const [initialCode, setInitialCode] = useState("");
-  const [isLoading,setIsLoading] = useState<boolean>(false);
-  const [testTab,setTestTab] = useAtom(resultAtom);
-  const [_,setResultData] = useAtom(resultDataAtom);
+  const [initialCode, setInitialCode] = useState('');
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [testTab, setTestTab] = useAtom(resultAtom);
+  const [_, setResultData] = useAtom(resultDataAtom);
 
   async function setDriverCode() {
-    console.log(language);
-    const { driver_code } = await getDriver(decodeURIComponent(questionName), language)
+    const { driver_code } = await getDriver(decodeURIComponent(questionName), language);
     setStoredCode(driver_code);
     setInitialCode(driver_code);
   }
@@ -42,12 +41,10 @@ const CodeEditor = ({
     fetchDriverCode();
   }, [questionName, language]);
 
-
   const [storedCode, setStoredCode] = useLocalStorage({
     key: `${questionName}-code`,
-    defaultValue: ""
-  })
-
+    defaultValue: '',
+  });
 
   const handleChange = (value: string) => {
     setStoredCode(value);
@@ -64,58 +61,52 @@ const CodeEditor = ({
   };
 
   const languageOptions = [
-    { value: "cpp", label: "C++" },
-    { value: "python", label: "Python" },
+    { value: 'cpp', label: 'C++' },
+    { value: 'python', label: 'Python' },
   ];
 
   function resetCode() {
     setStoredCode(initialCode);
   }
 
-  async function handleRunCode(){
-
+  async function handleRunCode() {
     setIsLoading(true);
 
     const requestBody = {
-      question_name : questionName,
-      code : storedCode,
-      language: language
-    }
+      question_name: questionName,
+      code: storedCode,
+      language,
+    };
 
-    const response = await fetch('/api/execution',{
-      method : "POST",
-      body : JSON.stringify(requestBody)
-    })
+    const response = await fetch('/api/execution', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
 
     // const {status,message} = await response.json();
     const data = await response.json();
     setResultData(data);
-    console.log(data)
     // if(process.env.ENV_MODE === "development") console.log(message);
     // if(process.env.ENV_MODE === "development") console.log(status);
 
-    setTestTab("results");
-
-
+    setTestTab('results');
 
     setIsLoading(false);
-
   }
 
-  async function handleSubmission(){
-
+  async function handleSubmission() {
     setIsLoading(true);
 
     const requestBody = {
-      question_name : questionName,
-      code : storedCode,
-      language: language
-    }
+      question_name: questionName,
+      code: storedCode,
+      language,
+    };
 
-    const response = await fetch('/api/execution/submission',{
-      method : "POST",
-      body : JSON.stringify(requestBody)
-    })
+    const response = await fetch('/api/execution/submission', {
+      method: 'POST',
+      body: JSON.stringify(requestBody),
+    });
 
     // const {status,message} = await response.json();
     const data = await response.json();
@@ -123,28 +114,26 @@ const CodeEditor = ({
     // if(process.env.ENV_MODE === "development") console.log(message);
     // if(process.env.ENV_MODE === "development") console.log(status);
 
-    setTestTab("results");
-
-
+    setTestTab('results');
 
     setIsLoading(false);
-
   }
 
   return (
 
     <div style={{
-      display:'flex',
+      display: 'flex',
       flexDirection: 'column',
-      height:'100%'
+      height: '100%',
     }}>
-      
 
-      <Card w="100%" style={{
-        display: "flex",
+      <Card
+        w="100%"
+        style={{
+        display: 'flex',
         flexDirection: 'row',
-        alignItems: "center",
-        justifyContent: "space-between",
+        alignItems: 'center',
+        justifyContent: 'space-between',
       }}
       >
         <Select
@@ -157,18 +146,17 @@ const CodeEditor = ({
 
 <Button onClick={resetCode}>
           <GrPowerReset />
-        </Button>
+</Button>
 
+      <div style={{ display: 'flex', flexDirection: 'row', gap: '5px' }}>
 
-      <div style={{display:'flex',flexDirection:'row',gap:'5px'}}>
-
-        <Button variant='secondary' onClick={handleRunCode} loading={isLoading}>Run</Button>
+        <Button variant="secondary" onClick={handleRunCode} loading={isLoading}>Run</Button>
         <Button onClick={handleSubmission}>Submit</Button>
       </div>
       </Card>
 
       <div style={{
-        flexGrow: 1
+        flexGrow: 1,
       }}>
       <CodeMirror
         value={storedCode}
@@ -199,7 +187,7 @@ const CodeEditor = ({
           completionKeymap: true,
           lintKeymap: true,
         }}
-        minHeight='100%'
+        minHeight="100%"
       />
       </div>
     </div>
