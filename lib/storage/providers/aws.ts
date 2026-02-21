@@ -1,5 +1,5 @@
 // providers/aws-storage.ts
-import { StorageService } from "../storage-services";
+import { StorageService } from '../storage-services';
 
 export class AwsStorage implements StorageService {
   async upload(file: Buffer, path: string): Promise<string> {
@@ -7,7 +7,7 @@ export class AwsStorage implements StorageService {
   }
 
   async download(path: string): Promise<Buffer> {
-    return Buffer.from("File content");
+    return Buffer.from('File content');
   }
 
   async delete(path: string): Promise<void> {

@@ -7,15 +7,16 @@ services:
       - data:/data/db
 
   database:
-    image: postgres:latest
+    image: postgres:16
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: testpass
       POSTGRES_DB: intui-test
     volumes:
       - postgres_data:/var/lib/postgresql/data
+    # avoid port clash with host Postgres
     ports:
-      - "5432:5432"
+      - "5433:5432"
 
 volumes:
   data:

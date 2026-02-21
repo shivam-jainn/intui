@@ -19,6 +19,8 @@ import (
 
 func ExecuteCode(c *fiber.Ctx) error {
 	log.Println("Starting code execution request")
+	mode := getExecutorMode()
+	log.Println("Executor mode:", mode)
 
 	var request struct {
 		QuestionName string `json:"questionName"`
@@ -47,14 +49,24 @@ func ExecuteCode(c *fiber.Ctx) error {
 	log.Println("Created temp dir:", tmpDir)
 
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Println("GCS client error:", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "GCS connection failed"})
-	}
-	defer client.Close()
-
 	bucketName := os.Getenv("GCS_BUCKET")
+	var client *storage.Client
+
+	if mode == "production" {
+		if bucketName == "" {
+			log.Println("Missing GCS_BUCKET in production mode")
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "GCS bucket not configured"})
+		}
+
+		client, err = storage.NewClient(ctx)
+		if err != nil {
+			log.Println("GCS client error:", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "GCS connection failed"})
+		}
+		defer client.Close()
+	} else {
+		log.Println("Development mode: using local question assets")
+	}
 	basePath := decodedQuestionName
 	testCasesFile := "testcases.txt"
 	if request.IsSubmission {
@@ -63,8 +75,11 @@ func ExecuteCode(c *fiber.Ctx) error {
 
 	testCasesPath := filepath.Join(tmpDir, testCasesFile)
 	log.Println("Fetching test cases:", testCasesFile)
-	if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, testCasesFile), testCasesPath); err != nil {
+	if err := fetchSource(ctx, client, bucketName, mode, []string{filepath.Join(basePath, testCasesFile)}, testCasesPath); err != nil {
 		log.Println("Test cases fetch error:", err)
+		if os.IsNotExist(err) {
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Local testcase file missing. Add questions/<question>/testcases*.txt or configure GCS_BUCKET for fallback."})
+		}
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get test cases"})
 	}
 
@@ -73,22 +88,29 @@ func ExecuteCode(c *fiber.Ctx) error {
 	case "python":
 		log.Println("Processing Python code")
 		driverPath := filepath.Join(tmpDir, "driver.py")
-		if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, "drivers/python/driver.py"), driverPath); err != nil {
+		if err := fetchSource(ctx, client, bucketName, mode, []string{filepath.Join(basePath, "drivers/python/driver.py")}, driverPath); err != nil {
 			log.Println("Python driver error:", err)
+			if os.IsNotExist(err) {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Python driver missing. Add questions/<question>/drivers/python/driver.py locally or configure GCS_BUCKET."})
+			}
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Python driver missing"})
 		}
 
 		driverCode, _ := os.ReadFile(driverPath)
 		tmpFile := filepath.Join(tmpDir, "temp.py")
-		os.WriteFile(tmpFile, []byte(request.UserCode+"\n"+string(driverCode)), 0644)
+		pythonPrelude := "from typing import *\n"
+		os.WriteFile(tmpFile, []byte(pythonPrelude+request.UserCode+"\n"+string(driverCode)), 0644)
 		cmd = exec.Command("python3", tmpFile, testCasesPath)
 		cmd.Dir = tmpDir
 
 	case "cpp":
 		log.Println("Processing C++ code")
 		driverPath := filepath.Join(tmpDir, "driver.cpp")
-		if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, "drivers/cpp/driver.cpp"), driverPath); err != nil {
+		if err := fetchSource(ctx, client, bucketName, mode, []string{filepath.Join(basePath, "drivers/cpp/driver.cpp")}, driverPath); err != nil {
 			log.Println("C++ driver error:", err)
+			if os.IsNotExist(err) {
+				return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "C++ driver missing. Add questions/<question>/drivers/cpp/driver.cpp locally or configure GCS_BUCKET."})
+			}
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "C++ driver missing"})
 		}
 
@@ -166,6 +188,78 @@ func ExecuteCode(c *fiber.Ctx) error {
 		"results":      parsedOutput,
 		"error":        stderr.String(),
 	})
+}
+
+func getExecutorMode() string {
+	mode := strings.ToLower(strings.TrimSpace(os.Getenv("EXECUTOR_MODE")))
+	if mode == "development" || mode == "production" {
+		return mode
+	}
+
+	envMode := strings.ToLower(strings.TrimSpace(os.Getenv("ENV_MODE")))
+	if envMode == "development" || envMode == "production" {
+		return envMode
+	}
+
+	if os.Getenv("GCS_BUCKET") == "" {
+		return "development"
+	}
+
+	return "production"
+}
+
+// fetchSource resolves an asset from candidate object paths.
+// Development mode tries local files first, then falls back to GCS if configured.
+// Production mode reads only from GCS.
+func fetchSource(ctx context.Context, client *storage.Client, bucketName, mode string, objectPaths []string, destPath string) error {
+	if len(objectPaths) == 0 {
+		return os.ErrNotExist
+	}
+
+	if mode == "development" {
+		localRoot := os.Getenv("LOCAL_QUESTIONS_PATH")
+		if localRoot == "" {
+			localRoot = "/app/questions"
+		}
+
+		for _, objectPath := range objectPaths {
+			localPath := filepath.Join(localRoot, objectPath)
+			log.Printf("Reading local file %s -> %s", localPath, destPath)
+			data, err := os.ReadFile(localPath)
+			if err == nil {
+				return os.WriteFile(destPath, data, 0644)
+			}
+		}
+
+		if bucketName != "" {
+			log.Printf("Local assets not found for %v, attempting GCS fallback", objectPaths)
+			gcsClient := client
+			if gcsClient == nil {
+				var err error
+				gcsClient, err = storage.NewClient(ctx)
+				if err != nil {
+					return err
+				}
+				defer gcsClient.Close()
+			}
+
+			for _, objectPath := range objectPaths {
+				if err := fetchFromGCS(ctx, gcsClient, bucketName, objectPath, destPath); err == nil {
+					return nil
+				}
+			}
+		}
+
+		return os.ErrNotExist
+	}
+
+	for _, objectPath := range objectPaths {
+		if err := fetchFromGCS(ctx, client, bucketName, objectPath, destPath); err == nil {
+			return nil
+		}
+	}
+
+	return os.ErrNotExist
 }
 
 func fetchFromGCS(ctx context.Context, client *storage.Client, bucketName, objectPath, destPath string) error {

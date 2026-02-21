@@ -1,26 +1,27 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/prisma/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/prisma/db';
 
 export async function GET(
   req: NextRequest,
-  res : NextResponse
 ) {
   try {
+    const { searchParams } = new URL(req.url);
+    const topic = searchParams.get('topic');
+
     const questionObject = await prisma.question.findMany({
-      include:{
-        topics: {
-          include:{
-            topic : true
-          }
-        }
-      }
+      where: topic
+        ? { topics: { some: { topic: { name: topic } } } }
+        : undefined,
+      include: {
+        topics: { include: { topic: true } },
+        companies: { include: { company: true } },
+      },
+      orderBy: { id: 'asc' },
     });
 
-    console.log("questionObject : ", questionObject);
     return NextResponse.json(questionObject);
   } catch (error: any) {
-    // Graceful fallback for local development when DB isn't available
-    console.warn("prisma: failed to fetch questions — returning empty list. Reason:", (error && error.message) ? error.message.split('\n')[0] : error);
+    console.warn('prisma: failed to fetch questions — returning empty list. Reason:', (error && error.message) ? error.message.split('\n')[0] : error);
     return NextResponse.json([]);
   }
 }

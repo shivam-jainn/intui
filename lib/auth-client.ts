@@ -1,7 +1,7 @@
-import { createAuthClient } from "better-auth/react";
+import { createAuthClient } from 'better-auth/react';
 
 // Toggle client-side auth behavior using NEXT_PUBLIC_AUTH_ENABLED
-const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== "false";
+const AUTH_ENABLED = process.env.NEXT_PUBLIC_AUTH_ENABLED !== 'false';
 
 let _signIn: any;
 let _signUp: any;
@@ -11,7 +11,7 @@ let _signOut: any;
 
 if (AUTH_ENABLED) {
   const authClient = createAuthClient({
-    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3000",
+    baseURL: process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:3000',
   });
 
   _signIn = authClient.signIn;

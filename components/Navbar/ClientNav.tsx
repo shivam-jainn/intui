@@ -8,6 +8,8 @@ import {
   IconCoin,
   IconFingerprint,
   IconNotification,
+  IconMoonStars,
+  IconSun,
 } from '@tabler/icons-react';
 import {
   Anchor,
@@ -28,20 +30,22 @@ import {
   ThemeIcon,
   UnstyledButton,
   useMantineTheme,
+  ActionIcon,
+  useMantineColorScheme,
 } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
+import { useRouter } from 'next/navigation';
+import React from 'react';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
-import { useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
-import React from 'react';
 import Profile from './Profile';
 
 const mockdata = [
   {
     icon: IconCode,
     title: 'Open source',
-    description: "This Pokémon's cry is very loud and distracting",   
+    description: "This Pokémon's cry is very loud and distracting",
   },
   {
     icon: IconCoin,
@@ -85,12 +89,16 @@ function UserNav({ router }: { router: any }) {
     <>
       {data?.user == null ? (
         <Group justify="center" grow pb="xl" px="md">
-          <Button variant="default" onClick={() => {
-            router.push('/signin')
-          }}>Log in</Button>
+          <Button
+            variant="default"
+            onClick={() => {
+            router.push('/signin');
+          }}>Log in
+          </Button>
           <Button onClick={() => {
-            router.push('/signup')
-          }}>Sign up</Button>
+            router.push('/signup');
+          }}>Sign up
+          </Button>
         </Group>
       ) : (
         <Group justify="center" grow pb="xl" px="md">
@@ -105,6 +113,7 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
   const theme = useMantineTheme();
+  const { colorScheme, toggleColorScheme } = useMantineColorScheme();
   const router = useRouter();
   const { data, isPending } = useSession();
 
@@ -141,6 +150,9 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
             <a href="/" className={classes.link}>
               Home
             </a>
+            <a href="/projects" className={classes.link}>
+              Projects
+            </a>
             <a href="/questions" className={classes.link}>
               Questions
             </a>
@@ -149,16 +161,32 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           <Group visibleFrom="sm">
             {currentSession?.user == null ? (
               <>
-                <Button variant="default" onClick={() => {
-                  router.push('/signin')
-                }}>Log in</Button>
+                <Button
+                  variant="default"
+                  onClick={() => {
+                  router.push('/signin');
+                }}>Log in
+                </Button>
                 <Button onClick={() => {
-                  router.push('/signup')
-                }}>Sign up</Button>
+                  router.push('/signup');
+                }}>Sign up
+                </Button>
               </>
             ) : (
               <Profile avatar={currentSession.user.image} />
             )}
+            <ActionIcon
+              variant="default"
+              onClick={() => toggleColorScheme()}
+              size="lg"
+              ml="md"
+            >
+              {colorScheme === 'dark' ? (
+                <IconSun size={18} />
+              ) : (
+                <IconMoonStars size={18} />
+              )}
+            </ActionIcon>
           </Group>
 
           <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
@@ -180,6 +208,9 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           <a href="/" className={classes.link}>
             Home
           </a>
+          <a href="/projects" className={classes.link}>
+            Projects
+          </a>
           <UnstyledButton className={classes.link} onClick={toggleLinks}>
             <Center inline>
               <Box component="span" mr={5}>
@@ -197,6 +228,16 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           </a>
 
           <Divider my="sm" />
+
+          <Group position="center" mb="sm">
+            <ActionIcon
+              variant="default"
+              onClick={() => toggleColorScheme()}
+              size="lg"
+            >
+              {colorScheme === 'dark' ? <IconSun size={18} /> : <IconMoonStars size={18} />}
+            </ActionIcon>
+          </Group>
 
           <UserNav router={router} />
         </ScrollArea>
