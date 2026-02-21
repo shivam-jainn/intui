@@ -1,5 +1,5 @@
 import { headers } from 'next/headers';
-import { auth } from '@/lib/auth'; // Your auth instance
+import { auth } from '@/lib/auth/auth'; // Your auth instance
 import ClientNavbar from './ClientNav';
 
 export async function Navbar() {

@@ -1,6 +1,6 @@
 import { toNextJsHandler } from 'better-auth/next-js';
 import { NextResponse, NextRequest } from 'next/server';
-import { auth } from '@/lib/auth'; // path to your auth file
+import { auth } from '@/lib/auth/auth'; // path to your auth file
 
 const handler = toNextJsHandler(auth);
 

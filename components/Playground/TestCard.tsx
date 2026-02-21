@@ -146,9 +146,19 @@ export default function TestCard() {
                   </Box>
                 </>
               ) : (
-                <Text size="sm" color="dimmed">
-                  No test results available
-                </Text>
+                <Stack gap="xs">
+                  <Text size="sm" color="dimmed">
+                    {resultData?.message || 'No test results available'}
+                  </Text>
+                  {resultData?.status && (
+                    <Badge variant="light" color={resultData?.status === 'failed' ? 'red' : 'blue'}>
+                      {String(resultData.status).toUpperCase()}
+                    </Badge>
+                  )}
+                  {resultData?.error && (
+                    <Code block style={codeBlockStyle}>{String(resultData.error)}</Code>
+                  )}
+                </Stack>
               )}
             </Stack>
           )}

@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Avatar, Button, Popover, Stack, Text } from '@mantine/core';
-import { signOut } from '@/lib/auth-client';
+import { signOut } from '@/lib/auth/auth-client';
 
 export default function Profile({ avatar, name }: { avatar: string; name?: string }) {
   const [opened, setOpened] = React.useState(false);

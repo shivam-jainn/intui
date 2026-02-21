@@ -38,7 +38,7 @@ import { useRouter } from 'next/navigation';
 import React from 'react';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
-import { useSession } from '@/lib/auth-client';
+import { useSession } from '@/lib/auth/auth-client';
 import Profile from './Profile';
 
 const mockdata = [

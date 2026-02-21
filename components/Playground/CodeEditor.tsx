@@ -25,8 +25,8 @@ const CodeEditor = ({
   const [language, setLanguage] = useAtom<Language>(langAtom);
   const [initialCode, setInitialCode] = useState('');
   const [isLoading, setIsLoading] = useState<boolean>(false);
-  const [testTab, setTestTab] = useAtom(resultAtom);
-  const [_, setResultData] = useAtom(resultDataAtom);
+  const [, setTestTab] = useAtom(resultAtom);
+  const [, setResultData] = useAtom<any>(resultDataAtom);
 
   async function setDriverCode() {
     const { driver_code } = await getDriver(decodeURIComponent(questionName), language);
@@ -46,6 +46,206 @@ const CodeEditor = ({
     defaultValue: '',
   });
 
+  async function streamExecutionResultViaFetch(jobId: string) {
+    const response = await fetch(`/api/execution/${jobId}/stream`, {
+      method: 'GET',
+      cache: 'no-store',
+      headers: {
+        Accept: 'text/event-stream',
+      },
+    });
+
+    if (!response.ok || !response.body) {
+      throw new Error('Failed to open execution stream');
+    }
+
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = '';
+
+    let streamDone = false;
+    while (!streamDone) {
+      const { value, done } = await reader.read();
+      if (done) {
+        streamDone = true;
+        break;
+      }
+
+      buffer += decoder.decode(value, { stream: true });
+      const chunks = buffer.split('\n\n');
+      buffer = chunks.pop() ?? '';
+
+      for (const chunk of chunks) {
+        const line = chunk
+          .split('\n')
+          .find((part) => part.startsWith('data: '));
+
+        if (line) {
+          const data = JSON.parse(line.replace(/^data:\s*/, '')) as Record<string, unknown>;
+          setResultData(data);
+          setTestTab('results');
+
+          if (data.status === 'completed' || data.status === 'failed') {
+            return data;
+          }
+        }
+      }
+    }
+
+    throw new Error('Execution stream closed before completion');
+  }
+
+  async function streamExecutionResult(jobId: string) {
+    return new Promise((resolve, reject) => {
+      let settled = false;
+      const timeoutAt = Date.now() + 120000;
+      let eventSource: EventSource | null = null;
+      let receivedMessage = false;
+      let fallbackTriggered = false;
+
+      const timeoutId = setTimeout(() => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        if (eventSource) {
+          eventSource.close();
+        }
+        reject(new Error('Execution stream timed out. Please try again.'));
+      }, 120000);
+
+      const done = (cb: () => void) => {
+        if (settled) {
+          return;
+        }
+
+        settled = true;
+        clearTimeout(timeoutId);
+        if (eventSource) {
+          eventSource.close();
+        }
+        cb();
+      };
+
+      const triggerFetchFallback = () => {
+        if (settled || fallbackTriggered) {
+          return;
+        }
+
+        fallbackTriggered = true;
+        if (eventSource) {
+          eventSource.close();
+        }
+
+        streamExecutionResultViaFetch(jobId)
+          .then((data) => done(() => resolve(data)))
+          .catch((error: unknown) => done(() => reject(error)));
+      };
+
+      setTimeout(() => {
+        if (!receivedMessage) {
+          triggerFetchFallback();
+        }
+      }, 5000);
+
+      const connect = () => {
+        if (settled) {
+          return;
+        }
+
+        if (Date.now() >= timeoutAt) {
+          done(() => reject(new Error('Execution stream timed out. Please try again.')));
+          return;
+        }
+
+        eventSource = new EventSource(`/api/execution/${jobId}/stream`);
+
+        eventSource.onmessage = (event) => {
+          try {
+            receivedMessage = true;
+            const data = JSON.parse(event.data) as Record<string, unknown>;
+            setResultData(data);
+            setTestTab('results');
+
+            if (data.status === 'completed' || data.status === 'failed') {
+              done(() => resolve(data));
+            }
+          } catch {
+            done(() => reject(new Error('Invalid SSE payload')));
+          }
+        };
+
+        eventSource.onerror = () => {
+          if (settled) {
+            return;
+          }
+
+          if (eventSource) {
+            eventSource.close();
+          }
+
+          setResultData({
+            status: 'processing',
+            message: 'Reconnecting stream...',
+          });
+
+          setTimeout(() => {
+            if (!receivedMessage && Date.now() > timeoutAt - 110000) {
+              triggerFetchFallback();
+              return;
+            }
+
+            connect();
+          }, 1000);
+        };
+      };
+
+      connect();
+    });
+  }
+
+  async function handleQueuedExecution(endpoint: string, queuedMessage: string) {
+    setIsLoading(true);
+
+    const requestBody = {
+      question_name: questionName,
+      code: storedCode,
+      language,
+    };
+
+    try {
+      const enqueueResponse = await fetch(endpoint, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(requestBody),
+      });
+
+      const enqueueData = await enqueueResponse.json();
+      if (!enqueueResponse.ok || !enqueueData?.jobId) {
+        setResultData(enqueueData);
+        setTestTab('results');
+        return;
+      }
+
+      setResultData({ message: queuedMessage, status: 'queued' });
+      setTestTab('results');
+
+      const finalData = await streamExecutionResult(enqueueData.jobId);
+
+      setResultData(finalData);
+      setTestTab('results');
+    } catch (error) {
+      setResultData({
+        message: 'Failed to process execution request',
+        error: error instanceof Error ? error.message : String(error),
+      });
+      setTestTab('results');
+    } finally {
+      setIsLoading(false);
+    }
+  }
+
   const handleChange = (value: string) => {
     setStoredCode(value);
   };
@@ -57,6 +257,9 @@ const CodeEditor = ({
 
       case 'cpp':
         return cpp();
+
+      default:
+        return python();
     }
   };
 
@@ -70,53 +273,11 @@ const CodeEditor = ({
   }
 
   async function handleRunCode() {
-    setIsLoading(true);
-
-    const requestBody = {
-      question_name: questionName,
-      code: storedCode,
-      language,
-    };
-
-    const response = await fetch('/api/execution', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-    });
-
-    // const {status,message} = await response.json();
-    const data = await response.json();
-    setResultData(data);
-    // if(process.env.ENV_MODE === "development") console.log(message);
-    // if(process.env.ENV_MODE === "development") console.log(status);
-
-    setTestTab('results');
-
-    setIsLoading(false);
+    await handleQueuedExecution('/api/execution', 'Execution queued...');
   }
 
   async function handleSubmission() {
-    setIsLoading(true);
-
-    const requestBody = {
-      question_name: questionName,
-      code: storedCode,
-      language,
-    };
-
-    const response = await fetch('/api/execution/submission', {
-      method: 'POST',
-      body: JSON.stringify(requestBody),
-    });
-
-    // const {status,message} = await response.json();
-    const data = await response.json();
-    setResultData(data);
-    // if(process.env.ENV_MODE === "development") console.log(message);
-    // if(process.env.ENV_MODE === "development") console.log(status);
-
-    setTestTab('results');
-
-    setIsLoading(false);
+    await handleQueuedExecution('/api/execution/submission', 'Submission queued...');
   }
 
   return (
