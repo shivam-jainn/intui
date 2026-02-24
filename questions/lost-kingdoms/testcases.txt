@@ -1,0 +1,3 @@
+{"n":5,"roads":[[0,1],[1,2],[2,3],[3,4]],"expected":true}
+{"n":5,"roads":[[0,1],[2,3]],"expected":false}
+{"n":1,"roads":[],"expected":true}
