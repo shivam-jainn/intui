@@ -1,13 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 
 export async function middleware(request: NextRequest) {
-  const cookieName =
-  process.env.NODE_ENV === "production"
-    ? "__Secure-better-auth.session_token"
-    : "better-auth.session_token";
+  // better-auth may use different cookie names depending on environment/setup.
+  // in production it uses a secure prefix; in dev sometimes the secure prefix is still applied
+  // which would make our original check miss the token.
+  const cookieCandidates = 
+    process.env.NODE_ENV === "production"
+      ? ["__Secure-better-auth.session_token"]
+      : ["better-auth.session_token", "__Secure-better-auth.session_token"];
 
-  const sessionToken = request.cookies.get(cookieName)?.value;
+  // try each name until we find a value
+  let sessionToken: string | undefined;
+  for (const name of cookieCandidates) {
+    const cookie = request.cookies.get(name);
+    if (cookie?.value) {
+      sessionToken = cookie.value;
+      break;
+    }
+  }
 
+  // debugging: log all received cookie names (remove later if desired)
+  // `request.cookies.keys` isn't available; use getAll() which returns all cookie objects.
+  const names = request.cookies.getAll().map(c => c.name);
+  console.log("cookies received:", names);
   console.log("sessionToken : ", sessionToken);
   
   const publicPaths = ["/", "/signin", "/signup"];

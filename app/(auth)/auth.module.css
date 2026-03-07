@@ -1,24 +1,75 @@
+/* ── Auth layout ─────────────────────────────────────────── */
+
 .wrapper {
-    height: 100vh;
-    background-position: center;
-    background-size: cover;
-    background-image: url('/authduck.jpeg');
-  }
-  
-  .form {
-    border-right: 1px solid light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-7));
-    height: 100vh;
-    max-width: 450px;
-    padding-top: 80px;
-  
-    @media (max-width: $mantine-breakpoint-sm) {
-      max-width: 100%;
-    }
-  }
-  
-  .title {
-    color: light-dark(var(--mantine-color-black), var(--mantine-color-white));
-    font-family:
-      Greycliff CF,
-      var(--mantine-font-family);
-  }
+  min-height: calc(100vh - 80px);
+  background: #000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 2rem 1rem;
+}
+
+.form {
+  width: 100%;
+  max-width: 420px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 20px;
+  padding: 2.5rem 2rem;
+}
+
+.title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.025em;
+  margin: 0 0 0.4rem;
+  text-align: center;
+}
+
+.subtitle {
+  font-size: 0.875rem;
+  color: rgba(255, 255, 255, 0.38);
+  text-align: center;
+  margin: 0 0 2rem;
+}
+
+.switchRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  margin-top: 1.75rem;
+  font-size: 0.84rem;
+  color: rgba(255, 255, 255, 0.38);
+}
+
+.switchLink {
+  color: rgba(255, 255, 255, 0.75);
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 0.15s;
+}
+
+.switchLink:hover {
+  color: #fff;
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  margin: 1.5rem 0;
+  color: rgba(255, 255, 255, 0.25);
+  font-size: 0.75rem;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.divider::before,
+.divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: rgba(255, 255, 255, 0.08);
+}
