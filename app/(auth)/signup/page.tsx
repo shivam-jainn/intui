@@ -1,19 +1,11 @@
+import classes from '../auth.module.css';
 
 export default function Page() {
-
-
   return (
-    <>
-    <div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '10px',
-      }}>
-      <p>Have an account already?</p>
-      <a href="/signin">Login instead</a>
-      </div>
+    <div className={classes.switchRow}>
+      <span>Already have an account?</span>
+      <a href="/signin" className={classes.switchLink}>Log in</a>
     </div>
-    </>
   );
 }
+

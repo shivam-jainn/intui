@@ -1,0 +1,247 @@
+/* ── Keyframes ─────────────────────────────────────────── */
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(22px); }
+  to   { opacity: 1; transform: translateY(0);    }
+}
+
+@keyframes floatDuck {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0px);    }
+  50%       { transform: translate(-50%, -50%) translateY(-16px);  }
+}
+
+@keyframes arrowBounce {
+  0%, 100% { transform: translateX(-50%) translateY(0px);   opacity: 0.4; }
+  50%       { transform: translateX(-50%) translateY(8px);   opacity: 0.9; }
+}
+
+/* ── Ambient glows ─────────────────────────────────────── */
+
+.glowLeft {
+  position: absolute;
+  top: 40%;
+  left: 32%;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(78, 205, 196, 0.09) 0%, transparent 65%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+.glowRight {
+  position: absolute;
+  top: 46%;
+  left: 68%;
+  width: 420px;
+  height: 420px;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgba(255, 107, 107, 0.09) 0%, transparent 65%);
+  pointer-events: none;
+  transform: translate(-50%, -50%);
+}
+
+/* ── Badge pill ────────────────────────────────────────── */
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.3rem 0.9rem;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 999px;
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.52);
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  animation: fadeUp 0.6s ease forwards;
+  opacity: 0;
+  cursor: default;
+  user-select: none;
+}
+
+/* ── Hero typography ───────────────────────────────────── */
+
+.heroTitle {
+  font-size: clamp(5rem, 14vw, 11rem);
+  font-weight: 900;
+  line-height: 1;
+  letter-spacing: -0.045em;
+  margin: 0.6rem 0 0;
+  background: linear-gradient(to bottom, #ffffff 10%, rgba(255, 255, 255, 0.6) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  animation: fadeUp 0.7s 0.1s ease forwards;
+  opacity: 0;
+}
+
+.heroSubtitle {
+  font-size: clamp(0.9rem, 2vw, 1.15rem);
+  color: rgba(255, 255, 255, 0.36);
+  margin: 0.75rem 0 0;
+  letter-spacing: 0.01em;
+  animation: fadeUp 0.7s 0.22s ease forwards;
+  opacity: 0;
+}
+
+/* ── Duck float wrapper ────────────────────────────────── */
+
+.duckFloat {
+  position: absolute;
+  top: 52%;
+  left: 50%;
+  width: clamp(160px, 17vw, 250px);
+  height: clamp(160px, 17vw, 250px);
+  pointer-events: none;
+  /* transform is entirely owned by the animation — do NOT set it inline */
+  animation: floatDuck 4.5s ease-in-out infinite;
+}
+
+/* ── CTA row ───────────────────────────────────────────── */
+
+.ctaRow {
+  position: absolute;
+  bottom: 3.5rem;
+  display: flex;
+  gap: 0.75rem;
+  z-index: 2;
+}
+
+.btnPrimary {
+  padding: 0.7rem 1.8rem;
+  background: #fff;
+  color: #000;
+  border: none;
+  border-radius: 999px;
+  font-weight: 700;
+  font-size: 0.875rem;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: opacity 0.15s, transform 0.15s;
+}
+
+.btnPrimary:hover {
+  opacity: 0.86;
+  transform: scale(1.03);
+}
+
+.btnGhost {
+  padding: 0.7rem 1.8rem;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.65);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: 999px;
+  font-weight: 500;
+  font-size: 0.875rem;
+  cursor: pointer;
+  letter-spacing: 0.02em;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+.btnGhost:hover {
+  border-color: rgba(255, 255, 255, 0.38);
+  color: rgba(255, 255, 255, 0.92);
+}
+
+/* ── Scroll indicator ──────────────────────────────────── */
+
+.scrollArrow {
+  position: absolute;
+  bottom: 1.5rem;
+  left: 50%;
+  /* transform is owned by the animation */
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  z-index: 2;
+  animation: arrowBounce 2.2s ease-in-out infinite;
+}
+
+/* ── Stats strip ───────────────────────────────────────── */
+
+.statsRow {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.statItem {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 0.25rem 2.5rem;
+}
+
+.statDivider {
+  width: 1px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.08);
+  align-self: center;
+  flex-shrink: 0;
+}
+
+.statValue {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #fff;
+  white-space: nowrap;
+}
+
+.statLabel {
+  font-size: 0.72rem;
+  color: rgba(255, 255, 255, 0.32);
+  margin-top: 0.1rem;
+  white-space: nowrap;
+  letter-spacing: 0.02em;
+}
+
+/* ── Feature cards (bento) ─────────────────────────────── */
+
+.bentoGrid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.125rem;
+}
+
+.featureCard {
+  background: rgba(255, 255, 255, 0.025);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 18px;
+  padding: 1.75rem;
+  transition: background 0.25s ease, border-color 0.25s ease;
+}
+
+.featureCard:hover {
+  background: rgba(255, 255, 255, 0.055);
+  border-color: rgba(255, 255, 255, 0.16);
+}
+
+.wideCard {
+  grid-column: span 2;
+}
+
+/* ── Responsive ────────────────────────────────────────── */
+
+@media (max-width: 768px) {
+  .bentoGrid {
+    grid-template-columns: 1fr;
+  }
+  .wideCard {
+    grid-column: span 1;
+  }
+  .duckFloat {
+    top: 50%;
+  }
+  .ctaRow {
+    bottom: 3.5rem;
+    flex-direction: column;
+    align-items: center;
+  }
+  .statItem {
+    padding: 0.25rem 1.25rem;
+  }
+}

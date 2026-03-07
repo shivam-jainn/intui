@@ -1,206 +1,187 @@
 'use client';
 
-import {
-  IconBook,
-  IconChartPie3,
-  IconChevronDown,
-  IconCode,
-  IconCoin,
-  IconFingerprint,
-  IconNotification,
-} from '@tabler/icons-react';
-import {
-  Anchor,
-  Box,
-  Burger,
-  Button,
-  Center,
-  Collapse,
-  Divider,
-  Drawer,
-  Group,
-  HoverCard,
-  rem,
-  ScrollArea,
-  SimpleGrid,
-  Skeleton,
-  Text,
-  ThemeIcon,
-  UnstyledButton,
-  useMantineTheme,
-} from '@mantine/core';
+import { Burger, Drawer, rem, ScrollArea, Skeleton } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
-import { useRouter } from 'next/navigation';
+import { useRouter, usePathname } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
 import React from 'react';
 import Profile from './Profile';
-
-const mockdata = [
-  {
-    icon: IconCode,
-    title: 'Open source',
-    description: "This Pokémon's cry is very loud and distracting",   
-  },
-  {
-    icon: IconCoin,
-    title: 'Free for everyone',
-    description: 'The fluid of Smeargle\'s tail secretions changes',
-  },
-  {
-    icon: IconBook,
-    title: 'Documentation',
-    description: 'Yanma is capable of seeing 360 degrees without',
-  },
-  {
-    icon: IconFingerprint,
-    title: 'Security',
-    description: 'The shell\'s rounded shape and the grooves on its surface are a security feature.',
-  },
-  {
-    icon: IconChartPie3,
-    title: 'Analytics',
-    description: 'This Pokémon uses its flying ability to quickly chase',
-  },
-  {
-    icon: IconNotification,
-    title: 'Notifications',
-    description: 'Combusken battles with the intensely hot flames it spews',
-  },
-];
 
 interface ClientNavbarProps {
   initialSession: any;
 }
 
-function UserNav({ router }: { router: any }) {
-  const { data, isPending } = useSession();
-
-  if (isPending) {
-    return <Skeleton height={40} radius="md" />;
-  }
-
-  return (
-    <>
-      {data?.user == null ? (
-        <Group justify="center" grow pb="xl" px="md">
-          <Button variant="default" onClick={() => {
-            router.push('/signin')
-          }}>Log in</Button>
-          <Button onClick={() => {
-            router.push('/signup')
-          }}>Sign up</Button>
-        </Group>
-      ) : (
-        <Group justify="center" grow pb="xl" px="md">
-          <Text>Welcome, {data.user.email}</Text>
-        </Group>
-      )}
-    </>
-  );
-}
-
 export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
-  const [linksOpened, { toggle: toggleLinks }] = useDisclosure(false);
-  const theme = useMantineTheme();
   const router = useRouter();
   const { data, isPending } = useSession();
 
-  // Use initial session if still loading
   const currentSession = isPending ? initialSession : data;
+  const isLoggedIn = currentSession?.user != null;
 
-  const links = mockdata.map((item) => (
-    <UnstyledButton className={classes.subLink} key={item.title}>
-      <Group wrap="nowrap" align="flex-start">
-        <ThemeIcon size={34} variant="default" radius="md">
-          <item.icon style={{ width: rem(22), height: rem(22) }} color={theme.colors.blue[6]} />
-        </ThemeIcon>
-        <div>
-          <Text size="sm" fw={500}>
-            {item.title}
-          </Text>
-          <Text size="xs" c="dimmed">
-            {item.description}
-          </Text>
-        </div>
-      </Group>
-    </UnstyledButton>
-  ));
+  const pathname = usePathname() || '/';
+  const isActive = (href: string) => {
+    if (href === '/') return pathname === '/';
+    return pathname.startsWith(href);
+  };
 
   return (
-    <Box>
-      <header className={classes.header}>
-        <Group justify="space-between" h="100%">
-          <a href="/">
+    <>
+      {/* Spacer so fixed nav doesn't overlap page content */}
+      <div className={classes.spacer} />
+
+      {/* Fixed floating pill */}
+      <div className={classes.root}>
+        <header className={classes.header}>
+          {/* Logo */}
+          <a
+            href="/"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              color: '#fff',
+              textDecoration: 'none',
+              flexShrink: 0,
+            }}
+          >
             <Intui />
           </a>
 
-          <Group h="100%" gap={0} visibleFrom="sm">
-            <a href="/" className={classes.link}>
-              Home
-            </a>
-            <a href="/questions" className={classes.link}>
-              Questions
-            </a>
-          </Group>
+          {/* Desktop nav links — centered */}
+          <div
+            style={{
+              flex: 1,
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+              height: '100%',
+            }}
+            className="visibleFromSm"
+          >
+            <nav
+              style={{ display: 'flex', gap: '0.5rem', height: '100%', alignItems: 'center' }}
+            >
+              <a
+                href="/"
+                className={`${classes.link} ${isActive('/') ? classes.linkActive : ''}`}
+              >
+                Home
+              </a>
+              <a
+                href="/questions"
+                className={`${classes.link} ${isActive('/questions') ? classes.linkActive : ''}`}
+              >
+                Questions
+              </a>
+            </nav>
+          </div>
 
-          <Group visibleFrom="sm">
-            {currentSession?.user == null ? (
-              <>
-                <Button variant="default" onClick={() => {
-                  router.push('/signin')
-                }}>Log in</Button>
-                <Button onClick={() => {
-                  router.push('/signup')
-                }}>Sign up</Button>
-              </>
-            ) : (
+          {/* Desktop auth / profile */}
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.5rem',
+              flexShrink: 0,
+            }}
+          >
+            {isPending ? (
+              <Skeleton height={32} width={120} radius="xl" />
+            ) : isLoggedIn ? (
               <Profile avatar={currentSession.user.image} />
+            ) : (
+              <>
+                {/* Hide on mobile */}
+                <button
+                  type="button"
+                  className={classes.btnLogin}
+                  onClick={() => router.push('/signin')}
+                  style={{ display: 'var(--nav-btn-display, flex)' } as React.CSSProperties}
+                >
+                  Log in
+                </button>
+                <button
+                  type="button"
+                  className={classes.btnSignup}
+                  onClick={() => router.push('/signup')}
+                  style={{ display: 'var(--nav-btn-display, flex)' } as React.CSSProperties}
+                >
+                  Sign up
+                </button>
+              </>
             )}
-          </Group>
 
-          <Burger opened={drawerOpened} onClick={toggleDrawer} hiddenFrom="sm" />
-        </Group>
-      </header>
+            {/* Mobile burger */}
+            <Burger
+              opened={drawerOpened}
+              onClick={toggleDrawer}
+              hiddenFrom="sm"
+              color="white"
+              size="sm"
+            />
+          </div>
+        </header>
+      </div>
 
+      {/* Mobile full-screen drawer */}
       <Drawer
         opened={drawerOpened}
         onClose={closeDrawer}
         size="100%"
-        padding="md"
-        title="Navigation"
+        padding="xl"
         hiddenFrom="sm"
         zIndex={1000000}
+        styles={{
+          content: { background: '#000' },
+          header: { background: '#000' },
+          close: { color: 'white' },
+        }}
+        withCloseButton
       >
-        <ScrollArea h={`calc(100vh - ${rem(80)})`} mx="-md">
-          <Divider my="sm" />
+        <ScrollArea h={`calc(100vh - ${rem(80)})`}>
+          <nav style={{ paddingTop: '1rem' }}>
+            <a
+              href="/"
+              className={`${classes.mobileLink} ${isActive('/') ? classes.mobileLinkActive : ''}`}
+              onClick={closeDrawer}
+            >
+              Home
+            </a>
+            <a
+              href="/questions"
+              className={`${classes.mobileLink} ${isActive('/questions') ? classes.mobileLinkActive : ''}`}
+              onClick={closeDrawer}
+            >
+              Questions
+            </a>
+          </nav>
 
-          <a href="/" className={classes.link}>
-            Home
-          </a>
-          <UnstyledButton className={classes.link} onClick={toggleLinks}>
-            <Center inline>
-              <Box component="span" mr={5}>
-                Features
-              </Box>
-              <IconChevronDown
-                style={{ width: rem(16), height: rem(16) }}
-                color={theme.colors.blue[6]}
-              />
-            </Center>
-          </UnstyledButton>
-          <Collapse in={linksOpened}>{links}</Collapse>
-          <a href="/questions" className={classes.link}>
-            Questions
-          </a>
-
-          <Divider my="sm" />
-
-          <UserNav router={router} />
+          <div className={classes.mobileBtnRow}>
+            {isLoggedIn ? (
+              <Profile avatar={currentSession?.user?.image} />
+            ) : (
+              <>
+                <button
+                  type="button"
+                  className={classes.btnLogin}
+                  onClick={() => { closeDrawer(); router.push('/signin'); }}
+                >
+                  Log in
+                </button>
+                <button
+                  type="button"
+                  className={classes.btnSignup}
+                  onClick={() => { closeDrawer(); router.push('/signup'); }}
+                >
+                  Sign up
+                </button>
+              </>
+            )}
+          </div>
         </ScrollArea>
       </Drawer>
-    </Box>
+    </>
   );
 }

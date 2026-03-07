@@ -7,7 +7,7 @@ services:
       - data:/data/db
 
   database:
-    image: postgres:latest
+    image: postgres:16
     environment:
       POSTGRES_USER: test
       POSTGRES_PASSWORD: testpass

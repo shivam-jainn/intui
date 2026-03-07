@@ -1,37 +1,122 @@
-# Mantine Next.js template
+# Intui
 
-This is a template for [Next.js](https://nextjs.org/) app router + [Mantine](https://mantine.dev/).
-If you want to use pages router instead, see [next-pages-template](https://github.com/mantinedev/next-pages-template).
+> **Interactive coding playground and learning platform**
 
-## Features
+Intui is a modern web application built with Next.js (app router) and Mantine UI, designed to provide users with an embedded code editor, question bank, and execution backend. It includes authentication, real‑time execution, and a modular component library for rapid feature development.
 
-This template comes with the following features:
+![Demo Gif Placeholder](gif-placeholder-1)
 
-- [PostCSS](https://postcss.org/) with [mantine-postcss-preset](https://mantine.dev/styles/postcss-preset)
-- [TypeScript](https://www.typescriptlang.org/)
-- [Storybook](https://storybook.js.org/)
-- [Jest](https://jestjs.io/) setup with [React Testing Library](https://testing-library.com/docs/react-testing-library/intro)
-- ESLint setup with [eslint-config-mantine](https://github.com/mantinedev/eslint-config-mantine)
+> _Insert GIF showing landing page and basic navigation_
 
-## npm scripts
+## 🚀 Features
 
-### Build and dev scripts
+- **Next.js app router** with optimized server‑side rendering and API routes
+- **Mantine UI** for consistent, themeable components
+- Rich **code editor** with syntax highlighting and execution
+- **Authentication** via GitHub and Google
+- Support for **submissions**, **questions**, and **playground** interactions
+- Google Cloud storage integration for assets and execution data
+- Built‑in **Storybook** and **Jest** testing setup
+- Environment configuration through `.env` with clear example
 
-- `dev` – start dev server
-- `build` – bundle application for production
-- `analyze` – analyzes application bundle with [@next/bundle-analyzer](https://www.npmjs.com/package/@next/bundle-analyzer)
+![Playground Gif Placeholder](gif-placeholder-2)
 
-### Testing scripts
+> _Insert GIF showing code editor interaction and execution results_
 
-- `typecheck` – checks TypeScript types
-- `lint` – runs ESLint
-- `prettier:check` – checks files with Prettier
-- `jest` – runs jest tests
-- `jest:watch` – starts jest watch
-- `test` – runs `jest`, `prettier:check`, `lint` and `typecheck` scripts
+## 🛠️ Getting Started
 
-### Other scripts
+### Prerequisites
 
-- `storybook` – starts storybook dev server
-- `storybook:build` – build production storybook bundle to `storybook-static`
-- `prettier:write` – formats all files with Prettier
+- Node.js 18+ (or LTS)
+- [pnpm](https://pnpm.io/) (preferred package manager)
+- A PostgreSQL database (see `DATABASE_URL`)
+
+### Installation
+
+```bash
+git clone https://github.com/your-org/intui.git
+cd intui
+pnpm install
+```
+
+Copy environment variables from the example:
+
+```bash
+cp .env.example .env
+# then edit `.env` with your values
+```
+
+### Running Locally
+
+Development server:
+
+```bash
+pnpm dev
+```
+
+Build for production:
+
+```bash
+pnpm build
+pnpm start
+```
+
+Analyze bundle size:
+
+```bash
+pnpm analyze
+```
+
+### Storybook
+
+```bash
+pnpm storybook
+```
+
+### Testing
+
+```bash
+pnpm test
+```
+
+### Docker (optional)
+
+For a containerized setup using `docker-compose`:
+
+```bash
+docker-compose up --build
+```
+
+## 📁 Project Structure
+
+```
+/ app/                # Next.js pages and components
+/ components/         # Reusable React components
+/ lib/                # Shared utilities and API clients
+/ contexts/           # React context providers
+/ prisma/             # Database schema and migrations
+/ public/             # Static assets
+/ test-utils/         # Utilities for tests
+```
+
+## 🔧 Environment Variables
+
+See `.env.example` for a full list. Key variables include:
+
+- `DATABASE_URL` – PostgreSQL connection string
+- `GITHUB_CLIENT_ID`, `GITHUB_CLIENT_SECRET` – GitHub OAuth
+- `GOOGLE_CLIENT_ID`, `GOOGLE_CLIENT_SECRET` – Google OAuth
+- `GCP_*` – Google Cloud service account details
+
+## 🤝 Contributing
+
+Contributions are welcome! Please fork the repo and open a pull request. Follow existing code style and add tests for new features. Run `pnpm lint && pnpm test` before submitting.
+
+## 📄 License
+
+[MIT](LICENSE)
+
+
+---
+
+*README generated and maintained by the Intui team.*
