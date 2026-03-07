@@ -61,6 +61,50 @@ pnpm build
 pnpm start
 ```
 
+### Database Seeding
+
+Export current local DB question bank into a reusable seed file:
+
+```bash
+pnpm run db:export-seed
+```
+
+Seed whichever database your `DATABASE_URL` points to:
+
+```bash
+pnpm run db:seed
+```
+
+### Vercel CI (Auto Migrate + Auto Seed)
+
+Use this as your Vercel Build Command so each push runs migrations, seeds, and then builds:
+
+```bash
+pnpm run vercel:build
+```
+
+`vercel:build` runs `scripts/ci-build.cjs`, which does:
+
+1. `prisma generate`
+2. `prisma migrate deploy`
+3. if migration fails with `P3005` (non-empty DB baseline case), it falls back to `prisma db push --accept-data-loss`
+4. `prisma db seed`
+5. `next build`
+
+Note: the `P3005` fallback is for first-time baseline/drifted databases in CI. It may alter schema destructively to match `schema.prisma`.
+
+Required Vercel environment variables:
+
+- `DATABASE_URL` (production DB connection string)
+- OAuth and any other runtime vars from `.env.example`
+
+How to update prod question data:
+
+1. Update local DB data.
+2. Run `pnpm run db:export-seed`.
+3. Commit `prisma/seed-data.json`.
+4. Push to main; Vercel CI will apply the updated seed automatically.
+
 Analyze bundle size:
 
 ```bash

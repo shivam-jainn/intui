@@ -17,7 +17,15 @@
     "test": "npm run prettier:check && npm run lint && npm run typecheck && npm run jest",
     "storybook": "storybook dev -p 6006",
     "storybook:build": "storybook build",
-    "postinstall": "prisma generate"
+    "postinstall": "prisma generate",
+    "db:export-seed": "node scripts/export-seed.cjs",
+    "db:seed": "prisma db seed",
+    "db:migrate:deploy": "prisma migrate deploy",
+    "build:ci": "node scripts/ci-build.cjs",
+    "vercel:build": "pnpm run build:ci"
+  },
+  "prisma": {
+    "seed": "node prisma/seed.cjs"
   },
   "dependencies": {
     "@aws-sdk/client-s3": "^3.864.0",
