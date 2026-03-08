@@ -1,14 +1,10 @@
-import { auth } from '@/lib/auth'; // Your auth instance
-import { headers } from 'next/headers';
+'use client';
+
+// Navbar is now a client component that simply forwards to ClientNav.  removing
+// the server-side session fetch stops the navigation-related reloads.
+
 import ClientNavbar from './ClientNav';
 
-export async function Navbar() {
-  const headersList = headers();
-  const session = await auth.api.getSession({
-    headers: headersList
-  });
-
-  console.log(session)
-
-  return <ClientNavbar initialSession={session} />;
+export default function Navbar() {
+  return <ClientNavbar />;
 }

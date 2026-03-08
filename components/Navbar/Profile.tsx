@@ -4,7 +4,7 @@ import React from 'react';
 import { Avatar, Button, Popover, Stack, Text } from '@mantine/core';
 import { signOut } from '@/lib/auth-client';
 
-export default function Profile({ avatar, name }: { avatar: string; name?: string }) {
+export default function Profile({ avatar, name }: { avatar?: string | null; name?: string }) {
   const [opened, setOpened] = React.useState(false);
   const [isSigningOut, setIsSigningOut] = React.useState(false);
 
@@ -22,6 +22,7 @@ export default function Profile({ avatar, name }: { avatar: string; name?: strin
       shadow="lg" // deeper shadow for popover
       opened={opened}
       onChange={setOpened}
+      zIndex={1100} // place popover above the navbar (navbar uses 1000)
     >
       <Popover.Target>
         <Avatar

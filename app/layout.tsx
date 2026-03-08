@@ -2,7 +2,7 @@ import '@mantine/core/styles.css';
 
 import React from 'react';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
-import { Navbar } from '@/components/Navbar/Navbar';
+import Navbar from '@/components/Navbar/Navbar';
 import { theme } from '../theme';
 import './globals.css';
 import '@mantine/dates/styles.css';

@@ -9,16 +9,25 @@ import { useSession } from '@/lib/auth-client';
 import React from 'react';
 import Profile from './Profile';
 
-interface ClientNavbarProps {
-  initialSession: any;
-}
+// Navbar is purely client-side now; we rely on react-query caching so the
+// component stays mounted across route transitions.  no props required.
 
-export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
+export default function ClientNavbar() {
   const [drawerOpened, { toggle: toggleDrawer, close: closeDrawer }] = useDisclosure(false);
   const router = useRouter();
   const { data, isPending } = useSession();
 
-  const currentSession = isPending ? initialSession : data;
+  // react-query sometimes returns `undefined` during a refetch even though
+  // previous data is cached.  that transient undefined is what causes the
+  // avatar to swap to the loading skeleton on every route change.  we keep a
+  // ref of the last *non-undefined* value so that temporary gaps are
+  // ignored.
+  const lastSession = React.useRef<typeof data>();
+  if (data !== undefined) {
+    // update when we have a fresh value (including `null` when logged out)
+    lastSession.current = data;
+  }
+  const currentSession = data !== undefined ? data : lastSession.current;
   const isLoggedIn = currentSession?.user != null;
 
   const pathname = usePathname() || '/';
@@ -87,10 +96,10 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
               flexShrink: 0,
             }}
           >
-            {isPending ? (
+            {isPending && !currentSession ? (
               <Skeleton height={32} width={120} radius="xl" />
             ) : isLoggedIn ? (
-              <Profile avatar={currentSession.user.image} />
+              <Profile avatar={currentSession.user.image || ''} />
             ) : (
               <>
                 {/* Hide on mobile */}
@@ -160,7 +169,7 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
 
           <div className={classes.mobileBtnRow}>
             {isLoggedIn ? (
-              <Profile avatar={currentSession?.user?.image} />
+              <Profile avatar={currentSession?.user?.image || ''} />
             ) : (
               <>
                 <button

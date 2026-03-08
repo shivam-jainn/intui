@@ -17,7 +17,9 @@
 }
 
 .header {
-  background: rgba(10, 10, 10, 0.72);
+  /* use solid black to match other navbar elements and avoid transparency issues */
+  background: #000;
+  /* keep the blur/backdrop in case we want some frostiness; opacity removed for consistency */
   backdrop-filter: blur(24px);
   -webkit-backdrop-filter: blur(24px);
   border: 1px solid rgba(255, 255, 255, 0.07);
@@ -33,7 +35,8 @@
 
 /* Stronger border when user has scrolled */
 .headerScrolled {
-  background: rgba(6, 6, 6, 0.9);
+  /* solid black when scrolled as well for exact color match */
+  background: #000;
   border-color: rgba(255, 255, 255, 0.13);
 }
 

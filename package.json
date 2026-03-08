@@ -22,7 +22,12 @@
     "db:seed": "prisma db seed",
     "db:migrate:deploy": "prisma migrate deploy",
     "build:ci": "node scripts/ci-build.cjs",
-    "vercel:build": "pnpm run build:ci"
+    "vercel:build": "pnpm run build:ci",
+    "dsa:generate": "tsx scripts/dsa/generateTopic.ts",
+    "dsa:generate:local": "tsx scripts/dsa/generateTopic.ts",
+    "dsa:generate:gcs": "tsx scripts/dsa/generateTopic.ts --upload",
+    "dsa:list": "tsx scripts/dsa/generateTopic.ts --list",
+    "dsa:fallback": "tsx scripts/dsa/printFallback.ts"
   },
   "prisma": {
     "seed": "node prisma/seed.cjs"
@@ -37,6 +42,7 @@
     "@dnd-kit/sortable": "^10.0.0",
     "@dnd-kit/utilities": "^3.2.2",
     "@google-cloud/storage": "^7.16.0",
+    "@google/generative-ai": "^0.24.1",
     "@mantine/core": "^7.17.8",
     "@mantine/dates": "^7.17.8",
     "@mantine/hooks": "^7.17.8",
@@ -44,10 +50,13 @@
     "@tabler/icons-react": "^3.34.1",
     "@tanstack/react-query": "^5.85.0",
     "@uiw/react-codemirror": "^4.24.2",
+    "ai": "^6.0.116",
     "better-auth": "^1.3.6",
     "codemirror": "^6.0.2",
     "dayjs": "^1.11.13",
+    "dotenv": "^17.3.1",
     "google-auth-library": "^9.15.1",
+    "groq-sdk": "^0.37.0",
     "highlight.js": "^11.11.1",
     "jotai": "^2.13.1",
     "katex": "^0.16.22",
@@ -108,6 +117,8 @@
     "stylelint": "^16.23.1",
     "stylelint-config-standard-scss": "^13.1.0",
     "ts-jest": "^29.4.1",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.21.0",
     "typescript": "5.5.2"
   },
   "pnpm": {

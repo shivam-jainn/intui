@@ -14,13 +14,34 @@ export default function Page() {
   const [search, setSearch] = useState("");
   const [difficulty, setDifficulty] = useState("All");
   const [topics, setTopics] = useState<string[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
+  const [errorMessage, setErrorMessage] = useState<string | null>(null);
   const router = useRouter();
 
   useEffect(() => {
-    fetch("/api/questions")
-      .then((r) => r.json())
-      .then(setData)
-      .catch(console.error);
+    const loadQuestions = async () => {
+      setIsLoading(true);
+      setErrorMessage(null);
+
+      try {
+        const response = await fetch("/api/questions", { cache: "no-store" });
+        const body = await response.json();
+
+        if (!response.ok) {
+          throw new Error(body?.error ?? "Failed to fetch questions");
+        }
+
+        setData(Array.isArray(body) ? body : []);
+      } catch (error) {
+        console.error("[questions/page] failed to load questions:", error);
+        setErrorMessage("Unable to load questions right now. Please try again shortly.");
+        setData([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    void loadQuestions();
   }, []);
 
   const allTopics = useMemo(() => {
@@ -86,7 +107,19 @@ export default function Page() {
             </tr>
           </thead>
           <tbody>
-            {filtered.length === 0 ? (
+            {isLoading ? (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", padding: "2rem", color: "#666" }}>
+                  Loading questions...
+                </td>
+              </tr>
+            ) : errorMessage ? (
+              <tr>
+                <td colSpan={4} style={{ textAlign: "center", padding: "2rem", color: "#f87171" }}>
+                  {errorMessage}
+                </td>
+              </tr>
+            ) : filtered.length === 0 ? (
               <tr>
                 <td colSpan={4} style={{ textAlign: "center", padding: "2rem", color: "#666" }}>
                   No questions match your filters.
