@@ -3,6 +3,7 @@ package main
 import (
 	"execserver/controllers"
 	"log"
+	"os"
 
 	"github.com/gofiber/fiber/v2"
 )
@@ -14,5 +15,10 @@ func main() {
 
 	app.Post("/execute", controllers.ExecuteCode)
 
-	log.Fatal(app.Listen(":8080"))
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
+
+	log.Fatal(app.Listen(":" + port))
 }

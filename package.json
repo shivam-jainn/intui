@@ -19,10 +19,17 @@
     "storybook:build": "storybook build",
     "postinstall": "prisma generate",
     "db:export-seed": "node scripts/export-seed.cjs",
+    "seed:validate": "node scripts/validate-seed.cjs",
     "db:seed": "prisma db seed",
     "db:migrate:deploy": "prisma migrate deploy",
     "build:ci": "node scripts/ci-build.cjs",
-    "vercel:build": "pnpm run build:ci"
+    "vercel:build": "pnpm run build:ci",
+    "pipeline:seed-local": "node scripts/pipeline-seed-local.cjs",
+    "pipeline:deploy": "node scripts/pipeline-deploy.cjs",
+    "compose:dev:up": "docker compose -f compose-dev.yml up --build -d",
+    "compose:dev:down": "docker compose -f compose-dev.yml down",
+    "compose:prod:up": "docker compose -f compose-prod.yml up -d",
+    "compose:prod:down": "docker compose -f compose-prod.yml down"
   },
   "prisma": {
     "seed": "node prisma/seed.cjs"

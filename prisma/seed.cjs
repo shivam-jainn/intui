@@ -19,14 +19,22 @@ function loadSeedData() {
 }
 
 async function seedQuestion(entry) {
+  const slug = entry.slug ?? entry.name;
+  const title = entry.title ?? entry.name;
+  if (!slug || !title) {
+    throw new Error('Each seed question must include slug/name and title');
+  }
+
   const question = await prisma.question.upsert({
-    where: { name: entry.name },
+    where: { slug },
     update: {
+      title,
       difficulty: entry.difficulty,
       description: entry.description,
     },
     create: {
-      name: entry.name,
+      slug,
+      title,
       difficulty: entry.difficulty,
       description: entry.description,
     },

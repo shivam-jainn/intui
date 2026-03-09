@@ -1,6 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
 
+function resolveExecutorUrl() {
+  const configured = process.env.EXECUTOR_BASE_URL ?? process.env.GCR_Host;
+  const localDefault = "http://127.0.0.1:8080";
+  const base = process.env.NODE_ENV === "development" ? (configured ?? localDefault) : configured;
+
+  if (!base) {
+    return { error: "Configuration error: EXECUTOR_BASE_URL is not defined." };
+  }
+
+  return {
+    base,
+    executeUrl: `${base.replace(/\/$/, "")}/execute`,
+  };
+}
+
 export async function POST(req: NextRequest) {
   const { question_name, code, language } = await req.json();
 
@@ -22,17 +37,10 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (!process.env.GCR_Host) {
-    return NextResponse.json(
-      { message: "Configuration error: GCR Host is not defined." },
-      { status: 500 }
-    );
+  const resolved = resolveExecutorUrl();
+  if ("error" in resolved) {
+    return NextResponse.json({ message: resolved.error }, { status: 500 });
   }
-
-  // Use Cloud Run URL for production; local URL for development.
-  const gcr_url = `${process.env.GCR_Host}/execute`;
-  const local_executor_url = `http://127.0.0.1:8080/execute`;
-  const url = process.env.ENV_MODE === "development" ? local_executor_url : gcr_url;
 
   const requestBody = {
     questionName: question_name,
@@ -46,33 +54,39 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
     };
 
-    if (process.env.ENV_MODE !== "development") {
-      console.log("Constructing headers ...");
-      // IMPORTANT: Set the target audience to the base Cloud Run URL (without tags)
-      const targetAudience = process.env.GCR_Host;
+    if (process.env.NODE_ENV !== "development") {
+      if (!process.env.EXEC_CLIENT_EMAIL || !process.env.EXEC_PRIVATE_KEY) {
+        return NextResponse.json(
+          {
+            message:
+              "Configuration error: EXEC_CLIENT_EMAIL and EXEC_PRIVATE_KEY are required in production.",
+          },
+          { status: 500 }
+        );
+      }
+
+      const targetAudience = resolved.base;
 
       const auth = new GoogleAuth({
         credentials: {
           client_email: process.env.EXEC_CLIENT_EMAIL,
           private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-        }      });
+        },
+      });
 
-      // Use getIdTokenClient to obtain an ID token with the proper audience.
       const idTokenClient = await auth.getIdTokenClient(targetAudience);
       const idToken = await idTokenClient.idTokenProvider.fetchIdToken(targetAudience);
 
       headers["Authorization"] = `Bearer ${idToken}`;
-      console.log("Headers done ...");
     }
 
-    const response = await fetch(url, {
+    const response = await fetch(resolved.executeUrl, {
       method: "POST",
       headers,
       body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
-    console.log(data)
     if (!response.ok) {
       throw new Error(
         `Execution Error: ${data?.error || "Unknown error"} (HTTP ${response.status})`
