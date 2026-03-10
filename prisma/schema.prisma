@@ -20,8 +20,8 @@ model Question {
   description String
   topics      QuestionTopic[]
   companies   QuestionCompany[]
-  User        User?             @relation(fields: [userId], references: [id])
-  userId      String?
+  // user relationship denormalized into join table
+  questionUsers QuestionUser[]
   Submission  Submission[]
 }
 
@@ -65,11 +65,21 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-  questions     Question[]
+  // questions now via join table
+  questionUsers QuestionUser[]
   Submission    Submission[]
 
   @@unique([email])
   @@map("user")
+}
+
+model QuestionUser {
+  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  questionId Int
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  userId     String
+
+  @@id([questionId, userId])
 }
 
 model Session {
