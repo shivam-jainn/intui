@@ -134,13 +134,14 @@ docker-compose up --build
 ## 📁 Project Structure
 
 ```
-/ app/                # Next.js pages and components
-/ components/         # Reusable React components
-/ lib/                # Shared utilities and API clients
-/ contexts/           # React context providers
-/ prisma/             # Database schema and migrations
-/ public/             # Static assets
-/ test-utils/         # Utilities for tests
+/src/app/             # Next.js pages and components
+/src/components/      # Reusable React components
+/src/contexts/        # React context providers
+/src/services/        # Business logic & API clients (formerly lib)
+/src/core/            # Core configuration (middleware, theme, etc.)
+/src/db/              # Database client and Prisma schema
+/src/utils/test-utils/ # Utilities for tests
+/public/              # Static assets
 ```
 
 ## 🔧 Environment Variables
