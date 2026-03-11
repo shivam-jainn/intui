@@ -38,7 +38,7 @@ function main() {
   }
 
   // 3) Seed data and then build app.
-  if (run('prisma', ['db seed']) !== 0) process.exit(1);
+  if (run('node', ['scripts/dataquestionseed.cjs']) !== 0) process.exit(1);
   if (run('next', ['build']) !== 0) process.exit(1);
 }
 
