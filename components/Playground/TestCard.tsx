@@ -188,6 +188,6 @@ const codeBlockStyle = (theme: any) => ({
   color: theme.colors.gray[0],
   padding: theme.spacing.md,
   marginTop: theme.spacing.xs,
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word'
+  whiteSpace: 'pre-wrap' as const,
+  wordBreak: 'break-word' as const
 });
