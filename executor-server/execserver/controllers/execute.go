@@ -63,7 +63,7 @@ func ExecuteCode(c *fiber.Ctx) error {
 
 	testCasesPath := filepath.Join(tmpDir, testCasesFile)
 	log.Println("Fetching test cases:", testCasesFile)
-	if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, testCasesFile), testCasesPath); err != nil {
+	if err := fetchData(ctx, client, bucketName, filepath.Join(basePath, testCasesFile), testCasesPath); err != nil {
 		log.Println("Test cases fetch error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get test cases"})
 	}
@@ -73,7 +73,7 @@ func ExecuteCode(c *fiber.Ctx) error {
 	case "python":
 		log.Println("Processing Python code")
 		driverPath := filepath.Join(tmpDir, "driver.py")
-		if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, "drivers/python/driver.py"), driverPath); err != nil {
+		if err := fetchData(ctx, client, bucketName, filepath.Join(basePath, "drivers/python/driver.py"), driverPath); err != nil {
 			log.Println("Python driver error:", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Python driver missing"})
 		}
@@ -87,7 +87,7 @@ func ExecuteCode(c *fiber.Ctx) error {
 	case "cpp":
 		log.Println("Processing C++ code")
 		driverPath := filepath.Join(tmpDir, "driver.cpp")
-		if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, "drivers/cpp/driver.cpp"), driverPath); err != nil {
+		if err := fetchData(ctx, client, bucketName, filepath.Join(basePath, "drivers/cpp/driver.cpp"), driverPath); err != nil {
 			log.Println("C++ driver error:", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "C++ driver missing"})
 		}
@@ -166,6 +166,25 @@ func ExecuteCode(c *fiber.Ctx) error {
 		"results":      parsedOutput,
 		"error":        stderr.String(),
 	})
+}
+
+func fetchData(ctx context.Context, client *storage.Client, bucketName, objectPath, destPath string) error {
+	if os.Getenv("APP_ENV") == "development" {
+		fsDataPath := os.Getenv("FS_DATA_PATH")
+		if fsDataPath == "" {
+			fsDataPath = "/data" // Default for docker if not provided
+		}
+		fullSrcPath := filepath.Join(fsDataPath, objectPath)
+		log.Printf("Copying local file %s to %s", fullSrcPath, destPath)
+
+		input, err := os.ReadFile(fullSrcPath)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(destPath, input, 0644)
+	}
+
+	return fetchFromGCS(ctx, client, bucketName, objectPath, destPath)
 }
 
 func fetchFromGCS(ctx context.Context, client *storage.Client, bucketName, objectPath, destPath string) error {

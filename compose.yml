@@ -12,6 +12,21 @@ services:
     ports:
       - "5432:5432"
 
+  executor:
+    build: 
+      context: ./executor-server
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=development
+      - FS_DATA_PATH=/data
+      - GCS_BUCKET=dummy
+    volumes:
+      - ./data:/data
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+
 volumes:
   data:
   postgres_data:
