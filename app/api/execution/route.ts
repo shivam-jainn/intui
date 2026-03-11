@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   // Use Cloud Run URL for production; local URL for development.
   const gcr_url = `${process.env.GCR_Host}/execute`;
   const local_executor_url = `http://127.0.0.1:8080/execute`;
-  const url = process.env.ENV_MODE === "development" ? local_executor_url : gcr_url;
+  const url = process.env.NODE_ENV === "development" ? local_executor_url : gcr_url;
 
   const requestBody = {
     questionName: question_name,
@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       "Content-Type": "application/json",
     };
 
-    if (process.env.ENV_MODE !== "development") {
+    if (process.env.NODE_ENV !== "development") {
       console.log("Constructing headers ...");
       // IMPORTANT: Set the target audience to the base Cloud Run URL (without tags)
       const targetAudience = process.env.GCR_Host;
