@@ -4,7 +4,7 @@ import { Table, Badge, TextInput, SegmentedControl, Text, MultiSelect } from "@m
 import { useRouter } from "next/navigation";
 
 const difficultyColor: Record<string, string> = {
-  Easy: "teal",
+  Easy: "blue",
   Medium: "yellow",
   Hard: "red",
 };
@@ -96,7 +96,7 @@ export default function Page() {
               filtered.map((q) => (
                 <tr
                   key={q.id}
-                  onClick={() => router.push(`/${q.name}`)}
+                  onClick={() => router.push(`/${q.slug}`)}
                   style={{ cursor: "pointer", transition: "background 0.15s" }}
                   onMouseEnter={(e) => (e.currentTarget.style.backgroundColor = "rgba(255,255,255,0.06)")}
                   onMouseLeave={(e) => (e.currentTarget.style.backgroundColor = "transparent")}

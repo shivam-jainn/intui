@@ -20,12 +20,14 @@ function loadSeedData() {
 
 async function seedQuestion(entry) {
   const question = await prisma.question.upsert({
-    where: { name: entry.name },
+    where: { slug: entry.name },
     update: {
+      name: entry.name,
       difficulty: entry.difficulty,
       description: entry.description,
     },
     create: {
+      slug: entry.name,
       name: entry.name,
       difficulty: entry.difficulty,
       description: entry.description,

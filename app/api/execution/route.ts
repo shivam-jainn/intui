@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
+import { executorService } from "@/lib/executor-config";
 
 export async function POST(req: NextRequest) {
-  const { question_name, code, language } = await req.json();
+  const { question_slug, code, language } = await req.json();
 
-  if (!question_name) {
+  if (!question_slug) {
     return NextResponse.json(
-      { message: "Cannot run code without the question name" },
+      { message: "Cannot run code without the question slug" },
       { status: 400 }
     );
   }
@@ -22,34 +23,39 @@ export async function POST(req: NextRequest) {
       { status: 400 }
     );
   }
-  if (!process.env.GCR_Host) {
+
+  const { valid, message } = executorService.validateConfig();
+  if (!valid) {
     return NextResponse.json(
-      { message: "Configuration error: GCR Host is not defined." },
+      { message: message || "Configuration error." },
       { status: 500 }
     );
   }
 
-  // Use Cloud Run URL for production; local URL for development.
-  const gcr_url = `${process.env.GCR_Host}/execute`;
-  const local_executor_url = `http://127.0.0.1:8080/execute`;
-  const url = process.env.NODE_ENV === "development" ? local_executor_url : gcr_url;
+  const { url, isDevelopment, targetAudience } = executorService.getConfig();
+
+  console.log("url is ", url);
 
   const requestBody = {
-    questionName: question_name,
+    questionName: question_slug,
     userCode: code,
     language: language,
     isSubmission: false,
   };
-  
+
+  console.log("Request body:", requestBody);
+
   try {
     let headers: Record<string, string> = {
       "Content-Type": "application/json",
     };
 
-    if (process.env.NODE_ENV !== "development") {
+    if (!isDevelopment) {
       console.log("Constructing headers ...");
       // IMPORTANT: Set the target audience to the base Cloud Run URL (without tags)
-      const targetAudience = process.env.GCR_Host;
+      if (!targetAudience) {
+          throw new Error("Target audience must be defined for production execution authentication.");
+      }
 
       const auth = new GoogleAuth({
         credentials: {
@@ -71,6 +77,8 @@ export async function POST(req: NextRequest) {
       body: JSON.stringify(requestBody),
     });
 
+    console.log("Response received from executor:", response);
+
     const data = await response.json();
     console.log(data)
     if (!response.ok) {
@@ -80,7 +88,11 @@ export async function POST(req: NextRequest) {
     }
 
     return NextResponse.json(
-      { results: data.results },
+      { 
+        results: data.results,
+        status: data.status,
+        error: data.error
+      },
       { status: response.status }
     );
   } catch (error: any) {

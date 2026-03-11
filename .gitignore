@@ -141,3 +141,6 @@ question_data
 the-intui-*.json
 .vercel
 .env*.local
+
+
+data/*

@@ -1,22 +1,22 @@
 import { NextRequest, NextResponse } from "next/server";
+import { GoogleAuth } from "google-auth-library";
+import { executorService } from "@/lib/executor-config";
 
 export async function POST(req: NextRequest) {
-  const { question_name, code, language } = await req.json();
+  const { question_slug, code, language } = await req.json();
 
-  if (!question_name) {
+  if (!question_slug) {
     return NextResponse.json(
-      { message: "Cannot run code without the question name" },
+      { message: "Cannot run code without the question slug" },
       { status: 400 }
     );
   }
-
   if (!language) {
     return NextResponse.json(
       { message: "Cannot run code without any language selected" },
       { status: 400 }
     );
   }
-
   if (!code || typeof code !== "string" || code.length < 10) {
     return NextResponse.json(
       { message: "No valid code exists." },
@@ -24,36 +24,53 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  if (!process.env.GCR_Host) {
+  const { valid, message } = executorService.validateConfig();
+  if (!valid) {
     return NextResponse.json(
-      { message: "Configuration error: GCR Host is not defined." },
+      { message: message || "Configuration error." },
       { status: 500 }
     );
   }
 
-  const gcr_url = `${process.env.GCR_Host}/execute`;
-  const local_executor_url = `http://127.0.0.1:8080/execute`;
+  const { url, isDevelopment, targetAudience } = executorService.getConfig();
+
   const requestBody = {
-    questionName: question_name,
+    questionName: question_slug,
     userCode: code,
     language: language,
-    isSubmission : false
+    isSubmission : true
   };
 
   try {
-    const response = await fetch(process.env.NODE_ENV === "development"?local_executor_url:gcr_url, {
+    let headers: Record<string, string> = {
+      "Content-Type": "application/json",
+    };
+
+    if (!isDevelopment) {
+      if (!targetAudience) {
+          throw new Error("Target audience must be defined for production execution authentication.");
+      }
+
+      const auth = new GoogleAuth({
+        credentials: {
+          client_email: process.env.EXEC_CLIENT_EMAIL,
+          private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, "\n"),
+        }
+      });
+
+      const idTokenClient = await auth.getIdTokenClient(targetAudience);
+      const idToken = await idTokenClient.idTokenProvider.fetchIdToken(targetAudience);
+
+      headers["Authorization"] = `Bearer ${idToken}`;
+    }
+
+    const response = await fetch(url, {
       method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
+      headers,
       body: JSON.stringify(requestBody),
     });
 
     const data = await response.json();
-
-    if (process.env.NODE_ENV === "development") {
-      console.log(data);
-    }
 
     if (!response.ok) {
         const errorMessage = data?.error || "Unknown error occurred";
@@ -64,17 +81,16 @@ export async function POST(req: NextRequest) {
       { 
         message: data.message,
         results : data.results,
+        status: data.status,
         timeTaken : data.timeTaken,
         memoryUsed : data.memoryUsedKB
       },
       { status: response.status }
     );
   } catch (error: any) {
-    if (process.env.NODE_ENV === "development") {
-      console.error("Execution error:", error.message);
-    }
+    console.error("Submission error:", error.message);
     return NextResponse.json(
-      { message: "Some error occurred. Please try again later." },
+      { message: error.message || "Some error occurred. Please try again later." },
       { status: 500 }
     );
   }

@@ -21,7 +21,7 @@ services:
       - FS_DATA_PATH=/data
       - GCS_BUCKET=dummy
     volumes:
-      - ./data:/data
+      - ./data/questions:/data/questions
     ports:
       - "8080:8080"
     depends_on:
