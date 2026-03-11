@@ -201,13 +201,15 @@ const CodeEditor = ({
       )}
 
       <div style={{
-        flexGrow: 1
+        flexGrow: 1,
+        overflowY: 'auto',
       }}>
       <CodeMirror
         value={storedCode}
         extensions={[getLanguageExtension()]}
         onChange={handleChange}
         theme={oneDark}
+        height="100%"
         basicSetup={{
           lineNumbers: true,
           highlightActiveLineGutter: true,
@@ -232,7 +234,6 @@ const CodeEditor = ({
           completionKeymap: true,
           lintKeymap: true,
         }}
-        minHeight='100%'
       />
       </div>
     </div>

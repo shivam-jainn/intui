@@ -35,7 +35,7 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
   }
 
   const currentResult = resultData?.results?.[Number(testcase) - 1] || {};
-  const isSuccess = currentResult.result === true;
+  const isSuccess = currentResult.output === true;
   const status = resultData?.status;
   
   // Check for any stderr/error in the response
@@ -146,10 +146,10 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
                     <Code block style={{
                       ...codeBlockStyle(theme),
                       backgroundColor: isSuccess 
-                        ? 'rgba(34, 139, 34, 0.15)' 
+                        ? 'rgba(34, 139, 139, 0.15)' 
                         : 'rgba(255, 0, 0, 0.15)'
                     }}>
-                      {String(currentResult.output ?? "No output")}
+                      {String(currentResult.result ?? "No output")}
                     </Code>
                   </Box>
                 ) : (

@@ -1,7 +1,15 @@
 .code-editor-container {
     width: 100%;
     min-height: 400px;
-    overflow: hidden;
+  }
+
+  /* Target CodeMirror classes to ensure it takes full height and is scrollable */
+  .cm-editor {
+    height: 100% !important;
+  }
+
+  .cm-scroller {
+    overflow: auto !important;
   }
 
   .cm-theme{

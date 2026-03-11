@@ -189,7 +189,8 @@ func ExecuteCode(c *fiber.Ctx) error {
 	// Check if all test cases passed
 	allPassed := true
 	for _, res := range parsedOutput {
-		if val, ok := res["result"].(bool); !ok || !val {
+		// Use "output" field for boolean pass/fail status
+		if val, ok := res["output"].(bool); !ok || !val {
 			allPassed = false
 			break
 		}
