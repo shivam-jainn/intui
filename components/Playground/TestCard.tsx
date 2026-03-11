@@ -1,13 +1,15 @@
 "use client";
-import { resultAtom, resultDataAtom } from '@/contexts/TestCardContext';
-import { Card, SegmentedControl, Text, Box, Stack, Code, Badge } from '@mantine/core';
+import { resultAtom, resultDataAtom, submissionAtom } from '@/contexts/TestCardContext';
+import { Card, SegmentedControl, Text, Box, Stack, Code, Badge, Group, useMantineTheme } from '@mantine/core';
 import { useAtom, useAtomValue } from 'jotai';
 import React, { useState, useEffect } from 'react';
 
-export default function TestCard() {
+export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
+  const theme = useMantineTheme();
   const [tab, setTab] = useAtom(resultAtom);
-  const [testcase, setTestCase] = useState<string>('0');
+  const [testcase, setTestCase] = useState<string>('1');
   const resultData:any = useAtomValue(resultDataAtom);
+  const isSubmission = useAtomValue(submissionAtom);
   const [isResultDataAvailable, setIsResultDataAvailable] = useState<boolean>(false);
 
   useEffect(() => {
@@ -16,7 +18,7 @@ export default function TestCard() {
     
     // Reset test case selection when results change
     if (hasValidResults) {
-      setTestCase('0');
+      setTestCase('1');
     }
 
     console.log(resultData);
@@ -32,8 +34,24 @@ export default function TestCard() {
     setTab(tabName);
   }
 
-  const currentResult = resultData?.results?.[Number(testcase)] || {};
+  const currentResult = resultData?.results?.[Number(testcase) - 1] || {};
   const isSuccess = currentResult.output === true;
+  const status = resultData?.status;
+  
+  // Check for any stderr/error in the response
+  const errorMessage = resultData?.error || resultData?.message || currentResult.stderr;
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'Accepted': return 'green';
+      case 'Wrong Answer': return 'red';
+      case 'Time Limit Exceeded': return 'orange';
+      case 'Memory Limit Exceeded': return 'orange';
+      case 'Runtime Error': return 'red';
+      case 'Compilation Error': return 'red';
+      default: return 'gray';
+    }
+  };
 
   return (
     <Card withBorder radius="md">
@@ -46,7 +64,7 @@ export default function TestCard() {
             { 
               label: 'Results', 
               value: 'results', 
-              disabled: !isResultDataAvailable 
+              disabled: !isResultDataAvailable && !errorMessage
             },
           ]}
           size="sm"
@@ -59,61 +77,101 @@ export default function TestCard() {
             <SegmentedControl
               value={testcase}
               onChange={setTestCase}
-              data={testcases.map((_, index) => ({
-                label: `Case ${index}`,
-                value: `${index}`
+              data={testCases.map((_, index) => ({
+                label: `Case ${index + 1}`,
+                value: `${index + 1}`
               }))}
               size="xs"
               color="blue"
             />
             <Text size="sm" fw={500}>Input:</Text>
-            <Code block style={codeBlockStyle}>
-              {testcases[Number(testcase)]?.value || "No input available"}
+            <Code block style={codeBlockStyle(theme)}>
+              {testCases[Number(testcase) - 1] || "No input available"}
             </Code>
           </Stack>
         ) : (
           <Stack>
+            {status && (
+              <Group justify="space-between" align="center">
+                <Badge 
+                  size="lg" 
+                  color={getStatusColor(status || "")} 
+                  variant="filled"
+                >
+                  {status}
+                </Badge>
+                {resultData.timeTaken && (
+                  <Text size="xs" color="dimmed">
+                    Runtime: {resultData.timeTaken}ms
+                  </Text>
+                )}
+              </Group>
+            )}
+
+            {errorMessage && (
+              <Box>
+                <Text size="sm" fw={500} color="red">Execution Error:</Text>
+                <Code block style={{ ...codeBlockStyle(theme), color: '#ff6b6b' }}>
+                  {errorMessage}
+                </Code>
+              </Box>
+            )}
+
             {resultData?.results?.length > 0 ? (
               <>
-                <SegmentedControl
-                  value={testcase}
-                  onChange={setTestCase}
-                  data={resultData.results.map((_:any, index: number) => ({
-                    label: `Case ${index}`,
-                    value: `${index}`
-                  }))}
-                  size="xs"
-                  color="blue"
-                />
+                {!isSubmission && (
+                  <SegmentedControl
+                    value={testcase}
+                    onChange={setTestCase}
+                    data={resultData.results.map((_:any, index: number) => ({
+                      label: `Case ${index + 1}`,
+                      value: `${index + 1}`
+                    }))}
+                    size="xs"
+                    color="blue"
+                  />
+                )}
 
-                <Box>
-                  <div className="flex items-center gap-2 mb-1">
-                    <Text size="sm" fw={500} color="dimmed">Your Output:</Text>
-                    <Badge 
-                      color={isSuccess ? "green" : "red"}
-                      variant="filled"
-                    >
-                      {isSuccess ? "Passed" : "Failed"}
-                    </Badge>
-                  </div>
-                  <Code block style={{
-                    ...codeBlockStyle,
-                    backgroundColor: isSuccess 
-                      ? 'rgba(34, 139, 34, 0.15)' 
-                      : 'rgba(255, 0, 0, 0.15)'
-                  }}>
-                    {currentResult.result ?? "No output"}
-                  </Code>
-                </Box>
+                {!isSubmission ? (
+                  <Box>
+                    <div className="flex items-center gap-2 mb-1">
+                      <Text size="sm" fw={500} color="dimmed">Your Output:</Text>
+                      <Badge 
+                        color={isSuccess ? "green" : "red"}
+                        variant="filled"
+                      >
+                        {isSuccess ? "Passed" : "Failed"}
+                      </Badge>
+                    </div>
+                    <Code block style={{
+                      ...codeBlockStyle(theme),
+                      backgroundColor: isSuccess 
+                        ? 'rgba(34, 139, 139, 0.15)' 
+                        : 'rgba(255, 0, 0, 0.15)'
+                    }}>
+                      {String(currentResult.result ?? "No output")}
+                    </Code>
+                  </Box>
+                ) : (
+                  <Box>
+                    <Text size="sm" color="dimmed">
+                      {status === 'Accepted' 
+                        ? 'All test cases passed!' 
+                        : `Passed ${resultData.results.filter((r: any) => r.result).length}/${resultData.results.length} test cases.`}
+                    </Text>
+                  </Box>
+                )}
 
-                <Box>
-                  <Text size="sm" fw={500} color="dimmed">Expected Output:</Text>
-                  <Code block style={codeBlockStyle}>
-                    {currentResult.expected ?? "No expected output"}
-                  </Code>
-                </Box>
+                {!isSubmission && (
+                  <Box>
+                    <Text size="sm" fw={500} color="dimmed">Expected Output:</Text>
+                    <Code block style={codeBlockStyle(theme)}>
+                      {String(currentResult.expected ?? "No expected output")}
+                    </Code>
+                  </Box>
+                )}
               </>
-            ) : (
+            ) : !errorMessage && (
               <Text size="sm" color="dimmed">
                 No test results available
               </Text>
@@ -130,6 +188,6 @@ const codeBlockStyle = (theme: any) => ({
   color: theme.colors.gray[0],
   padding: theme.spacing.md,
   marginTop: theme.spacing.xs,
-  whiteSpace: 'pre-wrap',
-  wordBreak: 'break-word'
+  whiteSpace: 'pre-wrap' as const,
+  wordBreak: 'break-word' as const
 });

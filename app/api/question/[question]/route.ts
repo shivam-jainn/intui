@@ -9,7 +9,7 @@ export async function GET(
   
   const questionObject = await prisma.question.findUnique({
     where:{
-      name:question
+      slug:question
     },
     include:{
       topics:{

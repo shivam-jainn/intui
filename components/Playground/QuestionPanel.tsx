@@ -70,6 +70,12 @@ const MarkdownComponents: MarkdownComponentsType = {
   ),
 };
 
+const difficultyColor: Record<string, string> = {
+  Easy: "blue",
+  Medium: "yellow",
+  Hard: "red",
+};
+
 export default function QuestionPanel({
   questionTitle,
   difficulty,
@@ -86,9 +92,16 @@ export default function QuestionPanel({
   const [tab, setTab] = useState<string>('description');
 
   return (
-    <Stack h="100%" style={{ minHeight: '100vh' }}>
+    <Stack h="100%" style={{ maxHeight: '100%' }}>
       {tab === 'description' ? (
-        <Box style={{ display: 'flex', flexDirection: 'column', height: '100%', overflow: 'auto' }}>
+        <Box
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+            overflowY: 'auto',
+          }}
+        >
           <Stack p="md" py="xl">
             <SegmentedControl
               value={tab}
@@ -102,9 +115,11 @@ export default function QuestionPanel({
             <Title order={1}>{questionTitle}</Title>
 
             <Group align="flex-start" gap="xs">
-              <Badge size="lg">{difficulty}</Badge>
+              <Badge size="lg" color={difficultyColor[difficulty] ?? "gray"} variant="light">
+                {difficulty}
+              </Badge>
               {companies.map((company, index) => (
-                <Badge key={index} color="orange" size="lg">
+                <Badge key={index} color="orange" size="lg" variant="dots">
                   {company}
                 </Badge>
               ))}

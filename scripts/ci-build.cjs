@@ -37,8 +37,7 @@ function main() {
     }
   }
 
-  // 3) Seed data and then build app.
-  if (run('prisma', ['db seed']) !== 0) process.exit(1);
+  // 3) Build app.
   if (run('next', ['build']) !== 0) process.exit(1);
 }
 

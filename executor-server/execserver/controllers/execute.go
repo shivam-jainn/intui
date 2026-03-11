@@ -47,15 +47,9 @@ func ExecuteCode(c *fiber.Ctx) error {
 	log.Println("Created temp dir:", tmpDir)
 
 	ctx := context.Background()
-	client, err := storage.NewClient(ctx)
-	if err != nil {
-		log.Println("GCS client error:", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "GCS connection failed"})
-	}
-	defer client.Close()
 
 	bucketName := os.Getenv("GCS_BUCKET")
-	basePath := decodedQuestionName
+	basePath := filepath.Join("questions", decodedQuestionName)
 	testCasesFile := "testcases.txt"
 	if request.IsSubmission {
 		testCasesFile = "testcases_submission.txt"
@@ -63,7 +57,7 @@ func ExecuteCode(c *fiber.Ctx) error {
 
 	testCasesPath := filepath.Join(tmpDir, testCasesFile)
 	log.Println("Fetching test cases:", testCasesFile)
-	if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, testCasesFile), testCasesPath); err != nil {
+	if err := fetchData(ctx, bucketName, filepath.Join(basePath, testCasesFile), testCasesPath); err != nil {
 		log.Println("Test cases fetch error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to get test cases"})
 	}
@@ -73,21 +67,32 @@ func ExecuteCode(c *fiber.Ctx) error {
 	case "python":
 		log.Println("Processing Python code")
 		driverPath := filepath.Join(tmpDir, "driver.py")
-		if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, "drivers/python/driver.py"), driverPath); err != nil {
+		if err := fetchData(ctx, bucketName, filepath.Join(basePath, "drivers/python/driver.py"), driverPath); err != nil {
 			log.Println("Python driver error:", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Python driver missing"})
+		}
+
+		signaturePath := filepath.Join(tmpDir, "signature.py")
+		if err := fetchData(ctx, bucketName, filepath.Join(basePath, "drivers/python/signature.py"), signaturePath); err != nil {
+			log.Println("Python signature error (optional):", err)
 		}
 
 		driverCode, _ := os.ReadFile(driverPath)
 		tmpFile := filepath.Join(tmpDir, "temp.py")
 		os.WriteFile(tmpFile, []byte(request.UserCode+"\n"+string(driverCode)), 0644)
-		cmd = exec.Command("python3", tmpFile, testCasesPath)
+		args := []string{tmpFile, testCasesPath}
+		if request.IsSubmission {
+			args = append(args, "submission")
+		} else {
+			args = append(args, "run")
+		}
+		cmd = exec.Command("python3", args...)
 		cmd.Dir = tmpDir
 
 	case "cpp":
 		log.Println("Processing C++ code")
 		driverPath := filepath.Join(tmpDir, "driver.cpp")
-		if err := fetchFromGCS(ctx, client, bucketName, filepath.Join(basePath, "drivers/cpp/driver.cpp"), driverPath); err != nil {
+		if err := fetchData(ctx, bucketName, filepath.Join(basePath, "drivers/cpp/driver.cpp"), driverPath); err != nil {
 			log.Println("C++ driver error:", err)
 			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "C++ driver missing"})
 		}
@@ -118,6 +123,11 @@ func ExecuteCode(c *fiber.Ctx) error {
 		}
 
 		cmd = exec.Command(outputFile, testCasesPath)
+		if request.IsSubmission {
+			cmd.Args = append(cmd.Args, "submission")
+		} else {
+			cmd.Args = append(cmd.Args, "run")
+		}
 		cmd.Dir = tmpDir
 
 	default:
@@ -134,16 +144,23 @@ func ExecuteCode(c *fiber.Ctx) error {
 	done := make(chan error)
 	go func() { done <- cmd.Run() }()
 
+	var status string = "Accepted"
 	select {
 	case err := <-done:
 		log.Println("Execution completed with status:", err)
+		if err != nil {
+			status = "Runtime Error"
+		}
 	case <-timeout:
 		log.Println("Execution timed out")
 		if cmd.Process != nil {
 			cmd.Process.Kill()
 		}
-		return c.Status(fiber.StatusRequestTimeout).JSON(fiber.Map{
-			"error": "Execution timed out",
+		return c.JSON(fiber.Map{
+			"questionName": request.QuestionName,
+			"results":      []interface{}{},
+			"status":       "Time Limit Exceeded",
+			"error":        "Execution timed out",
 		})
 	}
 
@@ -151,21 +168,69 @@ func ExecuteCode(c *fiber.Ctx) error {
 	log.Println("Raw output:", outputStr)
 	log.Println("Raw stderr:", stderr.String())
 
+	if outputStr == "" && stderr.String() != "" {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error":  "Execution failed",
+			"stderr": stderr.String(),
+		})
+	}
+
 	var parsedOutput []map[string]interface{}
 	if err := json.Unmarshal([]byte(outputStr), &parsedOutput); err != nil {
 		log.Println("JSON parse error:", err)
 		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
 			"error":  "Failed to parse output",
+			"status": "Runtime Error",
 			"raw":    outputStr,
 			"stderr": stderr.String(),
 		})
 	}
 
+	// Check if all test cases passed
+	allPassed := true
+	for _, res := range parsedOutput {
+		// Use "output" field for boolean pass/fail status
+		if val, ok := res["output"].(bool); !ok || !val {
+			allPassed = false
+			break
+		}
+	}
+
+	if status == "Accepted" && !allPassed {
+		status = "Wrong Answer"
+	}
+
 	return c.JSON(fiber.Map{
 		"questionName": request.QuestionName,
 		"results":      parsedOutput,
+		"status":       status,
 		"error":        stderr.String(),
 	})
+}
+
+func fetchData(ctx context.Context, bucketName, objectPath, destPath string) error {
+	if os.Getenv("APP_ENV") == "development" {
+		fsDataPath := os.Getenv("FS_DATA_PATH")
+		if fsDataPath == "" {
+			fsDataPath = "/data" // Default for docker if not provided
+		}
+		fullSrcPath := filepath.Join(fsDataPath, objectPath)
+		log.Printf("Copying local file %s to %s", fullSrcPath, destPath)
+
+		input, err := os.ReadFile(fullSrcPath)
+		if err != nil {
+			return err
+		}
+		return os.WriteFile(destPath, input, 0644)
+	}
+
+	client, err := storage.NewClient(ctx)
+	if err != nil {
+		return err
+	}
+	defer client.Close()
+
+	return fetchFromGCS(ctx, client, bucketName, objectPath, destPath)
 }
 
 func fetchFromGCS(ctx context.Context, client *storage.Client, bucketName, objectPath, destPath string) error {

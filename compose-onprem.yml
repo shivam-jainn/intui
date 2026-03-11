@@ -1,0 +1,29 @@
+services:
+  database:
+    image: postgres:16
+    environment:
+      POSTGRES_USER: prod_user
+      POSTGRES_PASSWORD: prod_pass
+      POSTGRES_DB: intui_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  executor:
+    build: 
+      context: ./executor-server
+    environment:
+      DATABASE_URL: postgresql://prod_user:prod_pass@database:5432/intui_prod
+      APP_ENV: production
+      GCS_BUCKET: ${GCS_BUCKET}
+      GOOGLE_APPLICATION_CREDENTIALS: /app/credentials.json
+    volumes:
+      - ./executor-server/credentials.json:/app/credentials.json:ro
+    depends_on:
+      - database
+    ports:
+      - "8080:8080"
+
+volumes:
+  postgres_data:

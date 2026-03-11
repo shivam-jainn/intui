@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
 import QuestionPanel from "@/components/Playground/QuestionPanel";
-import { getDesc } from "@/lib/common/playground/desc_and_driver";
+import { getDesc, getTestCases } from "@/lib/common/playground/desc_and_driver";
 import CodeEditor from "@/components/Playground/CodeEditor";
 import RunAndSubmissionBar from "@/components/Playground/TestCard";
 
@@ -11,6 +11,7 @@ interface QuestionData {
   name: string;
   difficulty: string;
   description: string;
+  testCases: string[];
   companies?: string[];
   topics?: string[];
 }
@@ -30,14 +31,16 @@ export default function Page({ params }: { params: { questionid: string } }) {
       setError(null);
 
       const questionId = decodeURIComponent(params.questionid);
-      const [apiResponse, questionDescription] = await Promise.all([
+      const [apiResponse, questionDescription, testCases] = await Promise.all([
         fetch(`/api/question/${questionId}`).then((res) => res.json()),
         getDesc(questionId),
+        getTestCases(questionId),
       ]);
 
       setQuestionData({
         ...apiResponse,
         description: questionDescription.question_description,
+        testCases: testCases,
       });
     } catch (err) {
       console.error("Error fetching question data:", err);
@@ -66,28 +69,30 @@ export default function Page({ params }: { params: { questionid: string } }) {
   }
 
   return (
-    <PanelGroup direction="horizontal">
-      <Panel>
-        <QuestionPanel
-          questionTitle={questionData.name}
-          difficulty={questionData.difficulty}
-          description={questionData.description}
-          companies={questionData.companies || []}
-          topics={questionData.topics || []}
-        />
-      </Panel>
-      <PanelResizeHandle style={{ width: "0.5rem" }} />
-     <Panel>
-      <PanelGroup direction="vertical">
-        <Panel minSize={50}>
-          <CodeEditor questionName={params.questionid} />
+    <div style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+      <PanelGroup direction="horizontal">
+        <Panel>
+          <QuestionPanel
+            questionTitle={questionData.name}
+            difficulty={questionData.difficulty}
+            description={questionData.description}
+            companies={questionData.companies || []}
+            topics={questionData.topics || []}
+          />
         </Panel>
-        <PanelResizeHandle style={{ height: "0.5rem" }} />
-        <Panel defaultSize={30} minSize={20} maxSize={40}>
-          <RunAndSubmissionBar />
+        <PanelResizeHandle style={{ width: "0.5rem" }} />
+        <Panel>
+          <PanelGroup direction="vertical">
+            <Panel minSize={50}>
+              <CodeEditor questionSlug={params.questionid} />
+            </Panel>
+            <PanelResizeHandle style={{ height: "0.5rem" }} />
+            <Panel defaultSize={30} minSize={20} maxSize={40} style={{ overflow: 'auto' }}>
+              <RunAndSubmissionBar testCases={questionData.testCases} />
+            </Panel>
+          </PanelGroup>
         </Panel>
       </PanelGroup>
-     </Panel>
-    </PanelGroup>
+    </div>
   );
 }

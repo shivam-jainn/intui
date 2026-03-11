@@ -1,11 +1,6 @@
 version: '3.8'
 
 services:
-  mongodb:
-    image: 'mongo:latest'
-    volumes:
-      - data:/data/db
-
   database:
     image: postgres:16
     environment:
@@ -17,8 +12,21 @@ services:
     ports:
       - "5432:5432"
 
+  executor:
+    build: 
+      context: ./executor-server
+      dockerfile: Dockerfile
+    environment:
+      - APP_ENV=development
+      - FS_DATA_PATH=/data
+      - GCS_BUCKET=dummy
+    volumes:
+      - ./data/questions:/data/questions
+    ports:
+      - "8080:8080"
+    depends_on:
+      - database
+
 volumes:
   data:
   postgres_data:
-  localstack_data:
-  localstack_persist:  # Local volume for LocalStack persistent data
