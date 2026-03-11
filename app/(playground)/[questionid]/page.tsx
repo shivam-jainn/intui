@@ -6,6 +6,7 @@ import QuestionPanel from "@/components/Playground/QuestionPanel";
 import { getDesc, getTestCases } from "@/lib/common/playground/desc_and_driver";
 import CodeEditor from "@/components/Playground/CodeEditor";
 import RunAndSubmissionBar from "@/components/Playground/TestCard";
+import PlaygroundSkeleton from "@/components/Playground/PlaygroundSkeleton";
 
 interface QuestionData {
   name: string;
@@ -57,7 +58,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
   }, [params.questionid]);
 
   if (loading) {
-    return <div>Loading...</div>;
+    return <PlaygroundSkeleton />;
   }
 
   if (error) {
