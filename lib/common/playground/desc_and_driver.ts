@@ -10,7 +10,7 @@ const storage = getStorage();
  * @returns An object containing the question description as a string.
  */
 export async function getDesc(question_name: string) {
-  const desc_key_path = `${question_name}/Question.md`;
+  const desc_key_path = `questions/${question_name}/Question.md`;
 
   try {
     const fileBuffer = await storage.download(desc_key_path);
@@ -34,7 +34,7 @@ export async function getDesc(question_name: string) {
  * @returns An object containing the driver code as a string.
  */
 export async function getDriver(question_name: string, language: Language) {
-  const driver_key_path = `${question_name}/drivers/${language}/signature.${languageExtensions[language]}`;
+  const driver_key_path = `questions/${question_name}/drivers/${language}/signature.${languageExtensions[language]}`;
 
   try {
     const fileBuffer = await storage.download(driver_key_path);

@@ -55,7 +55,7 @@ func ExecuteCode(c *fiber.Ctx) error {
 	defer client.Close()
 
 	bucketName := os.Getenv("GCS_BUCKET")
-	basePath := decodedQuestionName
+	basePath := filepath.Join("questions", decodedQuestionName)
 	testCasesFile := "testcases.txt"
 	if request.IsSubmission {
 		testCasesFile = "testcases_submission.txt"
