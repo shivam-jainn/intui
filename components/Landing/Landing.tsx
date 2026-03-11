@@ -7,11 +7,11 @@ import styles from './Landing.module.css';
 
 const FEATURES = [
   {
-    title: 'Socratic Learning',
+    title: 'Intuitive Learning',
     description:
-      'Our AI guides you with questions instead of answers — helping you genuinely internalize concepts and perform confidently under real interview pressure.',
+      'Master DSA through logic and patterns. Internalize concepts and perform confidently under interview pressure.',
     gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
-    wide: true,
+    wide: false,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
         <path d="M20 3H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM19 17H5v-1c0-1 4-2 5-2h4c1 0 5 1 5 2v1z" />
@@ -19,21 +19,21 @@ const FEATURES = [
     ),
   },
   {
-    title: 'Verified Badges',
+    title: 'P0 Incident Sim',
     description:
-      'Earn verifiable skill badges via Badgepa.cc that prove your readiness to employers.',
-    gradient: 'linear-gradient(135deg, #4ECDC4 0%, #556270 100%)',
+      'Debug real-world production outages. High-stakes "War Room" challenges where you solve complex bugs under strict SLA timers.',
+    gradient: 'linear-gradient(135deg, #FF3E3E 0%, #FF6B6B 100%)',
     wide: false,
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L9 13.17l6.59-6.59L17 8l-7 7z" />
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
       </svg>
     ),
   },
   {
     title: 'Contests & Bounties',
     description:
-      'Join employer-sponsored challenges and fast-track your path to an offer.',
+      'Join employer-sponsored coding challenges and fast-track your path to an offer.',
     gradient: 'linear-gradient(135deg, #4CB8C4 0%, #3CD3AD 100%)',
     wide: false,
     icon: (
@@ -45,9 +45,9 @@ const FEATURES = [
 ];
 
 const STATS = [
-  { value: '500+', label: 'Practice problems' },
-  { value: 'AI-guided', label: 'Hints & explanations' },
-  { value: 'Verifiable', label: 'Skill badges' },
+  { value: 'Finance/Trading Based', label: 'Practice problems' },
+  { value: 'Pattern-based', label: 'Learning' },
+  { value: 'P0 Sim', label: 'Incident Debugging' },
   { value: 'Free', label: 'To get started' },
 ];
 
@@ -74,9 +74,9 @@ const Landing: React.FC = () => {
       if (dist < DUCK_RADIUS) {
         const mx = (dx / dist) * 30;
         const my = (dy / dist) * 30;
-        duck.style.transform = `translate(${-mx}px, ${-my}px) rotate(30deg)`;
+        duck.style.transform = `translate(${-mx}px, ${-my}px) rotate(10deg)`;
       } else {
-        duck.style.transform = 'rotate(30deg)';
+        duck.style.transform = 'rotate(10deg)';
       }
     };
     window.addEventListener('mousemove', handleMouseMove);
@@ -104,7 +104,7 @@ const Landing: React.FC = () => {
         {/* Badge + title + subtitle */}
         <Container
           size="lg"
-          style={{ width: '100%', textAlign: 'center', paddingTop: '3rem', zIndex: 2 }}
+          style={{ width: '100%', textAlign: 'center', paddingTop: '4rem', zIndex: 2 }}
         >
           <div className={styles.badge}>
             <span
@@ -117,12 +117,12 @@ const Landing: React.FC = () => {
                 flexShrink: 0,
               }}
             />
-            AI-powered interview prep
+            Your personal rubber duck !
           </div>
           <h1 className={styles.heroTitle}>Intui</h1>
 
           <p className={styles.heroSubtitle}>
-            Your rubber duck for interview prep
+            Master DSA through intuition. Reaching P0 Incidents soon.
           </p>
         </Container>
 
@@ -254,12 +254,12 @@ const Landing: React.FC = () => {
             </Text>
           </Box>
 
-          {/* Bento grid */}
+          {/* Feature grid */}
           <div className={styles.bentoGrid}>
             {FEATURES.map((f) => (
               <div
                 key={f.title}
-                className={`${styles.featureCard} ${f.wide ? styles.wideCard : ''}`}
+                className={styles.featureCard}
               >
                 <div
                   style={{

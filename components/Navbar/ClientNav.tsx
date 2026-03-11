@@ -27,12 +27,10 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
     return pathname.startsWith(href);
   };
 
+  const isLandingPage = pathname === '/';
+
   return (
     <>
-      {/* Spacer so fixed nav doesn't overlap page content */}
-      <div className={classes.spacer} />
-
-      {/* Fixed floating pill */}
       <div className={classes.root}>
         <header className={classes.header}>
           {/* Logo */}
@@ -93,7 +91,6 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
               <Profile avatar={currentSession.user.image} />
             ) : (
               <>
-                {/* Hide on mobile */}
                 <button
                   type="button"
                   className={classes.btnLogin}

@@ -18,10 +18,11 @@ export default function Profile({ avatar, name }: { avatar: string; name?: strin
     <Popover
       width={200}
       position="bottom-end"
-      offset={2} // smaller gap so dropdown is closer to avatar
-      shadow="lg" // deeper shadow for popover
+      offset={8}
+      shadow="lg"
       opened={opened}
       onChange={setOpened}
+      zIndex={20000}
     >
       <Popover.Target>
         <Avatar
