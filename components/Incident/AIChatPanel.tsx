@@ -60,6 +60,14 @@ const MODEL_OPTIONS = [
       { value: "grok-2", label: "Grok 2" },
     ],
   },
+  {
+    group: "Groq",
+    items: [
+      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
+      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
+      { value: "mixtral-8x7b-32768", label: "Mixtral 8x7B 32K" },
+    ],
+  },
 ];
 
 const PROVIDER_LINKS: Record<string, string> = {
@@ -69,9 +77,13 @@ const PROVIDER_LINKS: Record<string, string> = {
   "grok-3": "https://console.x.ai",
   "grok-3-mini": "https://console.x.ai",
   "grok-2": "https://console.x.ai",
+  "llama-3.3-70b-versatile": "https://console.groq.com/keys",
+  "llama-3.1-8b-instant": "https://console.groq.com/keys",
+  "mixtral-8x7b-32768": "https://console.groq.com/keys",
 };
 
-function getProvider(model: string): "google" | "xai" {
+function getProvider(model: string): "google" | "xai" | "groq" {
+  if (model.includes("llama") || model.includes("mixtral")) return "groq";
   if (model.startsWith("grok")) return "xai";
   return "google";
 }
@@ -158,23 +170,6 @@ export default function AIChatPanel({ incidentName, incidentReport }: AIChatPane
     defaultValue: "",
   });
 
-  const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [showKeyInput, setShowKeyInput] = useState(false);
-
-  const scrollRef = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [messages]);
-
-  // Switch key storage when model provider changes
-  const provider = getProvider(model);
-
   function buildSystemPrompt() {
     return `You are an expert software engineer conducting a technical interview.
 The candidate is debugging an incident called "${incidentName}".
@@ -187,14 +182,43 @@ When they share code, analyze it carefully and point out specific issues.
 Be concise and conversational.`;
   }
 
+  const [messages, setMessages] = useState<Message[]>([]);
+  const [input, setInput] = useState("");
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const [showKeyInput, setShowKeyInput] = useState(false);
+
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const abortControllerRef = useRef<AbortController | null>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [messages]);
+
+  // Switch key storage when model provider changes
+  const provider = getProvider(model);
+
   function getActiveCode(): string {
     if (!activeFile) return "";
     const fileData = files.find((f) => f.path === activeFile);
     return fileContents[activeFile] ?? fileData?.content ?? "";
   }
 
+  function injectCode() {
+    const code = getActiveCode();
+    if (!code) return;
+    const fileName = activeFile?.split("/").pop() ?? "code";
+    setInput(
+      (prev) =>
+        `${prev ? prev + "\n\n" : ""}Here is my current \`${fileName}\`:\n\`\`\`\n${code}\n\`\`\``
+    );
+  }
+
   async function sendMessage() {
-    if (!input.trim()) return;
+    if (!input.trim() || isLoading) return;
     if (!apiKey.trim()) {
       setShowKeyInput(true);
       setError("Please provide your API key first.");
@@ -211,6 +235,7 @@ Be concise and conversational.`;
     setInput("");
     setIsLoading(true);
     setError(null);
+    abortControllerRef.current = new AbortController();
 
     try {
       const chatMessages = [...messages, userMessage].map((m) => ({
@@ -218,9 +243,10 @@ Be concise and conversational.`;
         content: m.content,
       }));
 
-      const response = await fetch("/api/ai/chat", {
+      const response = await fetch("/api/chat", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        signal: abortControllerRef.current.signal,
         body: JSON.stringify({
           messages: chatMessages,
           model,
@@ -234,7 +260,6 @@ Be concise and conversational.`;
         throw new Error(errData.error || `HTTP ${response.status}`);
       }
 
-      // Stream the response
       const reader = response.body?.getReader();
       if (!reader) throw new Error("No response body");
 
@@ -246,16 +271,18 @@ Be concise and conversational.`;
       setMessages((prev) => [...prev, assistantMessage]);
 
       const decoder = new TextDecoder();
+      let streamedText = "";
 
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
 
         const chunk = decoder.decode(value, { stream: true });
+        streamedText += chunk;
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
-          if (last.role === "assistant") {
+          if (last?.role === "assistant") {
             updated[updated.length - 1] = {
               ...last,
               content: last.content + chunk,
@@ -264,22 +291,66 @@ Be concise and conversational.`;
           return updated;
         });
       }
+
+      const finalChunk = decoder.decode();
+      if (finalChunk) {
+        streamedText += finalChunk;
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last?.role === "assistant") {
+            updated[updated.length - 1] = {
+              ...last,
+              content: last.content + finalChunk,
+            };
+          }
+          return updated;
+        });
+      }
+
+      const providerErrorMatch = streamedText.match(/\[Provider error:\s*([\s\S]+?)\]/);
+      if (providerErrorMatch?.[1]) {
+        const providerError = providerErrorMatch[1].trim();
+        setError(providerError);
+        setMessages((prev) => {
+          const updated = [...prev];
+          const last = updated[updated.length - 1];
+          if (last?.role === "assistant") {
+            const cleanedContent = last.content
+              .replace(/\[Provider error:[\s\S]+?\]/g, "")
+              .trim();
+
+            if (!cleanedContent) {
+              updated.pop();
+            } else {
+              updated[updated.length - 1] = {
+                ...last,
+                content: cleanedContent,
+              };
+            }
+          }
+          return updated;
+        });
+        return;
+      }
+
+      if (!streamedText.trim()) {
+        setError("The model returned an empty response. Check API key/model and try again.");
+      }
     } catch (err: any) {
-      setError(err.message || "Failed to get AI response.");
-      setMessages((prev) => prev.filter((m) => m.id !== "streaming"));
+      if (err?.name === "AbortError") {
+        setError("Request cancelled.");
+      } else {
+        setError(err.message || "Failed to get AI response.");
+      }
     } finally {
+      abortControllerRef.current = null;
       setIsLoading(false);
     }
   }
 
-  function injectCode() {
-    const code = getActiveCode();
-    if (!code) return;
-    const fileName = activeFile?.split("/").pop() ?? "code";
-    setInput(
-      (prev) =>
-        `${prev ? prev + "\n\n" : ""}Here is my current \`${fileName}\`:\n\`\`\`\n${code}\n\`\`\``
-    );
+  function stopStreaming() {
+    abortControllerRef.current?.abort();
   }
 
   function clearChat() {
@@ -288,8 +359,13 @@ Be concise and conversational.`;
   }
 
   const keyLabel =
-    provider === "google" ? "Google AI Studio API Key" : "xAI API Key";
-  const keyPlaceholder = provider === "google" ? "AIza..." : "xai-...";
+    provider === "google"
+      ? "Google AI Studio API Key"
+      : provider === "xai"
+        ? "xAI API Key"
+        : "Groq API Key";
+  const keyPlaceholder =
+    provider === "google" ? "AIza..." : provider === "xai" ? "xai-..." : "gsk_...";
 
   return (
     <Box
@@ -307,14 +383,23 @@ Be concise and conversational.`;
       >
         <Group justify="space-between" mb="xs">
           <Group gap={6}>
-            <ThemeIcon size="sm" variant="gradient" gradient={{ from: "violet", to: "blue" }}>
-              <IconRobot size={12} />
-            </ThemeIcon>
             <Title order={6} style={{ fontSize: 13 }}>
-              AI Interviewer
+              Rubber Duck
             </Title>
           </Group>
           <Group gap={4}>
+            {isLoading && (
+              <Tooltip label="Stop response">
+                <ActionIcon
+                  size="xs"
+                  variant="subtle"
+                  color="red"
+                  onClick={stopStreaming}
+                >
+                  <IconX size={12} />
+                </ActionIcon>
+              </Tooltip>
+            )}
             <Tooltip label="Clear chat">
               <ActionIcon
                 size="xs"
@@ -333,7 +418,7 @@ Be concise and conversational.`;
           size="xs"
           data={MODEL_OPTIONS ?? []}
           value={model}
-          onChange={(v) => v && setModel(v)}
+          onChange={(v: string | null) => v && setModel(v)}
           styles={{ input: { fontSize: 12 } }}
           mb="xs"
         />
@@ -346,7 +431,7 @@ Be concise and conversational.`;
               placeholder={keyPlaceholder}
               label={keyLabel}
               value={apiKey}
-              onChange={(e) => setApiKey(e.currentTarget.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApiKey(e.currentTarget.value)}
               styles={{ label: { fontSize: 11 }, input: { fontSize: 12 } }}
             />
             <Group justify="space-between">
@@ -440,10 +525,9 @@ Be concise and conversational.`;
         {activeFile && (
           <Button
             size="xs"
-            variant="subtle"
+            variant="solid"
             color="blue"
             mb="xs"
-            leftSection={<IconBrandGoogleFilled size={11} />}
             onClick={injectCode}
           >
             Attach current file
@@ -455,23 +539,24 @@ Be concise and conversational.`;
             size="xs"
             placeholder="Ask about the bug, request hints..."
             value={input}
-            onChange={(e) => setInput(e.currentTarget.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.currentTarget.value)}
             autosize
             minRows={2}
             maxRows={6}
-            onKeyDown={(e) => {
+            onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
-                sendMessage();
+                void sendMessage();
               }
             }}
             styles={{ input: { fontSize: 12 } }}
           />
           <ActionIcon
+            type="button"
             size="md"
             color="blue"
             variant="filled"
-            onClick={sendMessage}
+            onClick={() => void sendMessage()}
             loading={isLoading}
             disabled={!input.trim()}
           >
