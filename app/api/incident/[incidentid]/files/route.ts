@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import fs from "fs/promises";
-import path from "path";
+import { getStorage } from "@/lib/storage";
 
 export interface IncidentFile {
   path: string;
@@ -16,37 +15,34 @@ export interface IncidentData {
   entryFile: string;
 }
 
-function getLanguageFromPath(filePath: string): string {
-  const ext = path.extname(filePath).toLowerCase();
-  const map: Record<string, string> = {
-    ".py": "python",
-    ".cpp": "cpp",
-    ".ts": "typescript",
-    ".js": "javascript",
-    ".go": "go",
-    ".java": "java",
-  };
-  return map[ext] ?? "plaintext";
+interface IncidentManifest {
+  version: number;
+  report: string;
+  availableLanguages: string[];
+  defaultLanguage?: string;
+  entryFileByLanguage?: Record<string, string>;
+  filesByLanguage: Record<string, IncidentFile[]>;
 }
 
-async function listFilesRecursive(dir: string, baseDir: string): Promise<string[]> {
-  const results: string[] = [];
-  try {
-    const entries = await fs.readdir(dir, { withFileTypes: true });
-    for (const entry of entries) {
-      const fullPath = path.join(dir, entry.name);
-      if (entry.isDirectory()) {
-        if (entry.name === "__pycache__" || entry.name === "node_modules") continue;
-        const nested = await listFilesRecursive(fullPath, baseDir);
-        results.push(...nested);
-      } else {
-        results.push(path.relative(baseDir, fullPath));
-      }
-    }
-  } catch {
-    // directory doesn't exist
+function selectLanguage(manifest: IncidentManifest, requestedLang: string): string | null {
+  const languages =
+    manifest.availableLanguages.length > 0
+      ? manifest.availableLanguages
+      : Object.keys(manifest.filesByLanguage ?? {});
+
+  if (languages.length === 0) {
+    return null;
   }
-  return results;
+
+  if (languages.includes(requestedLang)) {
+    return requestedLang;
+  }
+
+  if (manifest.defaultLanguage && languages.includes(manifest.defaultLanguage)) {
+    return manifest.defaultLanguage;
+  }
+
+  return languages[0];
 }
 
 export async function GET(
@@ -54,81 +50,32 @@ export async function GET(
   { params }: { params: { incidentid: string } }
 ) {
   const { incidentid } = params;
-  const lang = req.nextUrl.searchParams.get("language") ?? "python";
+  const requestedLang = req.nextUrl.searchParams.get("language") ?? "python";
+  const storage = getStorage();
 
-  const dataDir = path.join(process.cwd(), "data", "incidents", incidentid);
-
-  // Read incident report
-  let report = "";
+  let manifest: IncidentManifest;
   try {
-    report = await fs.readFile(path.join(dataDir, "IncidentReport.md"), "utf8");
+    const manifestBuffer = await storage.download(`incidents/${incidentid}/manifest.json`);
+    manifest = JSON.parse(manifestBuffer.toString("utf8")) as IncidentManifest;
   } catch {
-    return NextResponse.json({ message: "Incident not found" }, { status: 404 });
+    return NextResponse.json({ message: "Incident manifest not found" }, { status: 404 });
   }
 
-  // Discover available languages
-  const langBaseDir = path.join(dataDir, "language");
-  let availableLanguages: string[] = [];
-  try {
-    const langEntries = await fs.readdir(langBaseDir, { withFileTypes: true });
-    availableLanguages = langEntries
-      .filter((e) => e.isDirectory())
-      .map((e) => e.name);
-  } catch {
-    availableLanguages = [];
+  const activeLang = selectLanguage(manifest, requestedLang);
+  if (!activeLang) {
+    return NextResponse.json({ message: "No languages available for this incident" }, { status: 404 });
   }
 
-  if (!availableLanguages.includes(lang)) {
-    if (availableLanguages.length === 0) {
-      return NextResponse.json({ message: "No languages available for this incident" }, { status: 404 });
-    }
-  }
-
-  const activeLang = availableLanguages.includes(lang) ? lang : availableLanguages[0];
-  const langDir = path.join(langBaseDir, activeLang);
-  const srcDir = path.join(langDir, "src");
-  const testsDir = path.join(langDir, "tests");
-
-  // List src (editable) files
-  const srcFiles = await listFilesRecursive(srcDir, langDir);
-  // List test (readonly) files
-  const testFiles = await listFilesRecursive(testsDir, langDir);
-
-  const files: IncidentFile[] = [];
-
-  for (const relPath of srcFiles) {
-    try {
-      const content = await fs.readFile(path.join(langDir, relPath), "utf8");
-      files.push({
-        path: relPath,
-        content,
-        readonly: false,
-        language: getLanguageFromPath(relPath),
-      });
-    } catch {
-      // skip unreadable files
-    }
-  }
-
-  for (const relPath of testFiles) {
-    try {
-      const content = await fs.readFile(path.join(langDir, relPath), "utf8");
-      files.push({
-        path: relPath,
-        content,
-        readonly: true,
-        language: getLanguageFromPath(relPath),
-      });
-    } catch {
-      // skip
-    }
-  }
-
-  // Determine a sensible entry file (first src file)
-  const entryFile = srcFiles[0] ?? "";
+  const files = manifest.filesByLanguage?.[activeLang] ?? [];
+  const availableLanguages =
+    manifest.availableLanguages.length > 0
+      ? manifest.availableLanguages
+      : Object.keys(manifest.filesByLanguage ?? {});
+  const fallbackEntryFile = files.find((file) => !file.readonly)?.path ?? files[0]?.path ?? "";
+  const entryFile = manifest.entryFileByLanguage?.[activeLang] ?? fallbackEntryFile;
 
   return NextResponse.json({
-    report,
+    report: manifest.report,
     files,
     availableLanguages,
     entryFile,
