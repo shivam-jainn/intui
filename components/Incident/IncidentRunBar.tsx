@@ -64,6 +64,13 @@ export default function IncidentRunBar({
     }
 
     try {
+      const executionFiles = files.map((file) => ({
+        path: file.path,
+        content: file.readonly ? file.content : (fileContents[file.path] ?? file.content),
+        readonly: file.readonly,
+        language: file.language,
+      }));
+
       const response = await fetch("/api/incident", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -72,6 +79,7 @@ export default function IncidentRunBar({
           code,
           language,
           entryFile: filePath,
+          files: executionFiles,
         }),
       });
 
@@ -113,7 +121,7 @@ export default function IncidentRunBar({
             size="xs"
             data={langOptions}
             value={language}
-            onChange={(v) => v && onLanguageChange(v)}
+            onChange={(v: string | null) => v && onLanguageChange(v)}
             w={110}
             styles={{ input: { fontSize: 12 } }}
           />

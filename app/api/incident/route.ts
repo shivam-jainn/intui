@@ -3,7 +3,7 @@ import { GoogleAuth } from "google-auth-library";
 import { executorService } from "@/lib/executor-config";
 
 export async function POST(req: NextRequest) {
-  const { incident_slug, code, language, entryFile } = await req.json();
+  const { incident_slug, code, language, entryFile, files } = await req.json();
 
   if (!incident_slug) {
     return NextResponse.json(
@@ -26,6 +26,13 @@ export async function POST(req: NextRequest) {
     );
   }
 
+  if (!Array.isArray(files) || files.length === 0) {
+    return NextResponse.json(
+      { message: "Incident files are required for execution." },
+      { status: 400 }
+    );
+  }
+
   const { valid, message } = executorService.validateConfig();
   if (!valid) {
     return NextResponse.json(
@@ -41,6 +48,7 @@ export async function POST(req: NextRequest) {
     userCode: code,
     language,
     entryFile,
+    files,
   };
 
   try {

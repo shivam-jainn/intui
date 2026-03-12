@@ -3,6 +3,7 @@ package controllers
 import (
 	"bytes"
 	"context"
+	"fmt"
 	"log"
 	"os"
 	"os/exec"
@@ -15,14 +16,22 @@ import (
 	"google.golang.org/api/iterator"
 )
 
+type IncidentExecutionFile struct {
+	Path     string `json:"path"`
+	Content  string `json:"content"`
+	Readonly bool   `json:"readonly"`
+	Language string `json:"language"`
+}
+
 func ExecuteIncident(c *fiber.Ctx) error {
 	log.Println("Starting incident execution request")
 
 	var request struct {
-		IncidentName string `json:"incidentName"`
-		UserCode     string `json:"userCode"`
-		Language     string `json:"language"`
-		EntryFile    string `json:"entryFile"`
+		IncidentName string                  `json:"incidentName"`
+		UserCode     string                  `json:"userCode"`
+		Language     string                  `json:"language"`
+		EntryFile    string                  `json:"entryFile"`
+		Files        []IncidentExecutionFile `json:"files"`
 	}
 
 	if err := c.BodyParser(&request); err != nil {
@@ -55,11 +64,21 @@ func ExecuteIncident(c *fiber.Ctx) error {
 
 	ctx := context.Background()
 	bucketName := os.Getenv("GCS_BUCKET")
+	if bucketName == "" {
+		bucketName = os.Getenv("GCP_BUCKET_NAME")
+	}
 	incidentPrefix := filepath.ToSlash(filepath.Join("incidents", request.IncidentName, "language", request.Language))
 
-	if err := fetchDirectory(ctx, bucketName, incidentPrefix, tmpDir); err != nil {
-		log.Println("Incident assets fetch error:", err)
-		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch incident assets"})
+	if len(request.Files) > 0 {
+		if err := materializeIncidentFiles(tmpDir, request.Files, request.Language); err != nil {
+			log.Println("Incident files materialize error:", err)
+			return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{"error": "Invalid incident files payload"})
+		}
+	} else {
+		if err := fetchDirectory(ctx, bucketName, incidentPrefix, tmpDir); err != nil {
+			log.Println("Incident assets fetch error:", err)
+			return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{"error": "Failed to fetch incident assets"})
+		}
 	}
 
 	entryFile := request.EntryFile
@@ -121,8 +140,40 @@ func ExecuteIncident(c *fiber.Ctx) error {
 	})
 }
 
+func materializeIncidentFiles(destDir string, files []IncidentExecutionFile, language string) error {
+	for _, file := range files {
+		if file.Language != "" && file.Language != language {
+			continue
+		}
+
+		relPath := filepath.Clean(file.Path)
+		if relPath == "." || strings.HasPrefix(relPath, "..") || filepath.IsAbs(relPath) {
+			return fmt.Errorf("invalid file path: %s", file.Path)
+		}
+
+		destPath := filepath.Join(destDir, relPath)
+		if err := os.MkdirAll(filepath.Dir(destPath), 0755); err != nil {
+			return err
+		}
+
+		if err := os.WriteFile(destPath, []byte(file.Content), 0644); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
 func fetchDirectory(ctx context.Context, bucketName, objectPrefix, destDir string) error {
-	if os.Getenv("APP_ENV") == "development" {
+	appEnv := strings.ToLower(os.Getenv("APP_ENV"))
+	if appEnv == "" {
+		appEnv = strings.ToLower(os.Getenv("ENV_MODE"))
+	}
+	if appEnv == "" {
+		appEnv = strings.ToLower(os.Getenv("NODE_ENV"))
+	}
+
+	if appEnv == "development" {
 		fsDataPath := os.Getenv("FS_DATA_PATH")
 		if fsDataPath == "" {
 			fsDataPath = "/data"
@@ -159,6 +210,10 @@ func fetchDirectory(ctx context.Context, bucketName, objectPrefix, destDir strin
 
 			return os.WriteFile(destPath, input, 0644)
 		})
+	}
+
+	if bucketName == "" {
+		return fmt.Errorf("bucket name is empty")
 	}
 
 	client, err := storage.NewClient(ctx)
