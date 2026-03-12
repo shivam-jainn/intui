@@ -1,12 +1,34 @@
-# Intui
+<p align="center">
+  <img src="public/intui.svg" alt="Intui logo" />
+</p>
+
+<p align="center">
+  <img src="public/prismduck.png" alt="Prismduck mascot" width="120" />
+</p>
 
 > **Interactive coding playground and learning platform**
 
 Intui is a modern web application built with Next.js (app router) and Mantine UI, designed to provide users with an embedded code editor, question bank, and execution backend. It includes authentication, real‑time execution, and a modular component library for rapid feature development.
 
-![Demo Gif Placeholder](gif-placeholder-1)
+## 📸 Screenshots
 
-> _Insert GIF showing landing page and basic navigation_
+### Landing Page
+<img src="public/landingpage.png" alt="Landing Page" width="700" />
+
+### Login
+<img src="public/login.png" alt="Login" width="700" />
+
+### DSA Playground
+<img src="public/home.png" alt="Home" width="700" />
+<img src="public/DSAPlayground.png" alt="DSA Playground" width="700" />
+
+### P0 Simulation
+<img src="public/p0.png" alt="P0" width="700" />
+<img src="public/p0wfiles.png" alt="P0 with Files" width="700" />
+
+### AI BYOK Feature
+<img src="public/AIByok.png" alt="AI BYOK" width="700" />
+<img src="public/AIResponse.png" alt="AI Response" width="700" />
 
 ## 🚀 Features
 
@@ -18,10 +40,6 @@ Intui is a modern web application built with Next.js (app router) and Mantine UI
 - Google Cloud storage integration for assets and execution data
 - Built‑in **Storybook** and **Jest** testing setup
 - Environment configuration through `.env` with clear example
-
-![Playground Gif Placeholder](gif-placeholder-2)
-
-> _Insert GIF showing code editor interaction and execution results_
 
 ## 🛠️ Getting Started
 
@@ -154,13 +172,11 @@ See `.env.example` for a full list. Key variables include:
 
 ## 🤝 Contributing
 
-Contributions are welcome! Please fork the repo and open a pull request. Follow existing code style and add tests for new features. Run `pnpm lint && pnpm test` before submitting.
+No contributons are allowed sorry ://
 
 ## 📄 License
 
-[MIT](LICENSE)
+All Rights Reserved @ Shivam Jain
 
 
 ---
-
-*README generated and maintained by the Intui team.*
