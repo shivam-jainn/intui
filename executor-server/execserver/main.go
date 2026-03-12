@@ -13,6 +13,7 @@ func main() {
 	app.Get("/health", controllers.HealthCheck)
 
 	app.Post("/execute", controllers.ExecuteCode)
+	app.Post("/incident", controllers.ExecuteIncident)
 
 	log.Fatal(app.Listen(":8080"))
 }
