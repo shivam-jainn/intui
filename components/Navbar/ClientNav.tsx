@@ -1,9 +1,10 @@
 'use client';
 
 import { Skeleton } from '@mantine/core';
+import Link from 'next/link';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
-import { useRouter } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { useSession } from '@/lib/auth-client';
 import React from 'react';
 import Profile from './Profile';
@@ -14,10 +15,19 @@ interface ClientNavbarProps {
 
 export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const router = useRouter();
+  const pathname = usePathname();
   const { data, isPending } = useSession();
 
   const currentSession = isPending ? initialSession : data;
   const isLoggedIn = currentSession?.user != null;
+
+  const isActive = (href: string) => {
+    if (href === '/') {
+      return pathname === '/';
+    }
+
+    return pathname === href || pathname.startsWith(`${href}/`);
+  };
 
   return (
     <>
@@ -37,8 +47,25 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
             <Intui />
           </a>
 
-          {/* Desktop auth / profile — flex-grow pushes it right */}
-          <div style={{ flex: 1 }} />
+          <nav className={classes.navLinks}>
+            {isLoggedIn && (
+              <>
+                <Link
+                  href="/"
+                  className={`${classes.link} ${isActive('/') ? classes.linkActive : ''}`}
+                >
+                  Home
+                </Link>
+                <Link
+                  href="/p0"
+                  className={`${classes.link} ${isActive('/p0') ? classes.linkActive : ''}`}
+                >
+                  P0
+                </Link>
+              </>
+            )}
+          </nav>
+
           <div
             style={{
               display: 'flex',

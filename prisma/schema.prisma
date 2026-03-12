@@ -119,6 +119,19 @@ model Verification {
   @@map("verification")
 }
 
+model Incident {
+  id          Int      @id @default(autoincrement())
+  slug        String   @unique @db.VarChar(160)
+  title       String   @db.VarChar(200)
+  severity    String   @default("P0") @db.VarChar(10)
+  difficulty  Difficulty
+  service     String   @db.VarChar(200)
+  summary     String
+  slaMinutes  Int      @default(20)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
 model Submission {
   id         Int      @id @default(autoincrement())
   questionId Int
