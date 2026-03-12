@@ -6,11 +6,13 @@ const prisma = new PrismaClient();
 
 async function main() {
   const baseDir = path.join(__dirname, '../data/questions');
-  const questionFolders = fs.readdirSync(baseDir);
+  const questionFolders = fs
+    .readdirSync(baseDir)
+    .filter((folder) => fs.statSync(path.join(baseDir, folder)).isDirectory())
+    .sort((a, b) => a.localeCompare(b));
 
-  for (const folder of questionFolders) {
+  for (const [index, folder] of questionFolders.entries()) {
     const folderPath = path.join(baseDir, folder);
-    if (!fs.statSync(folderPath).isDirectory()) continue;
 
     const metadataPath = path.join(folderPath, 'metadata.json');
     const questionMdPath = path.join(folderPath, 'Question.md');
@@ -21,6 +23,9 @@ async function main() {
     }
 
     const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
+    const displayOrder = Number.isInteger(metadata.displayOrder)
+      ? metadata.displayOrder
+      : index + 1;
     const description = fs.existsSync(questionMdPath) 
       ? fs.readFileSync(questionMdPath, 'utf8') 
       : "";
@@ -31,11 +36,13 @@ async function main() {
     const question = await prisma.question.upsert({
       where: { slug: metadata.slug },
       update: {
+        displayOrder,
         name: metadata.title,
         difficulty: metadata.difficulty,
         description: description,
       },
       create: {
+        displayOrder,
         slug: metadata.slug,
         name: metadata.title,
         difficulty: metadata.difficulty,
