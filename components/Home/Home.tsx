@@ -1,22 +1,26 @@
+'use client';
+
 import React from 'react'
 import MixerHome from '../Mixer/MixerHome'
-import P0SimulationHome from '../P0Simulation/P0SimulationHome'
+import Landing from '../Landing/Landing'
+import { useSession } from '@/lib/auth-client'
+import { Skeleton } from '@mantine/core'
 
 export default function Home() {
+  const { data: session, isPending } = useSession()
+
+  if (isPending) {
+    return (
+      <div style={{ padding: '2rem' }}>
+        <Skeleton height={400} radius="xl" mb="md" />
+        <Skeleton height={200} radius="xl" />
+      </div>
+    )
+  }
 
   return (
     <div>
-      {
-        process.env.NEXT_PUBLIC_P0_MODE === "true"
-        ?
-        <P0SimulationHome />
-        :
-        process.env.NEXT_PUBLIC_MIXER_STORY_FLAG === "true"
-        ?
-        "It's coooking . Until then checkout the questions"
-        :
-      <MixerHome />
-      }
+      {session ? <MixerHome /> : <Landing />}
     </div>
   )
 }

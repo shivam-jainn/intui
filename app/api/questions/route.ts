@@ -7,6 +7,9 @@ export async function GET(
 ) {
   
   const questionObject = await prisma.question.findMany({
+    orderBy: {
+      displayOrder: 'asc',
+    },
     include:{
       topics: {
         include:{
@@ -15,6 +18,5 @@ export async function GET(
       }
     }
   });
-  console.log("questionObject : ", questionObject);
   return NextResponse.json(questionObject);
 }

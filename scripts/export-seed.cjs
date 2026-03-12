@@ -10,12 +10,14 @@ async function main() {
       topics: { include: { topic: true } },
       companies: { include: { company: true } },
     },
-    orderBy: { id: 'asc' },
+    orderBy: { displayOrder: 'asc' },
   });
 
   const seedPayload = {
     exportedAt: new Date().toISOString(),
     questions: questions.map((q) => ({
+      slug: q.slug,
+      displayOrder: q.displayOrder,
       name: q.name,
       difficulty: q.difficulty,
       description: q.description,
