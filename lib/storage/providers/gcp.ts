@@ -55,7 +55,7 @@ export class GcpStorage implements StorageService {
     const bucket = this.storage.bucket(this.bucketName);
     const downloadPromises = paths.map((path) => {
       const fileDownload = bucket.file(path);
-      return fileDownload.download().then(([content]) => content);
+      return fileDownload.download().then(([content]: [Buffer]) => content);
     });
     return Promise.all(downloadPromises);
   }

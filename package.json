@@ -21,6 +21,7 @@
     "db:export-seed": "node scripts/export-seed.cjs",
     "db:seed": "prisma db seed",
     "db:seed-questions": "node scripts/dataquestionseed.cjs",
+    "data:incidents:manifest": "node scripts/generate-incident-manifests.cjs",
     "db:migrate:deploy": "prisma migrate deploy",
     "build:ci": "node scripts/ci-build.cjs",
     "vercel:build": "pnpm run build:ci"

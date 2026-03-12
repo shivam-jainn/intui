@@ -9,7 +9,8 @@ let storageInstance: Storage | null = null;
 export function getStorage(): Storage {
   if (storageInstance) return storageInstance;
 
-  const isDev = process.env.NODE_ENV === "development";
+  const mode = (process.env.ENV_MODE || process.env.NODE_ENV || "").toLowerCase();
+  const isDev = mode === "development";
   const provider = isDev ? "fs" : ((process.env.STORAGE_PROVIDER as "aws" | "gcp") || "gcp");
 
   if (provider === "fs") {
