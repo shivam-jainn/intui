@@ -1,6 +1,7 @@
 
 export interface ExecutorConfig {
   url: string;
+  incidentUrl: string;
   isDevelopment: boolean;
   targetAudience?: string;
 }
@@ -13,10 +14,12 @@ class ExecutorService {
     // Check if we are in development. Next.js sets this, but let's be robust
     const isDevelopment = process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
     const localUrl = "http://127.0.0.1:8080/execute";
+    const localIncidentUrl = "http://127.0.0.1:8080/incident";
     const gcrHost = process.env.GCR_Host;
 
     this.config = {
       url: isDevelopment ? localUrl : `${gcrHost}/execute`,
+      incidentUrl: isDevelopment ? localIncidentUrl : `${gcrHost}/incident`,
       isDevelopment,
       targetAudience: gcrHost,
     };
