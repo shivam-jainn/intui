@@ -11,7 +11,7 @@ export function getStorage(): Storage {
 
   const mode = (process.env.ENV_MODE || process.env.NODE_ENV || "").toLowerCase();
   const isDev = mode === "development";
-  const provider = isDev ? "fs" : ((process.env.STORAGE_PROVIDER as "aws" | "gcp") || "gcp");
+  const provider = process.env.STORAGE_PROVIDER || (isDev ? "fs" : "gcp");
 
   if (provider === "fs") {
     storageInstance = new Storage({

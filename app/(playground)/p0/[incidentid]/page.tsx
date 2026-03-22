@@ -16,6 +16,7 @@ import MultiFileEditor from "@/components/Incident/MultiFileEditor";
 import AIChatPanel from "@/components/Incident/AIChatPanel";
 import IncidentRunBar from "@/components/Incident/IncidentRunBar";
 import IncidentTestResults from "@/components/Incident/IncidentTestResults";
+import SubmissionTab from "@/components/Playground/SubmissionTab";
 import type { IncidentFile } from "@/app/api/incident/[incidentid]/files/route";
 
 interface IncidentData {
@@ -36,7 +37,7 @@ export default function IncidentPlaygroundPage({
   const [language, setLanguage] = useState("python");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [leftTab, setLeftTab] = useState<"description" | "files">("description");
+  const [leftTab, setLeftTab] = useState<"description" | "files" | "submissions">("description");
 
   const [, setFiles] = useAtom(incidentFilesAtom);
   const [, setActiveFile] = useAtom(activeFilePathAtom);
@@ -120,7 +121,7 @@ export default function IncidentPlaygroundPage({
               gap={0}
               style={{ borderBottom: "1px solid var(--mantine-color-dark-5)" }}
             >
-              {(["description", "files"] as const).map((tab) => (
+              {(["description", "files", "submissions"] as const).map((tab) => (
                 <Box
                   key={tab}
                   px="md"
@@ -152,8 +153,12 @@ export default function IncidentPlaygroundPage({
                   report={incidentData.report}
                   incidentName={incidentId}
                 />
-              ) : (
+              ) : leftTab === "files" ? (
                 <FileTree />
+              ) : (
+                <Box p="md" style={{ height: "100%" }}>
+                  <SubmissionTab incidentSlug={incidentId} />
+                </Box>
               )}
             </Box>
           </Box>

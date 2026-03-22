@@ -41,6 +41,7 @@ export default function IncidentRunBar({
   const [fileContents] = useAtom(fileContentsAtom);
   const [, setResult] = useAtom(incidentResultAtom);
   const [running, setRunning] = useAtom(incidentRunningAtom);
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   // The entry file to submit is the active editable file, fallback to declared entryFile
@@ -51,15 +52,17 @@ export default function IncidentRunBar({
     return { code, filePath: target };
   }
 
-  async function handleRun() {
+  async function handleRun(submit: boolean = false) {
     setError(null);
-    setRunning(true);
+    if (submit) setIsSubmitting(true);
+    else setRunning(true);
 
     const { code, filePath } = getSubmitCode();
 
     if (!code || code.trim().length < 5) {
       setError("No code to run. Select or edit a source file first.");
-      setRunning(false);
+      if (submit) setIsSubmitting(false);
+      else setRunning(false);
       return;
     }
 
@@ -71,7 +74,8 @@ export default function IncidentRunBar({
         language: file.language,
       }));
 
-      const response = await fetch("/api/incident", {
+      const endpoint = submit ? "/api/incident/submission" : "/api/incident";
+      const response = await fetch(endpoint, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -86,7 +90,7 @@ export default function IncidentRunBar({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || data.error || "Run failed");
+        setError(data.message || data.error || (submit ? "Submit failed" : "Run failed"));
         return;
       }
 
@@ -94,7 +98,8 @@ export default function IncidentRunBar({
     } catch (err: any) {
       setError("Network error: could not reach execution server.");
     } finally {
-      setRunning(false);
+      if (submit) setIsSubmitting(false);
+      else setRunning(false);
     }
   }
 
@@ -132,16 +137,27 @@ export default function IncidentRunBar({
           </Badge>
         </Group>
 
-        <Button
-          size="xs"
-          leftSection={<IconPlayerPlay size={12} />}
-          onClick={handleRun}
-          loading={running}
-          color="green"
-          variant="filled"
-        >
-          Run Tests
-        </Button>
+        <Group gap="sm">
+          <Button
+            size="xs"
+            leftSection={<IconPlayerPlay size={12} />}
+            onClick={() => handleRun(false)}
+            loading={running && !isSubmitting}
+            color="dark.4"
+            variant="filled"
+          >
+            Run
+          </Button>
+          <Button
+            size="xs"
+            onClick={() => handleRun(true)}
+            loading={isSubmitting}
+            color="green"
+            variant="filled"
+          >
+            Submit
+          </Button>
+        </Group>
       </Card>
 
       {error && (

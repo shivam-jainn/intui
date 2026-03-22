@@ -76,10 +76,10 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           >
             {/* Auth Section */}
             <div className={classes.desktopAuthContainer}>
-              {isPending ? (
-                <Skeleton height={32} width={120} radius="xl" />
-              ) : isLoggedIn ? (
+              {isLoggedIn ? (
                 <Profile avatar={currentSession.user.image} />
+              ) : isPending ? (
+                <Skeleton height={32} width={120} radius="xl" />
               ) : (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button

@@ -14,29 +14,35 @@ enum Difficulty {
 }
 
 model Question {
-  id          Int               @id @default(autoincrement())
-  displayOrder Int              @unique
-  slug        String            @unique @db.VarChar(160)
-  name        String            @db.VarChar(160)
-  difficulty  Difficulty
-  description String
-  topics      QuestionTopic[]
-  companies   QuestionCompany[]
-  User        User?             @relation(fields: [userId], references: [id])
-  userId      String?
-  Submission  Submission[]
+  id           Int               @id @default(autoincrement())
+  displayOrder Int               @unique
+  slug         String            @unique @db.VarChar(160)
+  name         String            @db.VarChar(160)
+  difficulty   Difficulty
+  description  String
+  topics       QuestionTopic[]
+  companies    QuestionCompany[]
+  User         User?             @relation(fields: [userId], references: [id])
+  userId       String?
+  Submission   Submission[]
+
+  @@map("question")
 }
 
 model Topic {
   id        Int             @id @default(autoincrement())
   name      String          @unique @db.VarChar(150)
   questions QuestionTopic[]
+
+  @@map("topic")
 }
 
 model Company {
   id        Int               @id @default(autoincrement())
   name      String            @unique @db.VarChar(150)
   questions QuestionCompany[]
+
+  @@map("company")
 }
 
 model QuestionTopic {
@@ -46,6 +52,7 @@ model QuestionTopic {
   topic      Topic    @relation(fields: [topicId], references: [id], onDelete: Cascade)
 
   @@id([questionId, topicId]) // Composite primary key
+  @@map("question_topic")
 }
 
 model QuestionCompany {
@@ -55,6 +62,7 @@ model QuestionCompany {
   company    Company  @relation(fields: [companyId], references: [id], onDelete: Cascade)
 
   @@id([questionId, companyId]) // Composite primary key
+  @@map("question_company")
 }
 
 model User {
@@ -120,29 +128,36 @@ model Verification {
 }
 
 model Incident {
-  id          Int      @id @default(autoincrement())
-  slug        String   @unique @db.VarChar(160)
-  title       String   @db.VarChar(200)
-  severity    String   @default("P0") @db.VarChar(10)
+  id          Int          @id @default(autoincrement())
+  slug        String       @unique @db.VarChar(160)
+  title       String       @db.VarChar(200)
+  severity    String       @default("P0") @db.VarChar(10)
   difficulty  Difficulty
-  service     String   @db.VarChar(200)
+  service     String       @db.VarChar(200)
   summary     String
-  slaMinutes  Int      @default(20)
-  createdAt   DateTime @default(now())
-  updatedAt   DateTime @updatedAt
+  slaMinutes  Int          @default(20)
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  Submissions Submission[]
+
+  @@map("incident")
 }
 
 model Submission {
-  id         Int      @id @default(autoincrement())
-  questionId Int
-  userId     String
-  code       String   @db.Text
-  language   String
-  status     String
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-  question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
-  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id           Int       @id @default(autoincrement())
+  questionId   Int?
+  incidentSlug String?   @db.VarChar(160)
+  userId       String
+  code         String    @db.Text
+  language     String
+  status       String
+  timeTaken    Float?
+  memoryUsed   Float?
+  createdAt    DateTime  @default(now())
+  updatedAt    DateTime  @updatedAt
+  question     Question? @relation(fields: [questionId], references: [id], onDelete: Cascade)
+  incident     Incident? @relation(fields: [incidentSlug], references: [slug], onDelete: Cascade)
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("submission")
 }

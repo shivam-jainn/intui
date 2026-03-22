@@ -7,6 +7,7 @@ import remarkMath from 'remark-math';
 import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
 import 'katex/dist/katex.min.css';
+import SubmissionTab from './SubmissionTab';
 
 type MarkdownComponentsType = {
   [key: string]: React.FC<any>;
@@ -77,12 +78,14 @@ const difficultyColor: Record<string, string> = {
 };
 
 export default function QuestionPanel({
+  questionSlug,
   questionTitle,
   difficulty,
   companies,
   description,
   topics,
 }: {
+  questionSlug?: string;
   questionTitle: string;
   difficulty: string;
   companies: string[];
@@ -175,17 +178,27 @@ export default function QuestionPanel({
           </Stack>
         </Box>
       ) : (
-        <Stack>
-          <SegmentedControl
-            value={tab}
-            onChange={setTab}
-            data={[
-              { label: 'Description', value: 'description' },
-              { label: 'Submission', value: 'submission' },
-            ]}
-          />
-          TODO : Submission
-        </Stack>
+        <Box
+          style={{
+            display: 'flex',
+            flexDirection: 'column',
+            height: '100%',
+          }}
+        >
+          <Stack p="md" py="xl" gap="md" style={{ flex: 1 }}>
+            <SegmentedControl
+              value={tab}
+              onChange={setTab}
+              data={[
+                { label: 'Description', value: 'description' },
+                { label: 'Submission', value: 'submission' },
+              ]}
+            />
+            <Box style={{ flex: 1, overflow: 'hidden' }}>
+              <SubmissionTab questionSlug={questionSlug} />
+            </Box>
+          </Stack>
+        </Box>
       )}
     </Stack>
   );

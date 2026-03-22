@@ -74,6 +74,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
       <PanelGroup direction="horizontal">
         <Panel>
           <QuestionPanel
+            questionSlug={params.questionid}
             questionTitle={questionData.name}
             difficulty={questionData.difficulty}
             description={questionData.description}

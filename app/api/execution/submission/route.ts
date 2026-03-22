@@ -1,8 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
 import { executorService } from "@/lib/executor-config";
+import { headers } from "next/headers";
+import { auth } from "@/lib/auth";
+import { prisma } from "@/prisma/db";
 
 export async function POST(req: NextRequest) {
+  const session = await auth.api.getSession({
+    headers: headers(),
+  });
+
+  if (!session?.user) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   const { question_slug, code, language } = await req.json();
 
   if (!question_slug) {
@@ -75,6 +86,24 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
         const errorMessage = data?.error || "Unknown error occurred";
         throw new Error(`Execution Error: ${errorMessage} (HTTP ${response.status})`);
+    }
+
+    const question = await prisma.question.findUnique({
+      where: { slug: question_slug }
+    });
+
+    if (question) {
+      await prisma.submission.create({
+        data: {
+          userId: session.user.id,
+          questionId: question.id,
+          code,
+          language,
+          status: data.status === "Success" && data.results?.every((r: any) => r.passed) ? "Accepted" : "Rejected",
+          timeTaken: data.timeTaken,
+          memoryUsed: data.memoryUsedKB
+        }
+      });
     }
 
     return NextResponse.json(
