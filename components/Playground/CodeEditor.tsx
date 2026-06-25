@@ -24,7 +24,8 @@ const CodeEditor = ({
 }: CodeEditorProps) => {
   const [language, setLanguage] = useAtom<Language>(langAtom);
   const [initialCode, setInitialCode] = useState("");
-  const [isLoading,setIsLoading] = useState<boolean>(false);
+  const [isRunning, setIsRunning] = useState<boolean>(false);
+  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
   const [testTab,setTestTab] = useAtom(resultAtom);
   const [_,setResultData] = useAtom(resultDataAtom);
   const [__, setSubmission] = useAtom(submissionAtom);
@@ -90,7 +91,7 @@ const CodeEditor = ({
 
   async function handleRunCode(){
     setUiError(null);
-    setIsLoading(true);
+    setIsRunning(true);
 
     try {
       const requestBody = {
@@ -116,13 +117,13 @@ const CodeEditor = ({
     } catch (error: any) {
       setUiError("Network error: Could not reach execution server.");
     } finally {
-      setIsLoading(false);
+      setIsRunning(false);
     }
   }
 
   async function handleSubmission(){
     setUiError(null);
-    setIsLoading(true);
+    setIsSubmitting(true);
 
     try {
       const requestBody = {
@@ -148,7 +149,7 @@ const CodeEditor = ({
     } catch (error: any) {
       setUiError("Network error: Could not reach submission server.");
     } finally {
-      setIsLoading(false);
+      setIsSubmitting(false);
     }
   }
 
@@ -183,8 +184,8 @@ const CodeEditor = ({
 
       <div style={{display:'flex',flexDirection:'row',gap:'5px'}}>
 
-        <Button variant='secondary' onClick={handleRunCode} loading={isLoading}>Run</Button>
-        <Button onClick={handleSubmission}>Submit</Button>
+        <Button variant='secondary' onClick={handleRunCode} loading={isRunning}>Run</Button>
+        <Button onClick={handleSubmission} loading={isSubmitting}>Submit</Button>
       </div>
       </Card>
 

@@ -9,24 +9,19 @@ export class FsStorage implements StorageService {
     this.baseDir = baseDir;
   }
 
-  private getFullPath(filePath: string): string {
-    return path.join(this.baseDir, filePath);
-  }
-
   async upload(file: Buffer, filePath: string): Promise<string> {
-    const fullPath = this.getFullPath(filePath);
+    const fullPath = path.join(this.baseDir, filePath);
     await fs.mkdir(path.dirname(fullPath), { recursive: true });
     await fs.writeFile(fullPath, file);
     return `fs://${fullPath}`;
   }
 
   async download(filePath: string): Promise<Buffer> {
-    const fullPath = this.getFullPath(filePath);
-    return await fs.readFile(fullPath);
+    return fs.readFile(path.join(this.baseDir, filePath));
   }
 
   async delete(filePath: string): Promise<void> {
-    const fullPath = this.getFullPath(filePath);
+    const fullPath = path.join(this.baseDir, filePath);
     await fs.unlink(fullPath);
   }
 

@@ -32,6 +32,14 @@ export default function IncidentTestResults() {
   const stdout = typeof result.stdout === "string" ? result.stdout : (typeof result.output === "string" ? result.output : "");
   const stderr = typeof result.stderr === "string" ? result.stderr : (typeof result.error === "string" ? result.error : "");
 
+  const testRows = Array.isArray(result.test_results) ? result.test_results : [];
+  const derivedPassedFromRows = testRows.filter((tc: any) => {
+    if (typeof tc?.passed === "boolean") return tc.passed;
+    if (typeof tc?.result === "boolean") return tc.result;
+    return tc?.output === true;
+  }).length;
+  const derivedTotalFromRows = testRows.length;
+
   // Heuristic for unittest summary in stderr if passed/failed counts are missing
   let parsedPassed = passedCount;
   let parsedFailed = failedCount;
@@ -59,13 +67,17 @@ export default function IncidentTestResults() {
     }
   }
 
-  const finalPassed = summaryMatched ? parsedPassed : passedCount;
-  const finalFailed = summaryMatched ? parsedFailed : failedCount;
-  const finalTotal = finalPassed + finalFailed;
+  const finalPassed = derivedTotalFromRows > 0
+    ? derivedPassedFromRows
+    : (summaryMatched ? parsedPassed : passedCount);
+  const finalFailed = derivedTotalFromRows > 0
+    ? Math.max(derivedTotalFromRows - derivedPassedFromRows, 0)
+    : (summaryMatched ? parsedFailed : failedCount);
+  const finalTotal = derivedTotalFromRows > 0
+    ? derivedTotalFromRows
+    : (finalPassed + finalFailed);
 
-  const allPassed = summaryMatched 
-    ? (finalFailed === 0 && finalTotal > 0)
-    : (hasCountFields ? (failedCount === 0 && totalCount > 0) : (passedBool === true));
+  const allPassed = finalTotal > 0 && finalFailed === 0;
 
   // Determine if this is a "valid" failure or a system error
   // If we matched the unittest summary, it's a test result, not a crash.
@@ -77,13 +89,13 @@ export default function IncidentTestResults() {
         {/* Summary */}
         <Group gap="xs">
           <Badge color={allPassed ? "green" : "red"} size="lg" variant="filled">
-            {summaryMatched || hasCountFields
-              ? (allPassed ? "All Tests Passed" : `${summaryMatched ? finalFailed : failedCount} / ${summaryMatched ? finalTotal : totalCount} Failed`)
-              : (allPassed ? "Passed" : (statusText ? statusText : "Failed"))}
+              {finalTotal > 0
+                ? (allPassed ? "All Tests Passed" : `${finalFailed} / ${finalTotal} Failed`)
+                : (allPassed ? "Passed" : (statusText ? statusText : "Failed"))}
           </Badge>
-          {(summaryMatched || (hasCountFields && totalCount > 0)) && (
+          {(finalTotal > 0) && (
             <Text size="sm" c="dimmed">
-              {summaryMatched ? finalPassed : finalPassed} passed, {summaryMatched ? finalFailed : failedCount} failed
+              {finalPassed} passed, {finalFailed} failed
             </Text>
           )}
         </Group>

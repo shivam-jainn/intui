@@ -35,7 +35,10 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
   }
 
   const currentResult = resultData?.results?.[Number(testcase) - 1] || {};
-  const isSuccess = currentResult.output === true;
+  const isSuccess =
+    currentResult.passed === true ||
+    currentResult.result === true ||
+    currentResult.output === true;
   const status = resultData?.status;
   
   // Check for any stderr/error in the response
@@ -52,6 +55,21 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
       default: return 'gray';
     }
   };
+
+  const resultRows = Array.isArray(resultData?.results) ? resultData.results : [];
+  const passedCases = resultRows.filter((r: any) => {
+    if (typeof r?.passed === "boolean") return r.passed;
+    if (typeof r?.result === "boolean") return r.result;
+    return r?.output === true;
+  }).length;
+  const totalCases = resultRows.length;
+  const failedCases = Math.max(totalCases - passedCases, 0);
+  const submissionSummary =
+    totalCases > 0
+      ? failedCases === 0
+        ? "All test cases passed!"
+        : `Passed ${passedCases}/${totalCases} test cases.`
+      : null;
 
   return (
     <Card withBorder radius="md">
@@ -155,9 +173,9 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
                 ) : (
                   <Box>
                     <Text size="sm" color="dimmed">
-                      {status === 'Accepted' 
-                        ? 'All test cases passed!' 
-                        : `Passed ${resultData.results.filter((r: any) => r.result).length}/${resultData.results.length} test cases.`}
+                      {status === 'Accepted'
+                        ? 'All test cases passed!'
+                        : (submissionSummary || 'No test results available.')}
                     </Text>
                   </Box>
                 )}

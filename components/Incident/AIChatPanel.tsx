@@ -103,7 +103,7 @@ function MessageBubble({ message }: { message: Message }) {
         <ThemeIcon
           size="xs"
           variant="light"
-          color={isUser ? "blue" : "violet"}
+          color={isUser ? "slate" : "orange"}
           radius="xl"
         >
           {isUser ? <IconUser size={10} /> : <IconRobot size={10} />}
@@ -118,11 +118,11 @@ function MessageBubble({ message }: { message: Message }) {
         style={{
           maxWidth: "92%",
           backgroundColor: isUser
-            ? "var(--mantine-color-blue-9)"
-            : "var(--mantine-color-dark-6)",
+            ? "rgba(15, 23, 42, 0.95)"
+            : "rgba(17, 24, 39, 0.94)",
           borderColor: isUser
-            ? "var(--mantine-color-blue-7)"
-            : "var(--mantine-color-dark-4)",
+            ? "rgba(148, 163, 184, 0.28)"
+            : "rgba(251, 146, 60, 0.2)",
         }}
       >
         {isUser ? (
@@ -365,7 +365,11 @@ Be concise and conversational.`;
         ? "xAI API Key"
         : "Groq API Key";
   const keyPlaceholder =
-    provider === "google" ? "AIza..." : provider === "xai" ? "xai-..." : "gsk_...";
+    provider === "google"
+      ? "google_xxxx"
+      : provider === "xai"
+        ? "xai_xxxx"
+        : "groq_xxxx";
 
   return (
     <Box
@@ -373,7 +377,7 @@ Be concise and conversational.`;
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "var(--mantine-color-dark-8)",
+        backgroundColor: "rgba(2, 6, 23, 0.78)",
       }}
     >
       {/* Header */}
@@ -437,7 +441,7 @@ Be concise and conversational.`;
             <Group justify="space-between">
               <Text
                 size="xs"
-                c="blue"
+                c="orange"
                 style={{ cursor: "pointer", textDecoration: "underline" }}
                 component="a"
                 href={PROVIDER_LINKS[model]}
@@ -479,7 +483,7 @@ Be concise and conversational.`;
       >
         {messages.length === 0 ? (
           <Stack gap="sm" align="center" pt="xl">
-            <ThemeIcon size="xl" variant="light" color="violet" radius="xl">
+            <ThemeIcon size="xl" variant="light" color="orange" radius="xl">
               <IconRobot size={24} />
             </ThemeIcon>
             <Text size="sm" c="dimmed" ta="center" maw={200}>
@@ -488,7 +492,7 @@ Be concise and conversational.`;
             <Button
               size="xs"
               variant="light"
-              color="violet"
+              color="orange"
               onClick={() =>
                 setInput("Can you give me a hint about what the bug might be?")
               }
@@ -503,7 +507,7 @@ Be concise and conversational.`;
             ))}
             {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
               <Group gap={6}>
-                <Loader size="xs" color="violet" />
+                <Loader size="xs" color="orange" />
                 <Text size="xs" c="dimmed">
                   Thinking...
                 </Text>
@@ -526,7 +530,7 @@ Be concise and conversational.`;
           <Button
             size="xs"
             variant="solid"
-            color="blue"
+            color="orange"
             mb="xs"
             onClick={injectCode}
           >
@@ -554,7 +558,7 @@ Be concise and conversational.`;
           <ActionIcon
             type="button"
             size="md"
-            color="blue"
+            color="orange"
             variant="filled"
             onClick={() => void sendMessage()}
             loading={isLoading}

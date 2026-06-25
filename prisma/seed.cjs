@@ -4,6 +4,49 @@ const os = require('os');
 const { PrismaClient } = require('@prisma/client');
 const { Storage } = require('@google-cloud/storage');
 
+function parseEnvFile(content) {
+  const env = {};
+  for (const rawLine of content.split(/\r?\n/)) {
+    const line = rawLine.trim();
+    if (!line || line.startsWith('#')) continue;
+
+    const equalsIndex = line.indexOf('=');
+    if (equalsIndex === -1) continue;
+
+    const key = line.slice(0, equalsIndex).trim();
+    let value = line.slice(equalsIndex + 1).trim();
+
+    if (
+      (value.startsWith('"') && value.endsWith('"')) ||
+      (value.startsWith("'") && value.endsWith("'"))
+    ) {
+      value = value.slice(1, -1);
+    }
+
+    env[key] = value;
+  }
+  return env;
+}
+
+function loadEnvFile(filePath) {
+  if (!fs.existsSync(filePath)) return;
+
+  const parsed = parseEnvFile(fs.readFileSync(filePath, 'utf8'));
+  for (const [key, value] of Object.entries(parsed)) {
+    if (process.env[key] === undefined) {
+      process.env[key] = value;
+    }
+  }
+}
+
+const rootDir = path.resolve(__dirname, '..');
+const nodeEnv = process.env.NODE_ENV || 'development';
+
+loadEnvFile(path.join(rootDir, `.env.${nodeEnv}.local`));
+loadEnvFile(path.join(rootDir, '.env.local'));
+loadEnvFile(path.join(rootDir, `.env.${nodeEnv}`));
+loadEnvFile(path.join(rootDir, '.env'));
+
 const prisma = new PrismaClient();
 const storage = new Storage({
   credentials: {
