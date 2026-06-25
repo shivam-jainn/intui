@@ -1,6 +1,6 @@
 "use client";
-import { Stack, Title, Group, Badge, Container, SegmentedControl, Accordion, Text, Box } from '@mantine/core';
-import React, { useState } from 'react';
+import { Stack, Title, Group, Badge, SegmentedControl, Accordion, Text, Box, Button, Paper, Loader, ScrollArea } from '@mantine/core';
+import React, { useEffect, useState } from 'react';
 import Markdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
 import remarkMath from 'remark-math';
@@ -77,12 +77,14 @@ const difficultyColor: Record<string, string> = {
 };
 
 export default function QuestionPanel({
+  questionSlug,
   questionTitle,
   difficulty,
   companies,
   description,
   topics,
 }: {
+  questionSlug: string;
   questionTitle: string;
   difficulty: string;
   companies: string[];
@@ -90,6 +92,34 @@ export default function QuestionPanel({
   topics: any[];
 }) {
   const [tab, setTab] = useState<string>('description');
+  const [submissions, setSubmissions] = useState<any[]>([]);
+  const [loadingSubmissions, setLoadingSubmissions] = useState(false);
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+
+  useEffect(() => {
+    async function loadSubmissions() {
+      if (tab !== "submission") return;
+
+      setLoadingSubmissions(true);
+      setSubmissionError(null);
+      try {
+        const response = await fetch(`/api/submissions?question=${encodeURIComponent(questionSlug)}`);
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(data.message || "Failed to load submissions");
+        }
+
+        setSubmissions(Array.isArray(data.submissions) ? data.submissions : []);
+      } catch (error: any) {
+        setSubmissionError(error.message || "Failed to load submissions");
+      } finally {
+        setLoadingSubmissions(false);
+      }
+    }
+
+    void loadSubmissions();
+  }, [questionSlug, tab]);
 
   return (
     <Stack h="100%" style={{ maxHeight: '100%' }}>
@@ -175,7 +205,7 @@ export default function QuestionPanel({
           </Stack>
         </Box>
       ) : (
-        <Stack>
+        <Stack h="100%" p="md" style={{ overflow: "hidden" }}>
           <SegmentedControl
             value={tab}
             onChange={setTab}
@@ -184,7 +214,69 @@ export default function QuestionPanel({
               { label: 'Submission', value: 'submission' },
             ]}
           />
-          TODO : Submission
+          <Paper withBorder p="md" radius="md" style={{ background: "rgba(2, 6, 23, 0.35)", flex: 1 }}>
+            <Stack gap="sm" h="100%">
+              <Group justify="space-between" align="center">
+                <Box>
+                  <Text fw={600}>Your submissions</Text>
+                  <Text size="xs" c="dimmed">
+                    Latest submission attempts for this question.
+                  </Text>
+                </Box>
+                <Button size="xs" variant="light" onClick={() => setTab("description")}>
+                  Back to description
+                </Button>
+              </Group>
+
+              {loadingSubmissions ? (
+                <Group justify="center" py="xl">
+                  <Loader size="sm" />
+                </Group>
+              ) : submissionError ? (
+                <Text size="sm" c="red">{submissionError}</Text>
+              ) : (
+                <ScrollArea h="100%">
+                  <Stack gap="sm">
+                    {submissions.length === 0 ? (
+                      <Text size="sm" c="dimmed">
+                        No submissions yet. Run code from the editor, then press Submit.
+                      </Text>
+                    ) : (
+                      submissions.map((submission) => (
+                        <Paper key={submission.id} withBorder p="sm" radius="md">
+                          <Group justify="space-between" align="center" mb={4}>
+                            <Badge color={submission.status === "Accepted" ? "green" : "orange"} variant="filled">
+                              {submission.status}
+                            </Badge>
+                            <Text size="xs" c="dimmed">
+                              {new Date(submission.createdAt).toLocaleString()}
+                            </Text>
+                          </Group>
+                          <Text size="xs" c="dimmed" mb={4}>
+                            Language: {submission.language}
+                          </Text>
+                          <Box
+                            component="pre"
+                            p="sm"
+                            style={{
+                              margin: 0,
+                              backgroundColor: "var(--mantine-color-dark-8)",
+                              borderRadius: "var(--mantine-radius-sm)",
+                              overflowX: "auto",
+                              fontSize: 12,
+                              color: "var(--mantine-color-gray-2)",
+                            }}
+                          >
+                            <code>{submission.code}</code>
+                          </Box>
+                        </Paper>
+                      ))
+                    )}
+                  </Stack>
+                </ScrollArea>
+              )}
+            </Stack>
+          </Paper>
         </Stack>
       )}
     </Stack>

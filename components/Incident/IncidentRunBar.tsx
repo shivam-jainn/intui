@@ -16,10 +16,11 @@ import {
   fileContentsAtom,
   incidentFilesAtom,
   incidentResultAtom,
+  incidentSubmissionAtom,
   incidentRunningAtom,
 } from "@/contexts/IncidentContext";
 import { useState } from "react";
-import { IconPlayerPlay } from "@tabler/icons-react";
+import { IconPlayerPlay, IconSend } from "@tabler/icons-react";
 
 interface IncidentRunBarProps {
   incidentSlug: string;
@@ -40,6 +41,7 @@ export default function IncidentRunBar({
   const [activeFile] = useAtom(activeFilePathAtom);
   const [fileContents] = useAtom(fileContentsAtom);
   const [, setResult] = useAtom(incidentResultAtom);
+  const [, setSubmission] = useAtom(incidentSubmissionAtom);
   const [running, setRunning] = useAtom(incidentRunningAtom);
   const [error, setError] = useState<string | null>(null);
 
@@ -51,9 +53,10 @@ export default function IncidentRunBar({
     return { code, filePath: target };
   }
 
-  async function handleRun() {
+  async function executeIncident(isSubmission: boolean) {
     setError(null);
     setRunning(true);
+    setSubmission(isSubmission);
 
     const { code, filePath } = getSubmitCode();
 
@@ -80,6 +83,7 @@ export default function IncidentRunBar({
           language,
           entryFile: filePath,
           files: executionFiles,
+          isSubmission,
         }),
       });
 
@@ -93,9 +97,18 @@ export default function IncidentRunBar({
       setResult(data);
     } catch (err: any) {
       setError("Network error: could not reach execution server.");
+      setSubmission(false);
     } finally {
       setRunning(false);
     }
+  }
+
+  async function handleRun() {
+    await executeIncident(false);
+  }
+
+  async function handleSubmit() {
+    await executeIncident(true);
   }
 
   const langOptions = availableLanguages.map((l) => ({
@@ -132,16 +145,28 @@ export default function IncidentRunBar({
           </Badge>
         </Group>
 
-        <Button
-          size="xs"
-          leftSection={<IconPlayerPlay size={12} />}
-          onClick={handleRun}
-          loading={running}
-          color="green"
-          variant="filled"
-        >
-          Run Tests
-        </Button>
+        <Group gap="xs">
+          <Button
+            size="xs"
+            leftSection={<IconPlayerPlay size={12} />}
+            onClick={handleRun}
+            loading={running}
+            color="green"
+            variant="light"
+          >
+            Run Tests
+          </Button>
+          <Button
+            size="xs"
+            leftSection={<IconSend size={12} />}
+            onClick={handleSubmit}
+            loading={running}
+            color="orange"
+            variant="filled"
+          >
+            Submit
+          </Button>
+        </Group>
       </Card>
 
       {error && (

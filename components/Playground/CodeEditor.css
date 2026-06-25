@@ -1,17 +1,88 @@
-.code-editor-container {
-    width: 100%;
-    min-height: 400px;
-  }
+.playground-editor-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  height: 100%;
+  min-height: 0;
+  padding: 0.75rem;
+}
 
-  /* Target CodeMirror classes to ensure it takes full height and is scrollable */
-  .cm-editor {
-    height: 100% !important;
-  }
+.playground-editor-toolbar {
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: rgba(11, 16, 32, 0.94);
+  box-shadow: none;
+}
 
-  .cm-scroller {
-    overflow: auto !important;
-  }
+.playground-editor-frame {
+  flex: 1;
+  min-height: 0;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.1);
+  background: #0b1020;
+}
 
-  .cm-theme{
-    height: 100%;
-  }
+.playground-editor-frame .cm-editor {
+  height: 100% !important;
+  min-height: 100% !important;
+  background: transparent !important;
+}
+
+.playground-editor-frame .cm-scroller {
+  overflow: auto !important;
+  height: 100% !important;
+  min-height: 100% !important;
+  font-family: "JetBrains Mono", "SFMono-Regular", Consolas, "Liberation Mono", Menlo, monospace;
+}
+
+.playground-editor-frame .cm-content,
+.playground-editor-frame .cm-gutters {
+  min-height: 100%;
+}
+
+.playground-editor-frame .cm-content {
+  min-height: 100% !important;
+}
+
+.playground-editor-frame .cm-gutters {
+  min-height: 100% !important;
+  align-self: stretch;
+}
+
+.playground-editor-frame .cm-gutters {
+  border-right: 1px solid rgba(148, 163, 184, 0.08);
+  background: rgba(2, 6, 23, 0.16);
+  color: rgba(148, 163, 184, 0.68);
+}
+
+.playground-editor-frame .cm-lineNumbers .cm-gutterElement {
+  padding-left: 8px;
+  padding-right: 8px;
+}
+
+.playground-editor-frame .cm-activeLine,
+.playground-editor-frame .cm-activeLineGutter {
+  background: rgba(255, 255, 255, 0.04) !important;
+}
+
+.playground-editor-frame .cm-cursor,
+.playground-editor-frame .cm-dropCursor {
+  border-left-color: #f59e0b !important;
+}
+
+.playground-editor-frame .cm-selectionBackground,
+.playground-editor-frame .cm-content ::selection {
+  background: rgba(255, 255, 255, 0.14) !important;
+}
+
+.playground-editor-frame .cm-panels {
+  background: #0b1020;
+  color: #e5e7eb;
+}
+
+.playground-editor-frame .cm-tooltip {
+  background: #111827;
+  color: #e5e7eb;
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.24);
+}

@@ -1,19 +1,41 @@
 "use client";
 
-import { Box, Badge, Stack, Text, Code, Group, ThemeIcon, ScrollArea } from "@mantine/core";
+import {
+  Box,
+  Badge,
+  Stack,
+  Text,
+  Code,
+  Group,
+  ThemeIcon,
+  ScrollArea,
+  Paper,
+  Divider,
+} from "@mantine/core";
 import { useAtom } from "jotai";
-import { incidentResultAtom } from "@/contexts/IncidentContext";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { incidentResultAtom, incidentSubmissionAtom } from "@/contexts/IncidentContext";
+import { IconCheck, IconX, IconSend, IconPlayerPlay } from "@tabler/icons-react";
 
 export default function IncidentTestResults() {
   const [result] = useAtom(incidentResultAtom);
+  const [isSubmission] = useAtom(incidentSubmissionAtom);
 
   if (!result) {
     return (
       <Box p="md">
-        <Text size="sm" c="dimmed">
-          Run your code to see test results
-        </Text>
+        <Paper withBorder p="md" radius="md" style={{ background: "rgba(2, 6, 23, 0.4)" }}>
+          <Group gap="xs" mb={6}>
+            <Badge size="sm" variant="light" color="gray">
+              No results yet
+            </Badge>
+            <Badge size="sm" variant="outline" color="blue">
+              {isSubmission ? "Submission" : "Run"}
+            </Badge>
+          </Group>
+          <Text size="sm" c="dimmed">
+            Run tests or submit your solution to populate this panel.
+          </Text>
+        </Paper>
       </Box>
     );
   }
@@ -78,6 +100,7 @@ export default function IncidentTestResults() {
     : (finalPassed + finalFailed);
 
   const allPassed = finalTotal > 0 && finalFailed === 0;
+  const actionLabel = isSubmission ? "Submission" : "Run";
 
   // Determine if this is a "valid" failure or a system error
   // If we matched the unittest summary, it's a test result, not a crash.
@@ -86,19 +109,30 @@ export default function IncidentTestResults() {
   return (
     <ScrollArea h="100%">
       <Stack gap="sm" p="md">
-        {/* Summary */}
-        <Group gap="xs">
-          <Badge color={allPassed ? "green" : "red"} size="lg" variant="filled">
-              {finalTotal > 0
-                ? (allPassed ? "All Tests Passed" : `${finalFailed} / ${finalTotal} Failed`)
-                : (allPassed ? "Passed" : (statusText ? statusText : "Failed"))}
-          </Badge>
-          {(finalTotal > 0) && (
-            <Text size="sm" c="dimmed">
-              {finalPassed} passed, {finalFailed} failed
-            </Text>
-          )}
-        </Group>
+        <Paper withBorder p="sm" radius="md" style={{ background: "rgba(2, 6, 23, 0.35)" }}>
+          <Group justify="space-between" align="flex-start">
+            <Box>
+              <Group gap={6} mb={4}>
+                <Badge color={isSubmission ? "orange" : "blue"} variant="filled">
+                  {actionLabel}
+                </Badge>
+                <Badge color={allPassed ? "green" : "red"} variant="light">
+                  {finalTotal > 0
+                    ? (allPassed ? "All Tests Passed" : `${finalFailed} / ${finalTotal} Failed`)
+                    : (allPassed ? "Passed" : (statusText ? statusText : "Failed"))}
+                </Badge>
+              </Group>
+              <Text size="sm" c="dimmed">
+                {finalTotal > 0
+                  ? `${finalPassed} passed, ${finalFailed} failed`
+                  : (statusText || "No detailed results returned")}
+              </Text>
+            </Box>
+            <ThemeIcon color={allPassed ? "green" : "red"} variant="light" radius="md">
+              {isSubmission ? <IconSend size={16} /> : <IconPlayerPlay size={16} />}
+            </ThemeIcon>
+          </Group>
+        </Paper>
 
         {/* Stdout */}
         {stdout && (
@@ -153,28 +187,48 @@ export default function IncidentTestResults() {
             </Text>
             <Stack gap={4}>
               {result.test_results.map((tc: any, i: number) => (
-                <Group key={i} gap="xs" wrap="nowrap">
-                  <ThemeIcon
-                    size="xs"
-                    color={tc.passed ? "green" : "red"}
-                    variant="light"
-                    radius="xl"
-                  >
-                    {tc.passed ? <IconCheck size={10} /> : <IconX size={10} />}
-                  </ThemeIcon>
-                  <Text size="xs" c={tc.passed ? "green" : "red"} style={{ fontFamily: "monospace" }}>
-                    {tc.name ?? `Test ${i + 1}`}
-                  </Text>
-                  {tc.message && (
-                    <Text size="xs" c="dimmed" truncate>
-                      — {tc.message}
-                    </Text>
-                  )}
-                </Group>
+                <Box
+                  key={i}
+                  p={8}
+                  style={{
+                    border: "1px solid var(--mantine-color-dark-5)",
+                    borderRadius: "var(--mantine-radius-sm)",
+                    backgroundColor: "rgba(2, 6, 23, 0.22)",
+                  }}
+                >
+                  <Group gap="xs" wrap="nowrap" align="flex-start">
+                    <ThemeIcon
+                      size="xs"
+                      color={tc.passed ? "green" : "red"}
+                      variant="light"
+                      radius="xl"
+                    >
+                      {tc.passed ? <IconCheck size={10} /> : <IconX size={10} />}
+                    </ThemeIcon>
+                    <Box style={{ flex: 1 }}>
+                      <Text size="xs" c={tc.passed ? "green" : "red"} style={{ fontFamily: "monospace" }}>
+                        {tc.name ?? `Test ${i + 1}`}
+                      </Text>
+                      {tc.message && (
+                        <Text size="xs" c="dimmed">
+                          {tc.message}
+                        </Text>
+                      )}
+                    </Box>
+                  </Group>
+                </Box>
               ))}
             </Stack>
           </Box>
         )}
+
+        <Divider color="dark.5" />
+
+        <Text size="xs" c="dimmed">
+          {isSubmission
+            ? "Submission mode is recorded separately from a regular run."
+            : "Run mode is for quick feedback before submitting."}
+        </Text>
       </Stack>
     </ScrollArea>
   );

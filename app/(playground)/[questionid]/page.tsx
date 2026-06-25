@@ -23,7 +23,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
   const [error, setError] = useState<string | null>(null);
 
   const handleCodeChange = (code: string) => {
-    console.log("Code changed:", code);
+    void code;
   };
 
   async function fetchQuestion() {
@@ -70,10 +70,11 @@ export default function Page({ params }: { params: { questionid: string } }) {
   }
 
   return (
-    <div style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+    <div className="playground-page-shell">
       <PanelGroup direction="horizontal">
-        <Panel>
+        <Panel className="playground-panel">
           <QuestionPanel
+            questionSlug={params.questionid}
             questionTitle={questionData.name}
             difficulty={questionData.difficulty}
             description={questionData.description}
@@ -81,14 +82,14 @@ export default function Page({ params }: { params: { questionid: string } }) {
             topics={questionData.topics || []}
           />
         </Panel>
-        <PanelResizeHandle style={{ width: "0.5rem" }} />
-        <Panel>
+        <PanelResizeHandle className="playground-resize-handle playground-resize-handle--vertical" />
+        <Panel className="playground-panel">
           <PanelGroup direction="vertical">
-            <Panel minSize={50}>
+            <Panel minSize={50} className="playground-panel">
               <CodeEditor questionSlug={params.questionid} />
             </Panel>
-            <PanelResizeHandle style={{ height: "0.5rem" }} />
-            <Panel defaultSize={30} minSize={20} maxSize={40} style={{ overflow: 'auto' }}>
+            <PanelResizeHandle className="playground-resize-handle playground-resize-handle--horizontal" />
+            <Panel defaultSize={30} minSize={30} maxSize={30} className="playground-panel" style={{ overflow: 'hidden' }}>
               <RunAndSubmissionBar testCases={questionData.testCases} />
             </Panel>
           </PanelGroup>

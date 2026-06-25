@@ -5,10 +5,7 @@ html {
 html, body {
   margin: 0;
   padding: 0;
-  background:
-    radial-gradient(circle at top left, rgba(59, 130, 246, 0.16), transparent 28%),
-    radial-gradient(circle at top right, rgba(249, 115, 22, 0.12), transparent 24%),
-    linear-gradient(180deg, #08111f 0%, #0b1220 52%, #070b14 100%);
+  background: #070b14;
   color: #e5e7eb;
 }
 
@@ -26,4 +23,29 @@ body {
   flex: 1;
   display: flex;
   flex-direction: column;
+}
+
+.playground-page-shell {
+  height: calc(100vh - 80px);
+  overflow: hidden;
+  padding: 0.5rem;
+}
+
+.playground-panel {
+  min-height: 30;
+  overflow: hidden;
+}
+
+.playground-resize-handle {
+  background: rgba(148, 163, 184, 0.12);
+}
+
+.playground-resize-handle--vertical {
+  width: 8px;
+  cursor: col-resize;
+}
+
+.playground-resize-handle--horizontal {
+  height: 8px;
+  cursor: row-resize;
 }

@@ -15,3 +15,6 @@ export const incidentResultAtom = atom<any>(null);
 
 // Loading state for test run
 export const incidentRunningAtom = atom<boolean>(false);
+
+// Whether the last execution was a submission attempt
+export const incidentSubmissionAtom = atom<boolean>(false);

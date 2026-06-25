@@ -6,8 +6,8 @@ import CodeMirror from '@uiw/react-codemirror';
 import { useEffect, useState } from 'react';
 import { oneDark } from '@codemirror/theme-one-dark';
 import './CodeEditor.css';
-import { Select, Button, Card, Notification } from '@mantine/core';
-import { GrPowerReset } from "react-icons/gr";
+import { ActionIcon, Button, Card, Group, Notification, Select, Tooltip } from '@mantine/core';
+import { IconPlayerPlay, IconRefresh, IconSend } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
 import { langAtom } from '@/contexts/LanguageContext';
 import { Language } from '@/lib/common/types/playground.types';
@@ -141,11 +141,27 @@ const CodeEditor = ({
 
       if (!response.ok) {
         setUiError(data.message || data.error || "Submission failed");
+        return;
       }
 
       setSubmission(true);
       setResultData(data);
       setTestTab("results");
+
+      try {
+        await fetch("/api/submissions", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            question_slug: questionSlug,
+            code: storedCode,
+            language,
+            status: data.status || (data.results?.length ? "Submitted" : "Unknown"),
+          }),
+        });
+      } catch (persistError) {
+        console.error("Failed to persist submission:", persistError);
+      }
     } catch (error: any) {
       setUiError("Network error: Could not reach submission server.");
     } finally {
@@ -154,39 +170,55 @@ const CodeEditor = ({
   }
 
   return (
+    <div className="playground-editor-shell">
+      <Card className="playground-editor-toolbar" withBorder radius="lg" p="md">
+        <Group justify="space-between" wrap="nowrap" align="center">
+          <Group gap="xs" wrap="nowrap">
+            <Select
+              className="playground-language-select"
+              placeholder="Language"
+              data={languageOptions}
+              value={language}
+              onChange={(value) => setLanguage(value as Language)}
+              w={130}
+              size="sm"
+            />
 
-    <div style={{
-      display:'flex',
-      flexDirection: 'column',
-      height:'100%'
-    }}>
-      
+            <Tooltip label="Reset" withArrow>
+              <ActionIcon
+                variant="subtle"
+                color="gray"
+                size="lg"
+                radius="md"
+                onClick={resetCode}
+                aria-label="Reset code"
+              >
+                <IconRefresh size={16} />
+              </ActionIcon>
+            </Tooltip>
+          </Group>
 
-      <Card w="100%" style={{
-        display: "flex",
-        flexDirection: 'row',
-        alignItems: "center",
-        justifyContent: "space-between",
-      }}
-      >
-        <Select
-          placeholder="Select Language"
-          data={languageOptions}
-          value={language}
-          onChange={(value) => setLanguage(value as Language)}
-
-        />
-
-<Button onClick={resetCode}>
-          <GrPowerReset />
-        </Button>
-
-
-      <div style={{display:'flex',flexDirection:'row',gap:'5px'}}>
-
-        <Button variant='secondary' onClick={handleRunCode} loading={isRunning}>Run</Button>
-        <Button onClick={handleSubmission} loading={isSubmitting}>Submit</Button>
-      </div>
+          <Group gap="xs" wrap="nowrap">
+            <Button
+              variant="light"
+              color="gray"
+              onClick={handleRunCode}
+              loading={isRunning}
+              leftSection={<IconPlayerPlay size={16} />}
+            >
+              Run
+            </Button>
+            <Button
+              variant="filled"
+              color="dark"
+              onClick={handleSubmission}
+              loading={isSubmitting}
+              leftSection={<IconSend size={16} />}
+            >
+              Submit
+            </Button>
+          </Group>
+        </Group>
       </Card>
 
       {uiError && (
@@ -201,41 +233,38 @@ const CodeEditor = ({
         </Notification>
       )}
 
-      <div style={{
-        flexGrow: 1,
-        overflowY: 'auto',
-      }}>
-      <CodeMirror
-        value={storedCode}
-        extensions={[getLanguageExtension()]}
-        onChange={handleChange}
-        theme={oneDark}
-        height="100%"
-        basicSetup={{
-          lineNumbers: true,
-          highlightActiveLineGutter: true,
-          highlightSpecialChars: true,
-          foldGutter: true,
-          drawSelection: true,
-          dropCursor: true,
-          allowMultipleSelections: true,
-          indentOnInput: true,
-          bracketMatching: true,
-          closeBrackets: true,
-          autocompletion: true,
-          rectangularSelection: true,
-          crosshairCursor: true,
-          highlightActiveLine: true,
-          highlightSelectionMatches: true,
-          closeBracketsKeymap: true,
-          defaultKeymap: true,
-          searchKeymap: true,
-          historyKeymap: true,
-          foldKeymap: true,
-          completionKeymap: true,
-          lintKeymap: true,
-        }}
-      />
+      <div className="playground-editor-frame">
+        <CodeMirror
+          value={storedCode}
+          extensions={[getLanguageExtension()]}
+          onChange={handleChange}
+          theme={oneDark}
+          height="100%"
+          basicSetup={{
+            lineNumbers: true,
+            highlightActiveLineGutter: true,
+            highlightSpecialChars: true,
+            foldGutter: true,
+            drawSelection: true,
+            dropCursor: true,
+            allowMultipleSelections: true,
+            indentOnInput: true,
+            bracketMatching: true,
+            closeBrackets: true,
+            autocompletion: true,
+            rectangularSelection: true,
+            crosshairCursor: true,
+            highlightActiveLine: true,
+            highlightSelectionMatches: true,
+            closeBracketsKeymap: true,
+            defaultKeymap: true,
+            searchKeymap: true,
+            historyKeymap: true,
+            foldKeymap: true,
+            completionKeymap: true,
+            lintKeymap: true,
+          }}
+        />
       </div>
     </div>
   );

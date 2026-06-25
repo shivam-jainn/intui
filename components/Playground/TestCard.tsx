@@ -72,16 +72,16 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
       : null;
 
   return (
-    <Card withBorder radius="md">
-      <Stack >
+    <Card withBorder radius="md" style={{ height: 320, overflow: "hidden" }}>
+      <Stack h="100%" gap="sm" style={{ overflow: "hidden" }}>
         <SegmentedControl
           value={tab}
           onChange={(value) => changeTab(value as "testcases" | "results")}
           data={[
             { label: 'Test Cases', value: 'testcases' },
-            { 
-              label: 'Results', 
-              value: 'results', 
+            {
+              label: 'Results',
+              value: 'results',
               disabled: !isResultDataAvailable && !errorMessage
             },
           ]}
@@ -90,8 +90,9 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
           fullWidth
         />
 
+        <div style={{ flex: 1, minHeight: 0, overflow: "hidden" }}>
         {tab === "testcases" ? (
-          <Stack>
+          <Stack h="100%" gap="sm" style={{ overflow: "hidden" }}>
             <SegmentedControl
               value={testcase}
               onChange={setTestCase}
@@ -108,7 +109,7 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
             </Code>
           </Stack>
         ) : (
-          <Stack>
+          <Stack h="100%" gap="sm" style={{ overflow: "hidden" }}>
             {status && (
               <Group justify="space-between" align="center">
                 <Badge 
@@ -196,6 +197,7 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
             )}
           </Stack>
         )}
+        </div>
       </Stack>
     </Card>
   );
