@@ -46,7 +46,8 @@ async function copyPrefixFromGcs(prefix, targetDir) {
 
     const destination = path.join(targetDir, relativePath);
     fs.mkdirSync(path.dirname(destination), { recursive: true });
-    await file.download({ destination });
+    const [content] = await file.download();
+    fs.writeFileSync(destination, content);
   }
 }
 

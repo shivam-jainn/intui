@@ -37,7 +37,10 @@ function main() {
     }
   }
 
-  // 3) Build app.
+  // 3) Seed data before the app build so CI and local dev use the same source.
+  if (run('prisma', ['db', 'seed']) !== 0) process.exit(1);
+
+  // 4) Build app.
   if (run('next', ['build']) !== 0) process.exit(1);
 }
 

@@ -100,7 +100,7 @@ Seeding works in both places:
 
 ### Vercel CI (Auto Migrate + Auto Seed)
 
-Use this as your Vercel Build Command so each push runs migrations, seeds, and then builds:
+Set the Vercel Build Command to this so each push runs migrations, seeds, and then builds:
 
 ```bash
 pnpm run vercel:build
@@ -124,10 +124,9 @@ Required Vercel environment variables:
 
 How to update prod question data:
 
-1. Update local DB data.
-2. Run `pnpm run db:seed:export`.
-3. Commit `prisma/seed-data.json`.
-4. Push to main; Vercel CI will run `prisma db seed` during `pnpm run vercel:build`, which uses `prisma/seed.cjs`.
+1. Update the source data in `data/questions` and `data/incidents`, or update the GCS bucket contents if that is your canonical source.
+2. Push to main.
+3. Vercel CI will run `pnpm run vercel:build`, which seeds from `prisma/seed.cjs` before building.
 
 Analyze bundle size:
 
