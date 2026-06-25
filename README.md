@@ -81,17 +81,22 @@ pnpm start
 
 ### Database Seeding
 
-Export current local DB question bank into a reusable seed file:
-
-```bash
-pnpm run db:export-seed
-```
-
-Seed whichever database your `DATABASE_URL` points to:
+Seed the local database with questions and incidents:
 
 ```bash
 pnpm run db:seed
 ```
+
+If you want to export the current question bank to JSON:
+
+```bash
+pnpm run db:seed:export
+```
+
+Seeding works in both places:
+
+- Locally, it reads from `data/questions` and `data/incidents` if they exist.
+- In Vercel CI, if `data/` is missing, it pulls `questions/` and `incidents/` from the GCS bucket configured by `GCP_BUCKET_NAME` and the other `GCP_*` env vars.
 
 ### Vercel CI (Auto Migrate + Auto Seed)
 
@@ -106,7 +111,7 @@ pnpm run vercel:build
 1. `prisma generate`
 2. `prisma migrate deploy`
 3. if migration fails with `P3005` (non-empty DB baseline case), it falls back to `prisma db push --accept-data-loss`
-4. `prisma db seed`
+4. `prisma db seed` and therefore `prisma/seed.cjs`
 5. `next build`
 
 Note: the `P3005` fallback is for first-time baseline/drifted databases in CI. It may alter schema destructively to match `schema.prisma`.
@@ -115,13 +120,14 @@ Required Vercel environment variables:
 
 - `DATABASE_URL` (production DB connection string)
 - OAuth and any other runtime vars from `.env.example`
+- GCP storage credentials plus `GCP_BUCKET_NAME` so seed can download `questions/` and `incidents/` from the bucket
 
 How to update prod question data:
 
 1. Update local DB data.
-2. Run `pnpm run db:export-seed`.
+2. Run `pnpm run db:seed:export`.
 3. Commit `prisma/seed-data.json`.
-4. Push to main; Vercel CI will apply the updated seed automatically.
+4. Push to main; Vercel CI will run `prisma db seed` during `pnpm run vercel:build`, which uses `prisma/seed.cjs`.
 
 Analyze bundle size:
 
