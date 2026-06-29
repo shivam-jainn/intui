@@ -6,15 +6,7 @@ const withBundleAnalyzer = bundleAnalyzer({
 
 export default withBundleAnalyzer({
   reactStrictMode: false,
-  async redirects() {
-    return [
-      {
-        source: '/questions',
-        destination: '/',
-        permanent: true,
-      },
-    ];
-  },
+
   eslint: {
     ignoreDuringBuilds: true,
   },

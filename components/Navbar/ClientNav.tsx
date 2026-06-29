@@ -54,13 +54,19 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
                   href="/"
                   className={`${classes.link} ${isActive('/') ? classes.linkActive : ''}`}
                 >
-                  Home
+                  Dashboard
+                </Link>
+                <Link
+                  href="/questions"
+                  className={`${classes.link} ${isActive('/questions') ? classes.linkActive : ''}`}
+                >
+                  Questions
                 </Link>
                 <Link
                   href="/p0"
                   className={`${classes.link} ${isActive('/p0') ? classes.linkActive : ''}`}
                 >
-                  P0
+                  Incidents
                 </Link>
               </>
             )}

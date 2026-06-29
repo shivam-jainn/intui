@@ -1,41 +1,35 @@
 "use client";
 
 import {
-  ActionIcon,
-  Badge,
-  Box,
-  Button,
-  Group,
   Loader,
-  Paper,
   PasswordInput,
   ScrollArea,
   Select,
-  Stack,
-  Text,
-  Textarea,
-  ThemeIcon,
-  Title,
-  Tooltip,
 } from "@mantine/core";
 import { useAtom } from "jotai";
 import {
-  activeFilePathAtom,
-  fileContentsAtom,
-  incidentFilesAtom,
-} from "@/contexts/IncidentContext";
-import {
-  IconBrandGoogleFilled,
   IconRobot,
   IconSend,
   IconUser,
   IconX,
+  IconPaperclip,
+  IconSparkles,
+  IconSettings,
+  IconTrash,
+  IconPlayerStop,
+  IconKey,
 } from "@tabler/icons-react";
 import React, { useEffect, useRef, useState } from "react";
 import { useLocalStorage } from "@mantine/hooks";
 import Markdown from "react-markdown";
 import rehypeHighlight from "rehype-highlight";
 import remarkGfm from "remark-gfm";
+import {
+  activeFilePathAtom,
+  fileContentsAtom,
+  incidentFilesAtom,
+} from "@/contexts/IncidentContext";
+import { t } from "@/lib/incident-theme";
 
 interface Message {
   id: string;
@@ -63,9 +57,9 @@ const MODEL_OPTIONS = [
   {
     group: "Groq",
     items: [
-      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
-      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { value: "mixtral-8x7b-32768", label: "Mixtral 8x7B 32K" },
+      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B" },
+      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B" },
+      { value: "mixtral-8x7b-32768", label: "Mixtral 8x7B" },
     ],
   },
 ];
@@ -91,50 +85,82 @@ function getProvider(model: string): "google" | "xai" | "groq" {
 function MessageBubble({ message }: { message: Message }) {
   const isUser = message.role === "user";
   return (
-    <Box
+    <div
       style={{
         display: "flex",
         flexDirection: "column",
         alignItems: isUser ? "flex-end" : "flex-start",
         gap: 4,
+        animation: "fade-in-up 0.2s ease-out",
       }}
     >
-      <Group gap={6} justify={isUser ? "flex-end" : "flex-start"}>
-        <ThemeIcon
-          size="xs"
-          variant="light"
-          color={isUser ? "slate" : "orange"}
-          radius="xl"
-        >
-          {isUser ? <IconUser size={10} /> : <IconRobot size={10} />}
-        </ThemeIcon>
-        <Text size="xs" c="dimmed">
-          {isUser ? "You" : "AI Interviewer"}
-        </Text>
-      </Group>
-      <Paper
-        p="sm"
-        withBorder
+      <div
         style={{
-          maxWidth: "92%",
-          backgroundColor: isUser
-            ? "rgba(15, 23, 42, 0.95)"
-            : "rgba(17, 24, 39, 0.94)",
-          borderColor: isUser
-            ? "rgba(148, 163, 184, 0.28)"
-            : "rgba(251, 146, 60, 0.2)",
+          display: "flex",
+          alignItems: "center",
+          gap: 5,
+          flexDirection: isUser ? "row-reverse" : "row",
+        }}
+      >
+        <div
+          style={{
+            width: 18,
+            height: 18,
+            borderRadius: t.radius.sm,
+            background: isUser ? "rgba(148,163,184,0.1)" : t.accentMuted,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          {isUser ? (
+            <IconUser size={10} color={t.textDim} />
+          ) : (
+            <IconRobot size={10} color={t.accent} />
+          )}
+        </div>
+        <span
+          style={{
+            fontSize: t.size.xs,
+            color: t.textDim,
+            fontFamily: t.font.mono,
+          }}
+        >
+          {isUser ? "You" : "AI"}
+        </span>
+      </div>
+      <div
+        style={{
+          maxWidth: "88%",
+          padding: "8px 12px",
+          borderRadius: isUser
+            ? `${t.radius.xl}px ${t.radius.xl}px ${t.radius.sm}px ${t.radius.xl}px`
+            : `${t.radius.xl}px ${t.radius.xl}px ${t.radius.xl}px ${t.radius.sm}px`,
+          background: isUser ? "rgba(15,23,42,0.9)" : "rgba(17,24,39,0.9)",
+          border: `1px solid ${
+            isUser ? "rgba(148,163,184,0.1)" : t.accentBorder
+          }`,
         }}
       >
         {isUser ? (
-          <Text size="sm" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
-            {message.content}
-          </Text>
-        ) : (
-          <Box
+          <div
             style={{
-              fontSize: 13,
-              lineHeight: 1.6,
+              fontSize: t.size.base,
+              whiteSpace: "pre-wrap",
               wordBreak: "break-word",
+              lineHeight: 1.6,
+              color: t.textSecondary,
+            }}
+          >
+            {message.content}
+          </div>
+        ) : (
+          <div
+            style={{
+              fontSize: t.size.base,
+              lineHeight: 1.65,
+              wordBreak: "break-word",
+              color: t.textSecondary,
             }}
             className="ai-response-markdown"
           >
@@ -144,10 +170,10 @@ function MessageBubble({ message }: { message: Message }) {
             >
               {message.content}
             </Markdown>
-          </Box>
+          </div>
         )}
-      </Paper>
-    </Box>
+      </div>
+    </div>
   );
 }
 
@@ -156,7 +182,10 @@ interface AIChatPanelProps {
   incidentReport: string;
 }
 
-export default function AIChatPanel({ incidentName, incidentReport }: AIChatPanelProps) {
+export default function AIChatPanel({
+  incidentName,
+  incidentReport,
+}: AIChatPanelProps) {
   const [files] = useAtom(incidentFilesAtom);
   const [activeFile] = useAtom(activeFilePathAtom);
   const [fileContents] = useAtom(fileContentsAtom);
@@ -186,8 +215,7 @@ Be concise and conversational.`;
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const [showKeyInput, setShowKeyInput] = useState(false);
+  const [showSettings, setShowSettings] = useState(false);
 
   const scrollRef = useRef<HTMLDivElement>(null);
   const abortControllerRef = useRef<AbortController | null>(null);
@@ -198,7 +226,6 @@ Be concise and conversational.`;
     }
   }, [messages]);
 
-  // Switch key storage when model provider changes
   const provider = getProvider(model);
 
   function getActiveCode(): string {
@@ -220,7 +247,7 @@ Be concise and conversational.`;
   async function sendMessage() {
     if (!input.trim() || isLoading) return;
     if (!apiKey.trim()) {
-      setShowKeyInput(true);
+      setShowSettings(true);
       setError("Please provide your API key first.");
       return;
     }
@@ -276,7 +303,6 @@ Be concise and conversational.`;
       while (true) {
         const { done, value } = await reader.read();
         if (done) break;
-
         const chunk = decoder.decode(value, { stream: true });
         streamedText += chunk;
         setMessages((prev) => {
@@ -308,26 +334,20 @@ Be concise and conversational.`;
         });
       }
 
-      const providerErrorMatch = streamedText.match(/\[Provider error:\s*([\s\S]+?)\]/);
+      const providerErrorMatch = streamedText.match(
+        /\[Provider error:\s*([\s\S]+?)\]/
+      );
       if (providerErrorMatch?.[1]) {
-        const providerError = providerErrorMatch[1].trim();
-        setError(providerError);
+        setError(providerErrorMatch[1].trim());
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
           if (last?.role === "assistant") {
-            const cleanedContent = last.content
+            const cleaned = last.content
               .replace(/\[Provider error:[\s\S]+?\]/g, "")
               .trim();
-
-            if (!cleanedContent) {
-              updated.pop();
-            } else {
-              updated[updated.length - 1] = {
-                ...last,
-                content: cleanedContent,
-              };
-            }
+            if (!cleaned) updated.pop();
+            else updated[updated.length - 1] = { ...last, content: cleaned };
           }
           return updated;
         });
@@ -335,7 +355,7 @@ Be concise and conversational.`;
       }
 
       if (!streamedText.trim()) {
-        setError("The model returned an empty response. Check API key/model and try again.");
+        setError("Empty response. Check API key/model and try again.");
       }
     } catch (err: any) {
       if (err?.name === "AbortError") {
@@ -372,107 +392,166 @@ Be concise and conversational.`;
         : "groq_xxxx";
 
   return (
-    <Box
+    <div
       style={{
         height: "100%",
         display: "flex",
         flexDirection: "column",
-        backgroundColor: "rgba(2, 6, 23, 0.78)",
+        background: "rgba(6,10,18,0.6)",
       }}
     >
       {/* Header */}
-      <Box
-        p="sm"
-        style={{ borderBottom: "1px solid var(--mantine-color-dark-5)" }}
-      >
-        <Group justify="space-between" mb="xs">
-          <Group gap={6}>
-            <Title order={6} style={{ fontSize: 13 }}>
-              Rubber Duck
-            </Title>
-          </Group>
-          <Group gap={4}>
-            {isLoading && (
-              <Tooltip label="Stop response">
-                <ActionIcon
-                  size="xs"
-                  variant="subtle"
-                  color="red"
-                  onClick={stopStreaming}
-                >
-                  <IconX size={12} />
-                </ActionIcon>
-              </Tooltip>
-            )}
-            <Tooltip label="Clear chat">
-              <ActionIcon
-                size="xs"
-                variant="subtle"
-                color="gray"
-                onClick={clearChat}
-              >
-                <IconX size={12} />
-              </ActionIcon>
-            </Tooltip>
-          </Group>
-        </Group>
-
-        {/* Model selector */}
-        <Select
-          size="xs"
-          data={MODEL_OPTIONS ?? []}
-          value={model}
-          onChange={(v: string | null) => v && setModel(v)}
-          styles={{ input: { fontSize: 12 } }}
-          mb="xs"
-        />
-
-        {/* API Key */}
-        {showKeyInput ? (
-          <Stack gap={4}>
-            <PasswordInput
-              size="xs"
-              placeholder={keyPlaceholder}
-              label={keyLabel}
-              value={apiKey}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApiKey(e.currentTarget.value)}
-              styles={{ label: { fontSize: 11 }, input: { fontSize: 12 } }}
-            />
-            <Group justify="space-between">
-              <Text
-                size="xs"
-                c="orange"
-                style={{ cursor: "pointer", textDecoration: "underline" }}
-                component="a"
-                href={PROVIDER_LINKS[model]}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                Get API key →
-              </Text>
-              <Button
-                size="xs"
-                variant="light"
-                onClick={() => setShowKeyInput(false)}
-              >
-                Done
-              </Button>
-            </Group>
-          </Stack>
-        ) : (
-          <Group gap={4}>
-            <Badge
-              size="xs"
-              color={apiKey ? "green" : "red"}
-              variant="dot"
-              style={{ cursor: "pointer" }}
-              onClick={() => setShowKeyInput(true)}
+      <div className="incident-panel-header" style={{ justifyContent: "space-between" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: 8, minWidth: 0 }}>
+          <div
+            style={{
+              width: 24,
+              height: 24,
+              borderRadius: t.radius.lg,
+              background: t.accentMuted,
+              border: `1px solid ${t.accentBorder}`,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              flexShrink: 0,
+            }}
+          >
+            <IconSparkles size={12} color={t.accent} />
+          </div>
+          <div style={{ minWidth: 0 }}>
+            <div
+              style={{
+                fontSize: t.size.md,
+                fontWeight: 600,
+                color: t.textPrimary,
+                lineHeight: 1,
+              }}
             >
-              {apiKey ? "API Key set" : "Set API Key"}
-            </Badge>
-          </Group>
-        )}
-      </Box>
+              AI Assistant
+            </div>
+            <div
+              style={{
+                fontSize: t.size.xs,
+                color: t.textDim,
+                fontFamily: t.font.mono,
+                marginTop: 2,
+              }}
+            >
+              Hints & guidance
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", gap: 3 }}>
+          {isLoading && (
+            <button
+              type="button"
+              onClick={stopStreaming}
+              className="incident-btn incident-btn-ghost"
+              style={{ padding: "4px 6px", color: "#f87171" }}
+              title="Stop"
+            >
+              <IconPlayerStop size={12} />
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={clearChat}
+            className="incident-btn incident-btn-ghost"
+            style={{ padding: "4px 6px" }}
+            title="Clear chat"
+          >
+            <IconTrash size={12} />
+          </button>
+          <button
+            type="button"
+            onClick={() => setShowSettings((p) => !p)}
+            className="incident-btn incident-btn-ghost"
+            style={{
+              padding: "4px 6px",
+              background: showSettings ? t.accentMuted : "transparent",
+              color: showSettings ? t.accent : t.textMuted,
+            }}
+            title="Settings"
+          >
+            <IconSettings size={12} />
+          </button>
+        </div>
+      </div>
+
+      {/* Settings panel (collapsible) */}
+      {showSettings && (
+        <div
+          style={{
+            padding: "8px 12px",
+            borderBottom: `1px solid ${t.border}`,
+            background: "rgba(10,15,30,0.5)",
+            display: "flex",
+            flexDirection: "column",
+            gap: 6,
+            animation: "fade-in 0.15s ease-out",
+          }}
+        >
+          <Select
+            size="xs"
+            data={MODEL_OPTIONS ?? []}
+            value={model}
+            onChange={(v: string | null) => v && setModel(v)}
+            styles={{
+              input: {
+                fontSize: t.size.sm,
+                fontFamily: t.font.mono,
+                background: "rgba(255,255,255,0.03)",
+                borderColor: t.border,
+              },
+            }}
+          />
+          <PasswordInput
+            size="xs"
+            placeholder={keyPlaceholder}
+            value={apiKey}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setApiKey(e.currentTarget.value)
+            }
+            styles={{
+              label: { fontSize: t.size.xs, color: t.textDim },
+              input: {
+                fontSize: t.size.sm,
+                fontFamily: t.font.mono,
+                background: "rgba(255,255,255,0.03)",
+                borderColor: t.border,
+              },
+            }}
+          />
+          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+            <a
+              href={PROVIDER_LINKS[model]}
+              target="_blank"
+              rel="noopener noreferrer"
+              style={{
+                fontSize: t.size.xs,
+                color: t.accent,
+                fontFamily: t.font.mono,
+                textDecoration: "underline",
+              }}
+            >
+              Get API key
+            </a>
+            <div style={{ display: "flex", alignItems: "center", gap: 5 }}>
+              <span
+                style={{
+                  width: 6,
+                  height: 6,
+                  borderRadius: "50%",
+                  background: apiKey ? t.success : t.error,
+                }}
+              />
+              <span style={{ fontSize: t.size.xs, color: t.textDim, fontFamily: t.font.mono }}>
+                {apiKey ? "Configured" : "Not set"}
+              </span>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Messages */}
       <ScrollArea
@@ -482,95 +561,275 @@ Be concise and conversational.`;
         style={{ flex: 1 }}
       >
         {messages.length === 0 ? (
-          <Stack gap="sm" align="center" pt="xl">
-            <ThemeIcon size="xl" variant="light" color="orange" radius="xl">
-              <IconRobot size={24} />
-            </ThemeIcon>
-            <Text size="sm" c="dimmed" ta="center" maw={200}>
-              Ask the AI interviewer about the bug or request hints
-            </Text>
-            <Button
-              size="xs"
-              variant="light"
-              color="orange"
-              onClick={() =>
-                setInput("Can you give me a hint about what the bug might be?")
-              }
-            >
-              Get a hint
-            </Button>
-          </Stack>
+          <div
+            style={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+              height: "100%",
+              gap: 12,
+              padding: 20,
+            }}
+          >
+            {!apiKey ? (
+              <>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: t.radius.xl,
+                    background: t.errorMuted,
+                    border: `1px solid ${t.errorBorder}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <IconKey size={22} color={t.error} />
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: t.size.base,
+                      color: t.textSecondary,
+                      fontWeight: 600,
+                      marginBottom: 4,
+                    }}
+                  >
+                    API Key Required
+                  </div>
+                  <div style={{ fontSize: t.size.sm, color: t.textDim, maxWidth: 200, lineHeight: 1.5 }}>
+                    Add your {getProvider(model)} API key to use AI hints
+                  </div>
+                </div>
+                <div style={{ width: "100%", maxWidth: 240, marginTop: 4 }}>
+                  <PasswordInput
+                    size="sm"
+                    placeholder={keyPlaceholder}
+                    value={apiKey}
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                      setApiKey(e.currentTarget.value)
+                    }
+                    styles={{
+                      input: {
+                        fontSize: t.size.sm,
+                        fontFamily: t.font.mono,
+                        background: "rgba(255,255,255,0.03)",
+                        borderColor: t.border,
+                      },
+                    }}
+                  />
+                  <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginTop: 6 }}>
+                    <a
+                      href={PROVIDER_LINKS[model]}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      style={{
+                        fontSize: t.size.xs,
+                        color: t.accent,
+                        fontFamily: t.font.mono,
+                        textDecoration: "underline",
+                      }}
+                    >
+                      Get API key
+                    </a>
+                    <button
+                      type="button"
+                      onClick={() => setShowSettings(true)}
+                      style={{
+                        fontSize: t.size.xs,
+                        color: t.textDim,
+                        fontFamily: t.font.mono,
+                        background: "none",
+                        border: "none",
+                        cursor: "pointer",
+                        padding: 0,
+                        textDecoration: "underline",
+                      }}
+                    >
+                      More settings
+                    </button>
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div
+                  style={{
+                    width: 48,
+                    height: 48,
+                    borderRadius: t.radius.xl,
+                    background: t.accentMuted,
+                    border: `1px solid ${t.accentBorder}`,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                  }}
+                >
+                  <IconRobot size={22} color={t.accent} />
+                </div>
+                <div style={{ textAlign: "center" }}>
+                  <div
+                    style={{
+                      fontSize: t.size.base,
+                      color: t.textSecondary,
+                      fontWeight: 600,
+                      marginBottom: 4,
+                    }}
+                  >
+                    Stuck on the bug?
+                  </div>
+                  <div style={{ fontSize: t.size.sm, color: t.textDim, maxWidth: 180, lineHeight: 1.5 }}>
+                    Ask the AI for hints or attach your code for analysis
+                  </div>
+                </div>
+                <button
+                  type="button"
+                  className="incident-btn incident-btn-primary"
+                  onClick={() =>
+                    setInput("Can you give me a hint about what the bug might be?")
+                  }
+                  style={{ marginTop: 4 }}
+                >
+                  Get a hint
+                </button>
+              </>
+            )}
+          </div>
         ) : (
-          <Stack gap="md">
+          <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
             {messages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
-            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
-              <Group gap={6}>
-                <Loader size="xs" color="orange" />
-                <Text size="xs" c="dimmed">
-                  Thinking...
-                </Text>
-              </Group>
-            )}
-          </Stack>
+            {isLoading &&
+              messages[messages.length - 1]?.role !== "assistant" && (
+                <div
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 6,
+                    padding: "4px 0",
+                  }}
+                >
+                  <Loader size={10} color="orange" />
+                  <span
+                    style={{
+                      fontSize: t.size.sm,
+                      color: t.textDim,
+                      fontFamily: t.font.mono,
+                    }}
+                  >
+                    Thinking...
+                  </span>
+                </div>
+              )}
+          </div>
         )}
         {error && (
-          <Paper p="xs" mt="sm" withBorder style={{ borderColor: "var(--mantine-color-red-7)" }}>
-            <Text size="xs" c="red">
+          <div
+            style={{
+              marginTop: 8,
+              padding: "6px 10px",
+              borderRadius: t.radius.md,
+              background: t.errorMuted,
+              border: `1px solid ${t.errorBorder}`,
+            }}
+          >
+            <span style={{ fontSize: t.size.xs, color: t.error, fontFamily: t.font.mono }}>
               {error}
-            </Text>
-          </Paper>
+            </span>
+          </div>
         )}
       </ScrollArea>
 
       {/* Input area */}
-      <Box p="sm" style={{ borderTop: "1px solid var(--mantine-color-dark-5)" }}>
+      <div
+        style={{
+          padding: "8px 10px",
+          borderTop: `1px solid ${t.border}`,
+        }}
+      >
         {activeFile && (
-          <Button
-            size="xs"
-            variant="solid"
-            color="orange"
-            mb="xs"
+          <button
+            type="button"
+            className="incident-btn incident-btn-ghost"
             onClick={injectCode}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 4,
+              padding: "3px 8px",
+              marginBottom: 6,
+              fontSize: t.size.xs,
+              color: t.accent,
+            }}
           >
-            Attach current file
-          </Button>
+            <IconPaperclip size={10} />
+            Attach {activeFile.split("/").pop()}
+          </button>
         )}
-        <Group gap="xs" align="flex-end">
-          <Textarea
-            style={{ flex: 1 }}
-            size="xs"
-            placeholder="Ask about the bug, request hints..."
+        <div style={{ display: "flex", gap: 6, alignItems: "flex-end" }}>
+          <textarea
             value={input}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.currentTarget.value)}
-            autosize
-            minRows={2}
-            maxRows={6}
-            onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+            onChange={(e) => setInput(e.target.value)}
+            placeholder="Ask about the bug, request hints..."
+            rows={2}
+            style={{
+              flex: 1,
+              resize: "none",
+              padding: "6px 10px",
+              borderRadius: t.radius.md,
+              background: "rgba(255,255,255,0.03)",
+              border: `1px solid ${t.border}`,
+              color: t.textSecondary,
+              fontSize: t.size.base,
+              fontFamily: t.font.mono,
+              outline: "none",
+              lineHeight: 1.5,
+              transition: `border-color ${t.transition.fast}`,
+            }}
+            onFocus={(e) => (e.target.style.borderColor = t.accentBorder)}
+            onBlur={(e) => (e.target.style.borderColor = t.border)}
+            onKeyDown={(e) => {
               if (e.key === "Enter" && !e.shiftKey) {
                 e.preventDefault();
                 void sendMessage();
               }
             }}
-            styles={{ input: { fontSize: 12 } }}
           />
-          <ActionIcon
+          <button
             type="button"
-            size="md"
-            color="orange"
-            variant="filled"
             onClick={() => void sendMessage()}
-            loading={isLoading}
             disabled={!input.trim()}
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: t.radius.lg,
+              background: input.trim() ? t.accentMuted : "rgba(255,255,255,0.03)",
+              border: `1px solid ${input.trim() ? t.accentBorder : t.border}`,
+              color: input.trim() ? t.accent : t.textDim,
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              cursor: input.trim() ? "pointer" : "not-allowed",
+              flexShrink: 0,
+              transition: `all ${t.transition.fast}`,
+            }}
           >
-            <IconSend size={14} />
-          </ActionIcon>
-        </Group>
-        <Text size="xs" c="dimmed" mt={4}>
-          Shift+Enter for newline · Enter to send
-        </Text>
-      </Box>
-    </Box>
+            {isLoading ? (
+              <Loader size={12} color="orange" />
+            ) : (
+              <IconSend size={12} />
+            )}
+          </button>
+        </div>
+        <div style={{ marginTop: 4 }}>
+          <span style={{ fontSize: 9, color: t.textFaint, fontFamily: t.font.mono }}>
+            Shift+Enter for newline
+          </span>
+        </div>
+      </div>
+    </div>
   );
 }

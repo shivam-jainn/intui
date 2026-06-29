@@ -100,8 +100,6 @@ dist
 # vuepress build output
 .vuepress/dist
 
-# Project data
-data/questions/
 
 # vuepress v2.x temp and cache directory
 .temp
@@ -146,4 +144,5 @@ the-intui-*.json
 .env*.local
 
 
-data/*
+data/
+.venv

@@ -10,6 +10,7 @@ import { ActionIcon, Button, Card, Group, Notification, Select, Tooltip } from '
 import { IconPlayerPlay, IconRefresh, IconSend } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
 import { langAtom } from '@/contexts/LanguageContext';
+import TimeSwitch from '@/components/Timer/TimeSwitch';
 import { Language } from '@/lib/common/types/playground.types';
 import { useLocalStorage } from '@mantine/hooks';
 import { getDriver } from '@/lib/common/playground/desc_and_driver';
@@ -20,7 +21,7 @@ interface CodeEditorProps {
 }
 
 const CodeEditor = ({
-  questionSlug
+  questionSlug,
 }: CodeEditorProps) => {
   const [language, setLanguage] = useAtom<Language>(langAtom);
   const [initialCode, setInitialCode] = useState("");
@@ -199,6 +200,11 @@ const CodeEditor = ({
           </Group>
 
           <Group gap="xs" wrap="nowrap">
+            {/* Timer | Mixer toggle + display */}
+            <TimeSwitch questionId={questionSlug} />
+
+            <div style={{ width: 1, height: 18, background: 'rgba(255,255,255,0.06)' }} />
+
             <Button
               variant="light"
               color="gray"
@@ -233,7 +239,7 @@ const CodeEditor = ({
         </Notification>
       )}
 
-      <div className="playground-editor-frame">
+      <div className="playground-editor-frame" style={{ position: 'relative' }}>
         <CodeMirror
           value={storedCode}
           extensions={[getLanguageExtension()]}

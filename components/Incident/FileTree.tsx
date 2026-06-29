@@ -1,10 +1,20 @@
 "use client";
 
-import { Box, Text, Group, Stack, ThemeIcon, UnstyledButton } from "@mantine/core";
 import { useAtom } from "jotai";
-import { activeFilePathAtom, incidentFilesAtom } from "@/contexts/IncidentContext";
-import { IconFile, IconFolder, IconLock } from "@tabler/icons-react";
 import React, { useMemo } from "react";
+import {
+  IconFile,
+  IconFolder,
+  IconFolderOpen,
+  IconLock,
+  IconFileCode,
+  IconFileText,
+  IconFileSettings,
+  IconSettings,
+  IconMarkdown,
+} from "@tabler/icons-react";
+import { activeFilePathAtom, incidentFilesAtom } from "@/contexts/IncidentContext";
+import { t } from "@/lib/incident-theme";
 
 interface TreeNode {
   name: string;
@@ -43,11 +53,38 @@ function buildTree(files: { path: string; readonly: boolean }[]): TreeNode[] {
       path: file.path,
       isDir: false,
       readonly: file.readonly,
-      children: undefined,
     });
   }
 
   return root;
+}
+
+function getFileIcon(name: string, readonly: boolean) {
+  const ext = name.split(".").pop()?.toLowerCase();
+  const color = readonly ? t.textDim : "rgba(74,222,128,0.5)";
+
+  switch (ext) {
+    case "py":
+      return <IconFileCode size={13} color={color} />;
+    case "cpp":
+    case "cc":
+    case "cxx":
+    case "h":
+    case "hpp":
+      return <IconFileCode size={13} color={color} />;
+    case "json":
+      return <IconFileSettings size={13} color={color} />;
+    case "md":
+      return <IconMarkdown size={13} color={color} />;
+    case "yaml":
+    case "yml":
+    case "toml":
+    case "cfg":
+    case "ini":
+      return <IconSettings size={13} color={color} />;
+    default:
+      return <IconFileText size={13} color={color} />;
+  }
 }
 
 function TreeNodeItem({
@@ -63,15 +100,29 @@ function TreeNodeItem({
 }) {
   if (node.isDir) {
     return (
-      <Box>
-        <Group gap={4} py={2} pl={depth * 16}>
-          <ThemeIcon size="xs" variant="transparent" color="blue">
-            <IconFolder size={14} />
-          </ThemeIcon>
-          <Text size="xs" c="dimmed" fw={600}>
+      <div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 5,
+            padding: "3px 8px",
+            paddingLeft: depth * 14 + 8,
+          }}
+        >
+          <IconFolderOpen size={13} color={t.textDim} />
+          <span
+            style={{
+              fontSize: t.size.sm,
+              color: t.textMuted,
+              fontWeight: 600,
+              fontFamily: t.font.mono,
+              letterSpacing: "0.02em",
+            }}
+          >
             {node.name}
-          </Text>
-        </Group>
+          </span>
+        </div>
         {node.children?.map((child) => (
           <TreeNodeItem
             key={child.path}
@@ -81,39 +132,56 @@ function TreeNodeItem({
             onSelect={onSelect}
           />
         ))}
-      </Box>
+      </div>
     );
   }
 
   const isActive = node.path === activeFile;
 
   return (
-    <UnstyledButton
+    <button
+      type="button"
       onClick={() => onSelect(node.path)}
-      w="100%"
-      py={3}
-      px={4}
-      pl={depth * 16 + 4}
       style={{
-        borderRadius: "var(--mantine-radius-sm)",
-        backgroundColor: isActive ? "var(--mantine-color-blue-9)" : "transparent",
+        width: "100%",
+        display: "flex",
+        alignItems: "center",
+        gap: 6,
+        padding: "4px 8px",
+        paddingLeft: depth * 14 + 8,
+        borderRadius: t.radius.sm,
+        background: isActive ? t.accentMuted : "transparent",
+        border: isActive ? `1px solid ${t.accentBorder}` : "1px solid transparent",
         cursor: "pointer",
+        transition: `all ${t.transition.fast}`,
+        textAlign: "left",
+      }}
+      onMouseEnter={(e) => {
+        if (!isActive) e.currentTarget.style.background = t.bgSurfaceHover;
+      }}
+      onMouseLeave={(e) => {
+        if (!isActive) e.currentTarget.style.background = "transparent";
       }}
     >
-      <Group gap={4}>
-        <ThemeIcon size="xs" variant="transparent" color={node.readonly ? "gray" : "green"}>
-          <IconFile size={13} />
-        </ThemeIcon>
-        <Text size="xs" c={isActive ? "white" : "gray.3"} style={{ fontFamily: "monospace" }}>
-          {node.name}
-        </Text>
-        {node.readonly && (
-          <ThemeIcon size="xs" variant="transparent" color="gray">
-            <IconLock size={10} />
-          </ThemeIcon>
-        )}
-      </Group>
-    </UnstyledButton>
+      {getFileIcon(node.name, node.readonly)}
+      <span
+        style={{
+          fontSize: t.size.sm,
+          fontFamily: t.font.mono,
+          color: isActive ? t.textPrimary : t.textMuted,
+          fontWeight: isActive ? 600 : 400,
+          flex: 1,
+          overflow: "hidden",
+          textOverflow: "ellipsis",
+          whiteSpace: "nowrap",
+        }}
+      >
+        {node.name}
+      </span>
+      {node.readonly && (
+        <IconLock size={9} color={t.textDim} style={{ flexShrink: 0 }} />
+      )}
+    </button>
   );
 }
 
@@ -126,19 +194,61 @@ export default function FileTree() {
     [files]
   );
 
+  const editableCount = files.filter((f) => !f.readonly).length;
+  const readonlyCount = files.filter((f) => f.readonly).length;
+
   return (
-    <Stack gap={2} p="xs" style={{ overflowY: "auto", height: "100%" }}>
-      <Text size="xs" fw={700} c="dimmed" mb={4} px={4}>
-        FILES
-      </Text>
-      {tree.map((node) => (
-        <TreeNodeItem
-          key={node.path}
-          node={node}
-          activeFile={activeFile}
-          onSelect={setActiveFile}
-        />
-      ))}
-    </Stack>
+    <div
+      style={{
+        height: "100%",
+        display: "flex",
+        flexDirection: "column",
+        overflow: "hidden",
+      }}
+    >
+      {/* Section label */}
+      <div
+        style={{
+          padding: "8px 12px 4px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+        }}
+      >
+        <span
+          style={{
+            fontSize: t.size.xs,
+            fontWeight: 700,
+            color: t.textDim,
+            textTransform: "uppercase",
+            letterSpacing: "0.1em",
+            fontFamily: t.font.mono,
+          }}
+        >
+          Explorer
+        </span>
+        <span
+          style={{
+            fontSize: t.size.xs,
+            color: t.textFaint,
+            fontFamily: t.font.mono,
+          }}
+        >
+          {editableCount} editable · {readonlyCount} ro
+        </span>
+      </div>
+
+      {/* File tree */}
+      <div style={{ flex: 1, overflow: "auto", padding: "4px 0" }}>
+        {tree.map((node) => (
+          <TreeNodeItem
+            key={node.path}
+            node={node}
+            activeFile={activeFile}
+            onSelect={setActiveFile}
+          />
+        ))}
+      </div>
+    </div>
   );
 }

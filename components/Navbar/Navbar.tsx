@@ -8,7 +8,5 @@ export async function Navbar() {
     headers: headersList
   });
 
-  console.log(session)
-
   return <ClientNavbar initialSession={session} />;
 }

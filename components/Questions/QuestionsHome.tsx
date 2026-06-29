@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import React, { useEffect, useMemo, useState } from 'react';
 import {
   Container,
@@ -37,8 +38,7 @@ function matchesGenre(question: Question, genre: GenreConfig) {
   return genre.patterns.some((p) => topicValues.some((v) => v.includes(p)));
 }
 
-
-export default function StoryMode() {
+export default function QuestionsHome() {
   const router = useRouter();
   const [questions, setQuestions] = useState<Question[]>([]);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,7 @@ export default function StoryMode() {
     fetch('/api/questions')
       .then(async (response) => {
         if (!response.ok) {
-          throw new Error('Failed to load episodes');
+          throw new Error('Failed to load questions');
         }
         return response.json();
       })
@@ -67,7 +67,7 @@ export default function StoryMode() {
         if (!mounted) {
           return;
         }
-        setError('Unable to load storyline episodes right now.');
+        setError('Unable to load questions right now.');
       })
       .finally(() => {
         if (!mounted) {
@@ -81,9 +81,10 @@ export default function StoryMode() {
     };
   }, []);
 
-  const episodes = useMemo(() => {
-    return [...questions].sort((a, b) => a.displayOrder - b.displayOrder);
-  }, [questions]);
+  const episodes = useMemo(
+    () => [...questions].sort((a, b) => a.displayOrder - b.displayOrder),
+    [questions],
+  );
 
   const featuredEpisode = episodes[0];
 
@@ -120,17 +121,8 @@ export default function StoryMode() {
   }, [difficultyFiltered, activeGenre]);
 
   return (
-    <div style={{ minHeight: '100vh', background: '#08080d', position: 'relative' }}>
-
-      {/* Ambient glow orbs */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-6%', left: '14%', width: 620, height: 620, borderRadius: '50%', background: 'rgba(99, 102, 241, 0.14)', filter: 'blur(120px)' }} />
-        <div style={{ position: 'absolute', top: '35%', right: '8%', width: 440, height: 440, borderRadius: '50%', background: 'rgba(236, 72, 153, 0.09)', filter: 'blur(100px)' }} />
-        <div style={{ position: 'absolute', bottom: '8%', left: '28%', width: 500, height: 500, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.07)', filter: 'blur(110px)' }} />
-      </div>
-
-      <Container size="xl" style={{ padding: '36px 20px 64px', position: 'relative', zIndex: 1 }}>
-
+    <div style={{ minHeight: '100vh', background: '#08080d' }}>
+      <Container size="xl" style={{ padding: '36px 20px 64px' }}>
         {loading ? (
           <Center py={80}><Loader color="indigo" /></Center>
         ) : error ? (
@@ -139,12 +131,11 @@ export default function StoryMode() {
           </div>
         ) : episodes.length === 0 ? (
           <div style={glassStyle({ radius: 14, pad: '20px 24px' })}>
-            <Text c="dimmed">No questions found yet. Seed questions to begin the storyline.</Text>
+            <Text c="dimmed">No questions found yet. Seed questions to begin.</Text>
           </div>
         ) : (
           <Stack gap={44}>
-
-            {/* ── Featured hero ── */}
+            {/* Featured hero */}
             {featuredEpisode && (
               <div style={glassStyle({ radius: 20, pad: '44px 48px' })}>
                 <Badge variant="light" color="violet" mb={14}>
@@ -157,8 +148,14 @@ export default function StoryMode() {
                 >
                   Question {featuredEpisode.displayOrder}: {featuredEpisode.name}
                 </Title>
-                <Text c="gray.4" mt={12} mb={20} style={{ maxWidth: 540, lineHeight: 1.7, fontSize: 15 }}>
-                  Start here. Each question builds on the last — solve them in sequence to develop sharp pattern recognition.
+                <Text
+                  c="gray.4"
+                  mt={12}
+                  mb={20}
+                  style={{ maxWidth: 540, lineHeight: 1.7, fontSize: 15 }}
+                >
+                  Start here. Each question builds on the last — solve them in
+                  sequence to develop sharp pattern recognition.
                 </Text>
                 <Group gap={8} mb={24}>
                   <Badge variant="light" color={difficultyColor[featuredEpisode.difficulty]}>
@@ -199,11 +196,9 @@ export default function StoryMode() {
               </div>
             )}
 
-            {/* ── Filters ── */}
+            {/* Filters */}
             <div style={glassStyle({ radius: 14, pad: '16px 20px' })}>
               <Group justify="space-between" align="flex-start" gap="xl">
-
-                {/* Genre filter */}
                 <div>
                   <Text size="xs" c="gray.6" mb={10} style={{ textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}>
                     Pattern
@@ -225,7 +220,6 @@ export default function StoryMode() {
                   </Group>
                 </div>
 
-                {/* Difficulty filter */}
                 <div>
                   <Text size="xs" c="gray.6" mb={10} style={{ textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}>
                     Difficulty
@@ -247,19 +241,14 @@ export default function StoryMode() {
                     ))}
                   </Group>
                 </div>
-
               </Group>
             </div>
 
-            {/* ── Genre rails ── */}
+            {/* Genre rails */}
             {genreRails.map((rail) => (
               <section key={rail.id}>
                 <Group justify="space-between" mb={16} align="baseline">
-                  <Text
-                    fw={600}
-                    c="white"
-                    style={{ fontSize: 16, letterSpacing: '-0.01em' }}
-                  >
+                  <Text fw={600} c="white" style={{ fontSize: 16, letterSpacing: '-0.01em' }}>
                     {rail.label}
                   </Text>
                   <Text size="xs" c="gray.6">
@@ -274,7 +263,6 @@ export default function StoryMode() {
                     overflowX: 'auto',
                     paddingBottom: 10,
                     scrollSnapType: 'x mandatory',
-                    /* hide scrollbar but keep scroll */
                     msOverflowStyle: 'none',
                   }}
                 >
@@ -288,16 +276,12 @@ export default function StoryMode() {
                 </div>
               </section>
             ))}
-
           </Stack>
         )}
-
       </Container>
     </div>
   );
 }
-
-/* ─── helpers ───────────────────────────────────────────────────────────── */
 
 function FilterPill({
   label,
@@ -311,7 +295,6 @@ function FilterPill({
   onClick: () => void;
 }) {
   const accent = accentColor ?? 'indigo';
-  // map Mantine colour names → rough hex for inline glow
   const glowMap: Record<string, string> = {
     teal: '20,184,166',
     yellow: '234,179,8',
@@ -323,6 +306,13 @@ function FilterPill({
   return (
     <div
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       style={{
         cursor: 'pointer',
         padding: '4px 12px',
@@ -341,7 +331,6 @@ function FilterPill({
     </div>
   );
 }
-
 
 function glassStyle({
   radius = 16,
@@ -370,6 +359,13 @@ function QuestionCard({
   return (
     <div
       onClick={onClick}
+      onKeyDown={(e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          onClick();
+        }
+      }}
+      role="button"
+      tabIndex={0}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
       style={{
@@ -395,13 +391,7 @@ function QuestionCard({
         </Badge>
       </Group>
 
-      <Text
-        fw={600}
-        c="gray.0"
-        mb={10}
-        lineClamp={2}
-        style={{ fontSize: 13.5, lineHeight: 1.35 }}
-      >
+      <Text fw={600} c="gray.0" mb={10} lineClamp={2} style={{ fontSize: 13.5, lineHeight: 1.35 }}>
         {question.name}
       </Text>
 

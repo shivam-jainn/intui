@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react'
-import MixerHome from '../Mixer/MixerHome'
+import Dashboard from '../Dashboard/Dashboard'
 import Landing from '../Landing/Landing'
 import { useSession } from '@/lib/auth-client'
 import { Skeleton } from '@mantine/core'
@@ -20,7 +20,7 @@ export default function Home() {
 
   return (
     <div>
-      {session ? <MixerHome /> : <Landing />}
+      {session ? <Dashboard /> : <Landing />}
     </div>
   )
 }

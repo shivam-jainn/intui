@@ -1,16 +1,7 @@
 "use client";
 
-import {
-  Badge,
-  Button,
-  Card,
-  Group,
-  Select,
-  Text,
-  Notification,
-  Stack,
-} from "@mantine/core";
 import { useAtom } from "jotai";
+import { useEffect, useState } from "react";
 import {
   activeFilePathAtom,
   fileContentsAtom,
@@ -19,21 +10,22 @@ import {
   incidentSubmissionAtom,
   incidentRunningAtom,
 } from "@/contexts/IncidentContext";
-import { useState } from "react";
-import { IconPlayerPlay, IconSend } from "@tabler/icons-react";
 
 interface IncidentRunBarProps {
   incidentSlug: string;
   language: string;
-  onLanguageChange: (lang: string) => void;
   availableLanguages: string[];
   entryFile: string;
 }
 
+/**
+ * Hidden controller component that handles Run/Submit logic.
+ * UI buttons are now in the TopBar — this component listens for
+ * custom DOM events and executes the API call.
+ */
 export default function IncidentRunBar({
   incidentSlug,
   language,
-  onLanguageChange,
   availableLanguages,
   entryFile,
 }: IncidentRunBarProps) {
@@ -43,9 +35,7 @@ export default function IncidentRunBar({
   const [, setResult] = useAtom(incidentResultAtom);
   const [, setSubmission] = useAtom(incidentSubmissionAtom);
   const [running, setRunning] = useAtom(incidentRunningAtom);
-  const [error, setError] = useState<string | null>(null);
 
-  // The entry file to submit is the active editable file, fallback to declared entryFile
   function getSubmitCode(): { code: string; filePath: string } {
     const target = activeFile || entryFile;
     const fileData = files.find((f) => f.path === target && !f.readonly);
@@ -54,14 +44,12 @@ export default function IncidentRunBar({
   }
 
   async function executeIncident(isSubmission: boolean) {
-    setError(null);
     setRunning(true);
     setSubmission(isSubmission);
 
     const { code, filePath } = getSubmitCode();
 
     if (!code || code.trim().length < 5) {
-      setError("No code to run. Select or edit a source file first.");
       setRunning(false);
       return;
     }
@@ -69,7 +57,9 @@ export default function IncidentRunBar({
     try {
       const executionFiles = files.map((file) => ({
         path: file.path,
-        content: file.readonly ? file.content : (fileContents[file.path] ?? file.content),
+        content: file.readonly
+          ? file.content
+          : fileContents[file.path] ?? file.content,
         readonly: file.readonly,
         language: file.language,
       }));
@@ -90,97 +80,52 @@ export default function IncidentRunBar({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || data.error || "Run failed");
+        setResult({
+          id: Date.now().toString(),
+          timestamp: Date.now(),
+          isSubmission,
+          status: "error",
+          passed: 0,
+          failed: 0,
+          total: 0,
+          stdout: "",
+          stderr: data.message || data.error || "Run failed",
+          testResults: [],
+        });
         return;
       }
 
       setResult(data);
-    } catch (err: any) {
-      setError("Network error: could not reach execution server.");
-      setSubmission(false);
+    } catch {
+      setResult({
+        id: Date.now().toString(),
+        timestamp: Date.now(),
+        isSubmission,
+        status: "error",
+        passed: 0,
+        failed: 0,
+        total: 0,
+        stdout: "",
+        stderr: "Network error: could not reach execution server.",
+        testResults: [],
+      });
     } finally {
       setRunning(false);
     }
   }
 
-  async function handleRun() {
-    await executeIncident(false);
-  }
+  // Listen for keyboard shortcut events
+  useEffect(() => {
+    const onRun = () => executeIncident(false);
+    const onSubmit = () => executeIncident(true);
+    document.addEventListener("incident-run", onRun);
+    document.addEventListener("incident-submit", onSubmit);
+    return () => {
+      document.removeEventListener("incident-run", onRun);
+      document.removeEventListener("incident-submit", onSubmit);
+    };
+  }, [files, fileContents, activeFile, incidentSlug, language]);
 
-  async function handleSubmit() {
-    await executeIncident(true);
-  }
-
-  const langOptions = availableLanguages.map((l) => ({
-    value: l,
-    label: l.charAt(0).toUpperCase() + l.slice(1),
-  }));
-
-  return (
-    <Stack gap={0}>
-      <Card
-        p="xs"
-        style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid var(--mantine-color-dark-5)",
-          borderRadius: 0,
-        }}
-      >
-        <Group gap="xs">
-          <Select
-            size="xs"
-            data={langOptions}
-            value={language}
-            onChange={(v: string | null) => v && onLanguageChange(v)}
-            w={110}
-            styles={{ input: { fontSize: 12 } }}
-          />
-          <Badge size="sm" variant="outline" color="gray">
-            {activeFile
-              ? activeFile.split("/").pop()
-              : entryFile.split("/").pop() || "no file"}
-          </Badge>
-        </Group>
-
-        <Group gap="xs">
-          <Button
-            size="xs"
-            leftSection={<IconPlayerPlay size={12} />}
-            onClick={handleRun}
-            loading={running}
-            color="green"
-            variant="light"
-          >
-            Run Tests
-          </Button>
-          <Button
-            size="xs"
-            leftSection={<IconSend size={12} />}
-            onClick={handleSubmit}
-            loading={running}
-            color="orange"
-            variant="filled"
-          >
-            Submit
-          </Button>
-        </Group>
-      </Card>
-
-      {error && (
-        <Notification
-          color="red"
-          title="Error"
-          withCloseButton
-          onClose={() => setError(null)}
-          p="xs"
-          style={{ borderRadius: 0 }}
-        >
-          <Text size="xs">{error}</Text>
-        </Notification>
-      )}
-    </Stack>
-  );
+  // This component renders nothing — it's a logic-only controller
+  return null;
 }

@@ -1,20 +1,23 @@
 "use client";
 
-import { Box, Group, ScrollArea, Tabs, Text, Badge, UnstyledButton } from "@mantine/core";
 import { useAtom } from "jotai";
-import {
-  activeFilePathAtom,
-  fileContentsAtom,
-  incidentFilesAtom,
-} from "@/contexts/IncidentContext";
 import { python } from "@codemirror/lang-python";
 import { cpp } from "@codemirror/lang-cpp";
 import CodeMirror from "@uiw/react-codemirror";
 import { oneDark } from "@codemirror/theme-one-dark";
 import { EditorView } from "@codemirror/view";
+import { searchKeymap, search } from "@codemirror/search";
+import { keymap } from "@codemirror/view";
 import type { Extension } from "@codemirror/state";
-import { useMemo, useState } from "react";
-import { IconX } from "@tabler/icons-react";
+import { useEffect, useMemo, useState } from "react";
+import { IconX, IconFileCode } from "@tabler/icons-react";
+import {
+  activeFilePathAtom,
+  fileContentsAtom,
+  incidentFilesAtom,
+} from "@/contexts/IncidentContext";
+import { screenLockupAtom } from "@/contexts/GlobalContext";
+import { t } from "@/lib/incident-theme";
 
 const readonlyExtension = EditorView.editable.of(false);
 
@@ -33,21 +36,18 @@ export default function MultiFileEditor() {
   const [files] = useAtom(incidentFilesAtom);
   const [activeFile, setActiveFile] = useAtom(activeFilePathAtom);
   const [fileContents, setFileContents] = useAtom(fileContentsAtom);
-
-  // Track which files are open as tabs (preserves order and allows close)
   const [openTabs, setOpenTabs] = useState<string[]>([]);
+  const [isLocked] = useAtom(screenLockupAtom);
 
-  // When activeFile changes, ensure it's in openTabs
-  useMemo(() => {
+  useEffect(() => {
     if (activeFile && !openTabs.includes(activeFile)) {
-      setOpenTabs((prev) => [...prev, activeFile]);
+      setOpenTabs((prev) => [...prev, activeFile].sort());
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [activeFile]);
 
   const activeFileData = files.find((f) => f.path === activeFile);
   const currentContent = activeFile
-    ? (fileContents[activeFile] ?? activeFileData?.content ?? "")
+    ? fileContents[activeFile] ?? activeFileData?.content ?? ""
     : "";
 
   function handleChange(value: string) {
@@ -65,99 +65,173 @@ export default function MultiFileEditor() {
   }
 
   const extensions = useMemo(() => {
-    const exts: Extension[] = [getLanguageExtension(activeFileData?.language ?? "python")];
-    if (activeFileData?.readonly) exts.push(readonlyExtension);
+    const exts: Extension[] = [
+      getLanguageExtension(activeFileData?.language ?? "python"),
+      search(),
+      keymap.of(searchKeymap),
+    ];
+    if (activeFileData?.readonly || isLocked) exts.push(readonlyExtension);
     return exts;
-  }, [activeFileData]);
+  }, [activeFileData, isLocked]);
 
   if (!activeFile) {
     return (
-      <Box
+      <div
         style={{
           height: "100%",
           display: "flex",
           alignItems: "center",
           justifyContent: "center",
           flexDirection: "column",
-          gap: 8,
+          gap: 12,
         }}
       >
-        <Text c="dimmed" size="sm">
-          Select a file from the tree to start editing
-        </Text>
-      </Box>
+        <div
+          style={{
+            width: 56,
+            height: 56,
+            borderRadius: t.radius.xl,
+            background: t.bgSurface,
+            border: `1px solid ${t.borderSubtle}`,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <IconFileCode size={24} color={t.textDim} />
+        </div>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: t.size.md, color: t.textMuted, fontWeight: 500, marginBottom: 4 }}>
+            Select a file to edit
+          </div>
+          <div style={{ fontSize: t.size.xs, color: t.textDim, fontFamily: t.font.mono }}>
+            Use the explorer sidebar on the left
+          </div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Box style={{ height: "100%", display: "flex", flexDirection: "column" }}>
+    <div style={{ height: "100%", display: "flex", flexDirection: "column" }}>
       {/* File tabs */}
-      <ScrollArea scrollbarSize={4} type="never">
-        <Group
-          gap={0}
-          style={{
-            borderBottom: "1px solid var(--mantine-color-dark-5)",
-            backgroundColor: "var(--mantine-color-dark-8)",
-            flexWrap: "nowrap",
-          }}
-        >
-          {openTabs.map((tabPath) => {
-            const tabFile = files.find((f) => f.path === tabPath);
-            const fileName = tabPath.split("/").pop() ?? tabPath;
-            const isActive = tabPath === activeFile;
-            return (
-              <UnstyledButton
-                key={tabPath}
-                onClick={() => setActiveFile(tabPath)}
-                px="sm"
-                py={8}
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          borderBottom: `1px solid ${t.borderSubtle}`,
+          background: "rgba(0,0,0,0.2)",
+          overflow: "auto",
+          flexShrink: 0,
+          minHeight: t.sidebar.tabHeight,
+        }}
+      >
+        {openTabs.map((tabPath) => {
+          const tabFile = files.find((f) => f.path === tabPath);
+          const fileName = tabPath.split("/").pop() ?? tabPath;
+          const isActive = tabPath === activeFile;
+          const isModified =
+            fileContents[tabPath] !== undefined &&
+            fileContents[tabPath] !== tabFile?.content;
+
+          return (
+            <button
+              key={tabPath}
+              onClick={() => setActiveFile(tabPath)}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 5,
+                padding: "0 12px",
+                height: t.sidebar.tabHeight,
+                borderBottom: isActive ? `2px solid ${t.accent}` : "2px solid transparent",
+                background: isActive ? "rgba(255,255,255,0.03)" : "transparent",
+                cursor: "pointer",
+                border: "none",
+                borderRight: `1px solid ${t.borderSubtle}`,
+                flexShrink: 0,
+                transition: `background ${t.transition.fast}`,
+              }}
+              onMouseEnter={(e) => {
+                if (!isActive) e.currentTarget.style.background = t.bgSurfaceHover;
+              }}
+              onMouseLeave={(e) => {
+                if (!isActive) e.currentTarget.style.background = "transparent";
+              }}
+            >
+              <span
                 style={{
-                  borderRight: "1px solid var(--mantine-color-dark-5)",
-                  borderBottom: isActive
-                    ? "2px solid var(--mantine-color-blue-5)"
-                    : "2px solid transparent",
-                  backgroundColor: isActive
-                    ? "var(--mantine-color-dark-7)"
-                    : "transparent",
-                  flexShrink: 0,
-                  cursor: "pointer",
+                  fontSize: t.size.sm,
+                  fontFamily: t.font.mono,
+                  color: isActive ? t.textPrimary : t.textMuted,
+                  fontWeight: isActive ? 600 : 400,
+                  whiteSpace: "nowrap",
                 }}
               >
-                <Group gap={6}>
-                  <Text
-                    size="xs"
-                    c={isActive ? "white" : "dimmed"}
-                    style={{ fontFamily: "monospace", whiteSpace: "nowrap" }}
-                  >
-                    {fileName}
-                  </Text>
-                  {tabFile?.readonly && (
-                    <Badge size="xs" color="gray" variant="outline" px={4}>
-                      RO
-                    </Badge>
-                  )}
-                  <UnstyledButton
-                    onClick={(e) => closeTab(e, tabPath)}
-                    style={{
-                      display: "flex",
-                      alignItems: "center",
-                      color: "var(--mantine-color-dimmed)",
-                      borderRadius: 2,
-                    }}
-                  >
-                    <IconX size={11} />
-                  </UnstyledButton>
-                </Group>
-              </UnstyledButton>
-            );
-          })}
-        </Group>
-      </ScrollArea>
+                {fileName}
+              </span>
+              {tabFile?.readonly && (
+                <span
+                  style={{
+                    fontSize: 8,
+                    padding: "1px 4px",
+                    borderRadius: t.radius.sm,
+                    background: "rgba(255,255,255,0.04)",
+                    border: `1px solid ${t.borderSubtle}`,
+                    color: t.textDim,
+                    fontFamily: t.font.mono,
+                    fontWeight: 700,
+                  }}
+                >
+                  RO
+                </span>
+              )}
+              {isModified && !tabFile?.readonly && (
+                <span
+                  style={{
+                    width: 5,
+                    height: 5,
+                    borderRadius: "50%",
+                    background: t.accent,
+                    flexShrink: 0,
+                  }}
+                />
+              )}
+              <button
+                onClick={(e) => closeTab(e, tabPath)}
+                style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  width: 16,
+                  height: 16,
+                  borderRadius: t.radius.sm,
+                  background: "transparent",
+                  border: "none",
+                  color: t.textDim,
+                  cursor: "pointer",
+                  padding: 0,
+                  transition: `all ${t.transition.fast}`,
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.background = "rgba(239,68,68,0.15)";
+                  e.currentTarget.style.color = "#f87171";
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.background = "transparent";
+                  e.currentTarget.style.color = t.textDim;
+                }}
+              >
+                <IconX size={10} />
+              </button>
+            </button>
+          );
+        })}
+      </div>
 
       {/* Editor */}
-      <Box style={{ flex: 1, overflow: "auto" }}>
+      <div style={{ flex: 1, overflow: "auto", position: "relative" }}>
         <CodeMirror
-          key={activeFile}
           value={currentContent}
           height="100%"
           theme={oneDark}
@@ -167,10 +241,10 @@ export default function MultiFileEditor() {
           basicSetup={{
             lineNumbers: true,
             foldGutter: true,
-            highlightActiveLine: !activeFileData?.readonly,
+            highlightActiveLine: !activeFileData?.readonly && !isLocked,
           }}
         />
-      </Box>
-    </Box>
+      </div>
+    </div>
   );
 }

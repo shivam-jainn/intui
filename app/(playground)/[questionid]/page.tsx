@@ -7,6 +7,7 @@ import { getDesc, getTestCases } from "@/lib/common/playground/desc_and_driver";
 import CodeEditor from "@/components/Playground/CodeEditor";
 import RunAndSubmissionBar from "@/components/Playground/TestCard";
 import PlaygroundSkeleton from "@/components/Playground/PlaygroundSkeleton";
+import ScreenLockUp from "@/components/ScreenLockUp";
 
 interface QuestionData {
   name: string;
@@ -71,22 +72,29 @@ export default function Page({ params }: { params: { questionid: string } }) {
 
   return (
     <div className="playground-page-shell">
+      <ScreenLockUp />
       <PanelGroup direction="horizontal">
         <Panel className="playground-panel">
-          <QuestionPanel
-            questionSlug={params.questionid}
-            questionTitle={questionData.name}
-            difficulty={questionData.difficulty}
-            description={questionData.description}
-            companies={questionData.companies || []}
-            topics={questionData.topics || []}
-          />
+          <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
+            <div style={{ flex: 1, overflow: 'auto' }}>
+              <QuestionPanel
+                questionSlug={params.questionid}
+                questionTitle={questionData.name}
+                difficulty={questionData.difficulty}
+                description={questionData.description}
+                companies={questionData.companies || []}
+                topics={questionData.topics || []}
+              />
+            </div>
+          </div>
         </Panel>
         <PanelResizeHandle className="playground-resize-handle playground-resize-handle--vertical" />
         <Panel className="playground-panel">
           <PanelGroup direction="vertical">
             <Panel minSize={50} className="playground-panel">
-              <CodeEditor questionSlug={params.questionid} />
+              <CodeEditor
+                questionSlug={params.questionid}
+              />
             </Panel>
             <PanelResizeHandle className="playground-resize-handle playground-resize-handle--horizontal" />
             <Panel defaultSize={30} minSize={30} maxSize={30} className="playground-panel" style={{ overflow: 'hidden' }}>
