@@ -1,17 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/db';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: headers(),
-    });
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = request.headers.get('x-user-id')!;
 
     const { email, sessionId } = await request.json();
 
@@ -23,7 +15,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 });
     }
 
-    if (referredUser.id === session.user.id) {
+    if (referredUser.id === userId) {
       return NextResponse.json({ error: 'Cannot refer yourself' }, { status: 400 });
     }
 

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/db';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
 const scriptsByMode: Record<string, string[]> = {
   normal: ['wallpaper', 'notification', 'voice', 'browser', 'screensaver'],
@@ -11,13 +9,7 @@ const scriptsByMode: Record<string, string[]> = {
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: headers(),
-    });
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = request.headers.get('x-user-id')!;
 
     const { sessionId } = await request.json();
 
@@ -29,7 +21,7 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Session not found' }, { status: 404 });
     }
 
-    if (mixerSession.userId !== session.user.id) {
+    if (mixerSession.userId !== userId) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 });
     }
 

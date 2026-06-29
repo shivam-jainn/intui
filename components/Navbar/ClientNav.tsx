@@ -1,12 +1,12 @@
 'use client';
 
 import { Skeleton } from '@mantine/core';
+import { usePathname, useRouter } from 'next/navigation';
 import Link from 'next/link';
+import React from 'react';
+import { useAuth } from '@/lib/auth-client';
 import Intui from './Intui';
 import classes from './Navbar.module.css';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSession } from '@/lib/auth-client';
-import React from 'react';
 import Profile from './Profile';
 
 interface ClientNavbarProps {
@@ -16,10 +16,10 @@ interface ClientNavbarProps {
 export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data, isPending } = useSession();
+  const { user, isPending } = useAuth();
 
-  const currentSession = isPending ? initialSession : data;
-  const isLoggedIn = currentSession?.user != null;
+  const currentUser = isPending ? initialSession?.user : user;
+  const isLoggedIn = currentUser != null;
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -85,7 +85,7 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
               {isPending ? (
                 <Skeleton height={32} width={120} radius="xl" />
               ) : isLoggedIn ? (
-                <Profile avatar={currentSession.user.image} />
+                <Profile avatar={currentUser.image} />
               ) : (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button

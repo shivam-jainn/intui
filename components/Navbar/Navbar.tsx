@@ -1,12 +1,8 @@
-import { auth } from '@/lib/auth'; // Your auth instance
-import { headers } from 'next/headers';
+import { getSession } from '@/lib/auth-utils';
 import ClientNavbar from './ClientNav';
 
 export async function Navbar() {
-  const headersList = headers();
-  const session = await auth.api.getSession({
-    headers: headersList
-  });
+  const session = await getSession();
 
   return <ClientNavbar initialSession={session} />;
 }

@@ -1,23 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { prisma } from '@/prisma/db';
-import { auth } from '@/lib/auth';
-import { headers } from 'next/headers';
 
 export async function POST(request: NextRequest) {
   try {
-    const session = await auth.api.getSession({
-      headers: headers(),
-    });
-
-    if (!session?.user?.id) {
-      return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
-    }
+    const userId = request.headers.get('x-user-id')!;
 
     const { questionId, incidentSlug, macMasked, mode } = await request.json();
 
     const existingSession = await prisma.mixerSession.findFirst({
       where: {
-        userId: session.user.id,
+        userId,
         status: 'banned',
       },
     });
@@ -40,7 +32,7 @@ export async function POST(request: NextRequest) {
 
     const previousVerifiedSession = await prisma.mixerSession.findFirst({
       where: {
-        userId: session.user.id,
+        userId,
         macMasked: { not: null },
       },
       select: {
@@ -52,7 +44,7 @@ export async function POST(request: NextRequest) {
 
     const newSession = await prisma.mixerSession.create({
       data: {
-        userId: session.user.id,
+        userId,
         questionId: questionId ? Number(questionId) : null,
         incidentId,
         status: 'active',

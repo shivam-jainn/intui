@@ -23,7 +23,7 @@ import {
 } from '@tabler/icons-react';
 import { useAtom } from 'jotai';
 import { screenLockupAtom, lockSessionIdAtom, lockConsequenceAtom } from '@/contexts/GlobalContext';
-import { useSession } from '@/lib/auth-client';
+import { useAuth } from '@/lib/auth-client';
 import { t } from '@/lib/incident-theme';
 
 type MixerMode = 'normal' | 'hardcore' | 'brick';
@@ -81,8 +81,8 @@ export default function TimeSwitch({ questionId, incidentId }: TimeSwitchProps) 
   const [, setLockSessionId] = useAtom(lockSessionIdAtom);
   const [, setLockConsequence] = useAtom(lockConsequenceAtom);
 
-  const { data: session } = useSession();
-  const userId = session?.user?.id || '';
+  const { user } = useAuth();
+  const userId = user?.id || '';
 
   // Close dropdown when clicking outside
   useEffect(() => {

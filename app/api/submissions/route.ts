@@ -1,22 +1,14 @@
-import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@/lib/auth";
-import { prisma } from "@/prisma/db";
-import { headers } from "next/headers";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/prisma/db';
 
 export async function GET(req: NextRequest) {
-  const questionSlug = req.nextUrl.searchParams.get("question");
+  const questionSlug = req.nextUrl.searchParams.get('question');
 
   if (!questionSlug) {
-    return NextResponse.json({ message: "question is required" }, { status: 400 });
+    return NextResponse.json({ message: 'question is required' }, { status: 400 });
   }
 
-  const session = await auth.api.getSession({
-    headers: headers(),
-  });
-
-  if (!session?.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+  const userId = req.headers.get('x-user-id')!;
 
   const question = await prisma.question.findUnique({
     where: { slug: questionSlug },
@@ -24,15 +16,15 @@ export async function GET(req: NextRequest) {
   });
 
   if (!question) {
-    return NextResponse.json({ message: "Question not found" }, { status: 404 });
+    return NextResponse.json({ message: 'Question not found' }, { status: 404 });
   }
 
   const submissions = await prisma.submission.findMany({
     where: {
       questionId: question.id,
-      userId: session.user.id,
+      userId,
     },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
     take: 10,
   });
 
@@ -48,18 +40,12 @@ export async function POST(req: NextRequest) {
 
   if (!questionSlug || !code || !language || !status) {
     return NextResponse.json(
-      { message: "question_slug, code, language, and status are required" },
+      { message: 'question_slug, code, language, and status are required' },
       { status: 400 }
     );
   }
 
-  const session = await auth.api.getSession({
-    headers: headers(),
-  });
-
-  if (!session?.user) {
-    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
-  }
+  const userId = req.headers.get('x-user-id')!;
 
   const question = await prisma.question.findUnique({
     where: { slug: questionSlug },
@@ -67,13 +53,13 @@ export async function POST(req: NextRequest) {
   });
 
   if (!question) {
-    return NextResponse.json({ message: "Question not found" }, { status: 404 });
+    return NextResponse.json({ message: 'Question not found' }, { status: 404 });
   }
 
   const submission = await prisma.submission.create({
     data: {
       questionId: question.id,
-      userId: session.user.id,
+      userId,
       code,
       language,
       status,
