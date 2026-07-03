@@ -47,9 +47,9 @@ function selectLanguage(manifest: IncidentManifest, requestedLang: string): stri
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { incidentid: string } }
+  { params }: { params: Promise<{ incidentid: string }> }
 ) {
-  const { incidentid } = params;
+  const { incidentid } = await params;
   const requestedLang = req.nextUrl.searchParams.get("language") ?? "python";
   const storage = getStorage();
 
