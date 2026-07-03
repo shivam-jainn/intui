@@ -67,8 +67,9 @@ model User {
   updatedAt     DateTime
   sessions      Session[]
   accounts      Account[]
-  questions     Question[]
-  Submission    Submission[]
+  questions            Question[]
+  Submission           Submission[]
+  IncidentSubmission   IncidentSubmission[]
 
   @@unique([email])
   @@map("user")
@@ -130,6 +131,7 @@ model Incident {
   slaMinutes  Int      @default(20)
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
+  IncidentSubmission IncidentSubmission[]
 }
 
 model Submission {
@@ -139,10 +141,29 @@ model Submission {
   code       String   @db.Text
   language   String
   status     String
+  timeTaken  Float?
+  spaceTaken Float?
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
   question   Question @relation(fields: [questionId], references: [id], onDelete: Cascade)
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("submission")
+}
+
+model IncidentSubmission {
+  id         Int      @id @default(autoincrement())
+  incidentId Int
+  userId     String
+  code       String   @db.Text
+  language   String
+  status     String
+  timeTaken  Float?
+  spaceTaken Float?
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  incident   Incident @relation(fields: [incidentId], references: [id], onDelete: Cascade)
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("incident_submission")
 }

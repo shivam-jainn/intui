@@ -1,8 +1,12 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
 import { executorService } from "@/lib/executor-config";
+import { prisma } from "@/prisma/db";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  const session = await auth.api.getSession({ headers: req.headers });
+
   const { question_slug, code, language } = await req.json();
 
   if (!question_slug) {
@@ -75,6 +79,32 @@ export async function POST(req: NextRequest) {
     if (!response.ok) {
         const errorMessage = data?.error || "Unknown error occurred";
         throw new Error(`Execution Error: ${errorMessage} (HTTP ${response.status})`);
+    }
+
+    // Save submission to DB if user is authenticated
+    if (session?.user?.id) {
+      try {
+        const question = await prisma.question.findUnique({
+          where: { slug: question_slug },
+          select: { id: true }
+        });
+
+        if (question) {
+          await prisma.submission.create({
+            data: {
+              questionId: question.id,
+              userId: session.user.id,
+              code,
+              language,
+              status: data.status || "Unknown",
+              timeTaken: data.timeTaken ?? null,
+              spaceTaken: data.memoryUsedKB ?? null,
+            }
+          });
+        }
+      } catch (dbError) {
+        console.error("Failed to save submission to DB:", dbError);
+      }
     }
 
     return NextResponse.json(

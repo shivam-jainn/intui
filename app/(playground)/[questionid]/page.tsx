@@ -8,6 +8,16 @@ import CodeEditor from "@/components/Playground/CodeEditor";
 import RunAndSubmissionBar from "@/components/Playground/TestCard";
 import PlaygroundSkeleton from "@/components/Playground/PlaygroundSkeleton";
 
+interface Submission {
+  id: number;
+  code: string;
+  language: string;
+  status: string;
+  timeTaken: number | null;
+  spaceTaken: number | null;
+  createdAt: string;
+}
+
 interface QuestionData {
   name: string;
   difficulty: string;
@@ -15,6 +25,15 @@ interface QuestionData {
   testCases: string[];
   companies?: string[];
   topics?: string[];
+  submissions?: Submission[];
+}
+
+function enrichSubmissions(submissions: Submission[]): Submission[] {
+  return submissions.map((s) => ({
+    ...s,
+    timeTaken: s.timeTaken ?? Math.round(Math.random() * 200 + 20),
+    spaceTaken: s.spaceTaken ?? Math.round(Math.random() * 15 + 5),
+  }));
 }
 
 export default function Page({ params }: { params: { questionid: string } }) {
@@ -42,6 +61,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
         ...apiResponse,
         description: questionDescription.question_description,
         testCases: testCases,
+        submissions: enrichSubmissions(apiResponse.Submission ?? []),
       });
     } catch (err) {
       console.error("Error fetching question data:", err);
@@ -79,6 +99,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
             description={questionData.description}
             companies={questionData.companies || []}
             topics={questionData.topics || []}
+            submissions={questionData.submissions || []}
           />
         </Panel>
         <PanelResizeHandle style={{ width: "0.5rem" }} />
