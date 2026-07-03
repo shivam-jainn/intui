@@ -161,7 +161,12 @@ function TestCaseContent({
   if (testCases.length === 0) {
     return (
       <Group justify="center" py="xl">
-        <Text size="sm" c="dimmed">No test cases available</Text>
+        <Stack align="center" gap={4}>
+          <Text size="sm" c="dimmed">No test cases available</Text>
+          <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+            Try running your code to see results
+          </Text>
+        </Stack>
       </Group>
     );
   }
@@ -269,6 +274,29 @@ function ResultsContent({
   };
 
   if (errorMessage && !resultData?.results?.length) {
+    let errorTitle = "Execution Error";
+    let errorHint = "";
+
+    if (errorMessage.includes("Compilation Error") || errorMessage.includes("Compilation failed") || errorMessage.includes("syntax error") || errorMessage.includes("error:")) {
+      errorTitle = "Compilation Error";
+      errorHint = "Check your code for syntax errors and try again.";
+    } else if (errorMessage.includes("Runtime Error") || errorMessage.includes("segmentation fault")) {
+      errorTitle = "Runtime Error";
+      errorHint = "Your code crashed during execution. Check for null pointer access or infinite loops.";
+    } else if (errorMessage.includes("Time Limit Exceeded") || errorMessage.includes("timeout")) {
+      errorTitle = "Time Limit Exceeded";
+      errorHint = "Your code took too long to run. Optimize your algorithm or reduce unnecessary operations.";
+    } else if (errorMessage.includes("Memory Limit Exceeded")) {
+      errorTitle = "Memory Limit Exceeded";
+      errorHint = "Your code used too much memory. Reduce data structure sizes or optimize memory usage.";
+    } else if (errorMessage.includes("Network error") || errorMessage.includes("Unable to connect")) {
+      errorTitle = "Connection Error";
+      errorHint = "Unable to reach the execution service. Check your internet connection.";
+    } else if (errorMessage.includes("Configuration error")) {
+      errorTitle = "Service Error";
+      errorHint = "The execution service is misconfigured. Please contact support.";
+    }
+
     return (
       <Stack p="12px">
         <Group gap={6}>
@@ -276,7 +304,7 @@ function ResultsContent({
             <IconX size={12} />
           </ThemeIcon>
           <Text size="xs" fw={600} c="red">
-            Execution Error
+            {errorTitle}
           </Text>
         </Group>
         <Code
@@ -296,6 +324,11 @@ function ResultsContent({
         >
           {errorMessage}
         </Code>
+        {errorHint && (
+          <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+            {errorHint}
+          </Text>
+        )}
       </Stack>
     );
   }
@@ -303,7 +336,12 @@ function ResultsContent({
   if (!resultData?.results?.length) {
     return (
       <Group justify="center" py="xl">
-        <Text size="sm" c="dimmed">Run your code to see results</Text>
+        <Stack align="center" gap={4}>
+          <Text size="sm" c="dimmed">Run your code to see results</Text>
+          <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
+            Click "Run" to test against sample cases or "Submit" to evaluate
+          </Text>
+        </Stack>
       </Group>
     );
   }

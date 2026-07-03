@@ -63,9 +63,17 @@ export default function Page({ params }: { params: { questionid: string } }) {
         testCases: testCases,
         submissions: enrichSubmissions(apiResponse.Submission ?? []),
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error("Error fetching question data:", err);
-      setError("Failed to fetch question data. Please try again.");
+      if (err.message?.includes("Failed to retrieve question description")) {
+        setError("Could not load the question description. The question may not exist or is temporarily unavailable.");
+      } else if (err.message?.includes("Failed to retrieve driver code")) {
+        setError("Could not load the starter code. Please try refreshing the page.");
+      } else if (err.message?.includes("storage") || err.message?.includes("download")) {
+        setError("Unable to connect to storage service. Please check your internet connection and try again.");
+      } else {
+        setError("Something went wrong while loading the question. Please try again or refresh the page.");
+      }
     } finally {
       setLoading(false);
     }
@@ -82,11 +90,56 @@ export default function Page({ params }: { params: { questionid: string } }) {
   }
 
   if (error) {
-    return <div>{error}</div>;
+    return (
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 'calc(100vh - 80px)',
+        padding: '20px',
+        textAlign: 'center',
+      }}>
+        <div style={{
+          maxWidth: '400px',
+          padding: '24px',
+          borderRadius: '8px',
+          border: '1px solid #e03131',
+          backgroundColor: 'rgba(224, 49, 49, 0.1)',
+        }}>
+          <h3 style={{ color: '#e03131', margin: '0 0 8px 0', fontSize: '16px' }}>Error Loading Question</h3>
+          <p style={{ color: '#868e96', margin: '0 0 16px 0', fontSize: '14px' }}>{error}</p>
+          <button
+            onClick={() => fetchQuestion()}
+            style={{
+              padding: '8px 16px',
+              backgroundColor: '#228be6',
+              color: 'white',
+              border: 'none',
+              borderRadius: '4px',
+              cursor: 'pointer',
+              fontSize: '14px',
+            }}
+          >
+            Try Again
+          </button>
+        </div>
+      </div>
+    );
   }
 
   if (!questionData) {
-    return <div>No question data found</div>;
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        height: 'calc(100vh - 80px)',
+        color: '#868e96',
+      }}>
+        <p>No question data found. Please check the URL and try again.</p>
+      </div>
+    );
   }
 
   return (

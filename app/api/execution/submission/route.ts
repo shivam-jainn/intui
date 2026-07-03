@@ -11,19 +11,19 @@ export async function POST(req: NextRequest) {
 
   if (!question_slug) {
     return NextResponse.json(
-      { message: "Cannot run code without the question slug" },
+      { message: "Missing question information. Please refresh the page and try again." },
       { status: 400 }
     );
   }
   if (!language) {
     return NextResponse.json(
-      { message: "Cannot run code without any language selected" },
+      { message: "Please select a programming language before submitting your code." },
       { status: 400 }
     );
   }
   if (!code || typeof code !== "string" || code.length < 10) {
     return NextResponse.json(
-      { message: "No valid code exists." },
+      { message: "Your code is empty or too short. Please write some code before submitting." },
       { status: 400 }
     );
   }
@@ -119,9 +119,27 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     console.error("Submission error:", error.message);
-    return NextResponse.json(
-      { message: error.message || "Some error occurred. Please try again later." },
-      { status: 500 }
-    );
+    if (error.message?.includes("Target audience")) {
+      return NextResponse.json(
+        { message: "Service configuration error. Please contact support." },
+        { status: 500 }
+      );
+    } else if (error.message?.includes("fetch")) {
+      return NextResponse.json(
+        { message: "Unable to reach the execution service. Please try again later." },
+        { status: 500 }
+      );
+    } else if (error.message?.includes("Execution Error:")) {
+      const executionErrorMsg = error.message.replace("Execution Error: ", "").replace(/ \(HTTP \d+\)$/, "");
+      return NextResponse.json(
+        { message: executionErrorMsg },
+        { status: 400 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "An unexpected error occurred while submitting your code. Please try again." },
+        { status: 500 }
+      );
+    }
   }
 }
