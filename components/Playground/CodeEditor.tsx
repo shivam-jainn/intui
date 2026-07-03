@@ -3,7 +3,7 @@
 import { python } from '@codemirror/lang-python';
 import { cpp } from '@codemirror/lang-cpp';
 import CodeMirror from '@uiw/react-codemirror';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { oneDark } from '@codemirror/theme-one-dark';
 import './CodeEditor.css';
 import { Select, Button, Card, Notification } from '@mantine/core';
@@ -14,6 +14,7 @@ import { Language } from '@/lib/common/types/playground.types';
 import { useLocalStorage } from '@mantine/hooks';
 import { getDriver } from '@/lib/common/playground/desc_and_driver';
 import { resultAtom, resultDataAtom, submissionAtom } from '@/contexts/TestCardContext';
+import Timer, { TimerHandle } from '../Timer/Timer';
 
 interface CodeEditorProps {
   questionSlug: string;
@@ -28,6 +29,7 @@ const CodeEditor = ({
   const [testTab,setTestTab] = useAtom(resultAtom);
   const [_,setResultData] = useAtom(resultDataAtom);
   const [__, setSubmission] = useAtom(submissionAtom);
+  const timerRef = useRef<TimerHandle>(null);
 
   async function setDriverCode() {
     try {
@@ -137,6 +139,8 @@ const CodeEditor = ({
       setSubmission(true);
       setResultData(data);
       setTestTab("results");
+
+      await timerRef.current?.submitMixerRun();
     } catch (error: any) {
       setUiError("Unable to connect to the submission server. Check your internet connection and try again.");
     } finally {
@@ -153,11 +157,11 @@ const CodeEditor = ({
     }}>
       
 
-      <Card w="100%" style={{
+      <Card w="100%" p="sm" style={{
         display: "flex",
         flexDirection: 'row',
         alignItems: "center",
-        justifyContent: "space-between",
+        gap: 10,
       }}
       >
         <Select
@@ -165,19 +169,21 @@ const CodeEditor = ({
           data={languageOptions}
           value={language}
           onChange={(value) => setLanguage(value as Language)}
-
+          style={{ width: 110 }}
+          size="xs"
         />
 
-<Button onClick={resetCode}>
+        <Button onClick={resetCode} variant="subtle" size="compact-sm" px={6}>
           <GrPowerReset />
         </Button>
 
+        <div style={{ flex: 1 }} />
 
-      <div style={{display:'flex',flexDirection:'row',gap:'5px'}}>
-
-        <Button variant='secondary' onClick={handleRunCode} loading={isLoading}>Run</Button>
-        <Button onClick={handleSubmission}>Submit</Button>
-      </div>
+        <div style={{display:'flex', alignItems:'center', gap: 8}}>
+          <Timer ref={timerRef} />
+          <Button variant='secondary' size="xs" onClick={handleRunCode} loading={isLoading}>Run</Button>
+          <Button size="xs" onClick={handleSubmission}>Submit</Button>
+        </div>
       </Card>
 
       {uiError && (

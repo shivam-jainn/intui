@@ -4,17 +4,18 @@ import React, { Fragment, useEffect, useRef } from 'react';
 import { Text, Box, Container } from '@mantine/core';
 import { useRouter } from 'next/navigation';
 import styles from './Landing.module.css';
+import { colors } from '@/lib/theme/colors';
 
 const FEATURES = [
   {
     title: 'Intuitive Learning',
     description:
       'Master DSA through logic and patterns. Internalize concepts and perform confidently under interview pressure.',
-    gradient: 'linear-gradient(135deg, #FF6B6B 0%, #FF8E53 100%)',
+    gradient: `linear-gradient(135deg, ${colors.primary[600]} 0%, ${colors.primary[400]} 100%)`,
     wide: false,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-        <path d="M20 3H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5zM19 17H5v-1c0-1 4-2 5-2h4c1 0 5 1 5 2v1z" />
+        <path d="M20 3H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-9 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5-2.5zM19 17H5v-1c0-1 4-2 5-2h4c1 0 5 1 5 2v1z" />
       </svg>
     ),
   },
@@ -22,7 +23,7 @@ const FEATURES = [
     title: 'P0 Incident Sim',
     description:
       'Debug real-world production outages. High-stakes "War Room" challenges where you solve complex bugs under strict SLA timers.',
-    gradient: 'linear-gradient(135deg, #FF3E3E 0%, #FF6B6B 100%)',
+    gradient: `linear-gradient(135deg, ${colors.danger[600]} 0%, ${colors.danger[400]} 100%)`,
     wide: false,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
@@ -34,7 +35,7 @@ const FEATURES = [
     title: 'Contests & Bounties',
     description:
       'Join employer-sponsored coding challenges and fast-track your path to an offer.',
-    gradient: 'linear-gradient(135deg, #4CB8C4 0%, #3CD3AD 100%)',
+    gradient: `linear-gradient(135deg, ${colors.accent[600]} 0%, ${colors.accent[400]} 100%)`,
     wide: false,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
@@ -88,7 +89,7 @@ const Landing: React.FC = () => {
       {/* ── Hero ──────────────────────────────────────────── */}
       <section
         style={{
-          background: '#000',
+          background: colors.bg.base,
           height: 'calc(100vh - 80px)',
           display: 'flex',
           flexDirection: 'column',
@@ -112,7 +113,7 @@ const Landing: React.FC = () => {
                 width: 6,
                 height: 6,
                 borderRadius: '50%',
-                background: '#4ECDC4',
+                background: colors.primary[400],
                 display: 'inline-block',
                 flexShrink: 0,
               }}
@@ -173,7 +174,7 @@ const Landing: React.FC = () => {
             height="20"
             viewBox="0 0 24 24"
             fill="none"
-            stroke="rgba(255,255,255,0.4)"
+            stroke={colors.text.muted}
             strokeWidth="1.5"
             strokeLinecap="round"
           >
@@ -185,9 +186,9 @@ const Landing: React.FC = () => {
       {/* ── Stats strip ───────────────────────────────────── */}
       <div
         style={{
-          background: '#000',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
-          borderBottom: '1px solid rgba(255,255,255,0.06)',
+          background: colors.bg.base,
+          borderTop: `1px solid ${colors.border.subtle}`,
+          borderBottom: `1px solid ${colors.border.subtle}`,
           padding: '1.35rem 0',
         }}
       >
@@ -210,8 +211,8 @@ const Landing: React.FC = () => {
       <section
         id="whyus"
         style={{
-          background: '#000',
-          color: '#fff',
+          background: colors.bg.base,
+          color: colors.text.primary,
           padding: '7rem 0',
         }}
       >
@@ -222,7 +223,7 @@ const Landing: React.FC = () => {
                 fontSize: '0.7rem',
                 textTransform: 'uppercase',
                 letterSpacing: '0.2em',
-                color: 'rgba(255,255,255,0.28)',
+                color: colors.text.muted,
                 marginBottom: '1rem',
               }}
             >
@@ -233,7 +234,7 @@ const Landing: React.FC = () => {
               style={{
                 fontSize: 'clamp(2rem, 5vw, 3rem)',
                 fontWeight: 800,
-                color: '#fff',
+                color: colors.text.primary,
                 lineHeight: 1.1,
                 letterSpacing: '-0.025em',
                 margin: 0,
@@ -245,7 +246,7 @@ const Landing: React.FC = () => {
               style={{
                 marginTop: '0.875rem',
                 fontSize: '1rem',
-                color: 'rgba(255,255,255,0.38)',
+                color: colors.text.muted,
                 maxWidth: '420px',
                 margin: '0.875rem auto 0',
               }}
@@ -276,10 +277,10 @@ const Landing: React.FC = () => {
                 >
                   {f.icon}
                 </div>
-                <Text fw={700} size="lg" c="white" mb={6}>
+                <Text fw={700} size="lg" c={colors.text.primary} mb={6}>
                   {f.title}
                 </Text>
-                <Text size="sm" style={{ color: 'rgba(255,255,255,0.42)', lineHeight: 1.75 }}>
+                <Text size="sm" style={{ color: colors.text.muted, lineHeight: 1.75 }}>
                   {f.description}
                 </Text>
               </div>
@@ -291,8 +292,8 @@ const Landing: React.FC = () => {
       {/* ── Final CTA ─────────────────────────────────────── */}
       <section
         style={{
-          background: '#050505',
-          borderTop: '1px solid rgba(255,255,255,0.06)',
+          background: colors.bg.overlay,
+          borderTop: `1px solid ${colors.border.subtle}`,
           padding: '8rem 0',
           textAlign: 'center',
           position: 'relative',
@@ -308,8 +309,7 @@ const Landing: React.FC = () => {
             transform: 'translate(-50%,-50%)',
             width: '600px',
             height: '300px',
-            background:
-              'radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%)',
+            background: `radial-gradient(ellipse, rgba(255,255,255,0.04) 0%, transparent 70%)`,
             pointerEvents: 'none',
           }}
         />
@@ -319,7 +319,7 @@ const Landing: React.FC = () => {
             style={{
               fontSize: 'clamp(1.75rem, 4vw, 2.75rem)',
               fontWeight: 800,
-              color: '#fff',
+              color: colors.text.primary,
               lineHeight: 1.2,
               letterSpacing: '-0.025em',
               margin: '0 0 0.875rem',
@@ -330,7 +330,7 @@ const Landing: React.FC = () => {
           <Text
             style={{
               fontSize: '1rem',
-              color: 'rgba(255,255,255,0.36)',
+              color: colors.text.muted,
               marginBottom: '2.25rem',
             }}
           >

@@ -1,18 +1,16 @@
-/* ── Keyframes ─────────────────────────────────────────── */
-
-@keyframes fadeUp {
+@keyframes fade-up {
   from { opacity: 0; transform: translateY(22px); }
-  to   { opacity: 1; transform: translateY(0);    }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-@keyframes floatDuck {
-  0%, 100% { transform: translate(-50%, -50%) translateY(0px);    }
-  50%       { transform: translate(-50%, -50%) translateY(-16px);  }
+@keyframes float-duck {
+  0%, 100% { transform: translate(-50%, -50%) translateY(0px); }
+  50% { transform: translate(-50%, -50%) translateY(-16px); }
 }
 
-@keyframes arrowBounce {
-  0%, 100% { transform: translateX(-50%) translateY(0px);   opacity: 0.4; }
-  50%       { transform: translateX(-50%) translateY(8px);   opacity: 0.9; }
+@keyframes arrow-bounce {
+  0%, 100% { transform: translateX(-50%) translateY(0px); opacity: 0.4; }
+  50% { transform: translateX(-50%) translateY(8px); opacity: 0.9; }
 }
 
 /* ── Ambient glows ─────────────────────────────────────── */
@@ -24,7 +22,7 @@
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(78, 205, 196, 0.09) 0%, transparent 65%);
+  background: radial-gradient(ellipse, rgba(56,217,169,0.09) 0%, transparent 65%);
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
@@ -36,7 +34,7 @@
   width: 420px;
   height: 420px;
   border-radius: 50%;
-  background: radial-gradient(ellipse, rgba(255, 107, 107, 0.09) 0%, transparent 65%);
+  background: radial-gradient(ellipse, rgba(255,107,107,0.09) 0%, transparent 65%);
   pointer-events: none;
   transform: translate(-50%, -50%);
 }
@@ -52,10 +50,10 @@
   border: 1px solid rgba(255, 255, 255, 0.1);
   border-radius: 999px;
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.52);
+  color: #8888a0;
   letter-spacing: 0.06em;
   text-transform: uppercase;
-  animation: fadeUp 0.6s ease forwards;
+  animation: fade-up 0.6s ease forwards;
   opacity: 0;
   cursor: default;
   user-select: none;
@@ -69,11 +67,11 @@
   line-height: 1;
   letter-spacing: -0.045em;
   margin: 0.6rem 0 0;
-  background: linear-gradient(to bottom, #ffffff 10%, rgba(255, 255, 255, 0.6) 100%);
+  background: linear-gradient(to bottom, #fff 10%, rgba(255, 255, 255, 0.6) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  animation: fadeUp 0.7s 0.1s ease forwards;
+  animation: fade-up 0.7s 0.1s ease forwards;
   opacity: 0;
 }
 
@@ -82,7 +80,7 @@
   color: rgba(255, 255, 255, 0.36);
   margin: 0.75rem 0 0;
   letter-spacing: 0.01em;
-  animation: fadeUp 0.7s 0.22s ease forwards;
+  animation: fade-up 0.7s 0.22s ease forwards;
   opacity: 0;
 }
 
@@ -95,8 +93,7 @@
   width: clamp(160px, 17vw, 250px);
   height: clamp(160px, 17vw, 250px);
   pointer-events: none;
-  /* transform is entirely owned by the animation — do NOT set it inline */
-  animation: floatDuck 4.5s ease-in-out infinite;
+  animation: float-duck 4.5s ease-in-out infinite;
 }
 
 /* ── CTA row ───────────────────────────────────────────── */
@@ -130,7 +127,7 @@
 .btnGhost {
   padding: 0.7rem 1.8rem;
   background: transparent;
-  color: rgba(255, 255, 255, 0.65);
+  color: #8888a0;
   border: 1px solid rgba(255, 255, 255, 0.14);
   border-radius: 999px;
   font-weight: 500;
@@ -142,7 +139,7 @@
 
 .btnGhost:hover {
   border-color: rgba(255, 255, 255, 0.38);
-  color: rgba(255, 255, 255, 0.92);
+  color: #e4e4ef;
 }
 
 /* ── Scroll indicator ──────────────────────────────────── */
@@ -151,13 +148,12 @@
   position: absolute;
   bottom: 1.5rem;
   left: 50%;
-  /* transform is owned by the animation */
   background: none;
   border: none;
   cursor: pointer;
   padding: 0.5rem;
   z-index: 2;
-  animation: arrowBounce 2.2s ease-in-out infinite;
+  animation: arrow-bounce 2.2s ease-in-out infinite;
 }
 
 /* ── Stats strip ───────────────────────────────────────── */
@@ -187,13 +183,13 @@
 .statValue {
   font-size: 0.9rem;
   font-weight: 700;
-  color: #fff;
+  color: #e4e4ef;
   white-space: nowrap;
 }
 
 .statLabel {
   font-size: 0.72rem;
-  color: rgba(255, 255, 255, 0.32);
+  color: #55556a;
   margin-top: 0.1rem;
   white-space: nowrap;
   letter-spacing: 0.02em;
@@ -212,12 +208,13 @@
   border: 1px solid rgba(255, 255, 255, 0.07);
   border-radius: 18px;
   padding: 1.75rem;
-  transition: background 0.25s ease, border-color 0.25s ease;
+  transition: background 0.25s ease, border-color 0.25s ease, cursor 0.15s ease;
 }
 
 .featureCard:hover {
   background: rgba(255, 255, 255, 0.055);
   border-color: rgba(255, 255, 255, 0.16);
+  cursor: pointer;
 }
 
 /* ── Responsive ────────────────────────────────────────── */

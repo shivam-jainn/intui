@@ -70,9 +70,58 @@ model User {
   questions            Question[]
   Submission           Submission[]
   IncidentSubmission   IncidentSubmission[]
+  shadowban     Shadowban?
+  referrals     Referral[]       @relation("Referrer")
 
   @@unique([email])
   @@map("user")
+}
+
+model MixerRun {
+  id          String    @id @default(cuid())
+  userId      String
+  difficulty  String
+  duration    Int
+  status      String    @default("pending")
+  startedAt   DateTime  @default(now())
+  endedAt     DateTime?
+  submittedAt DateTime?
+
+  @@index([userId])
+  @@map("mixer_run")
+}
+
+model Shadowban {
+  id           String    @id @default(cuid())
+  userId       String    @unique
+  reason       String
+  bannedAt     DateTime  @default(now())
+  referralCode String    @unique @default(cuid())
+  unlockedBy   String?
+  unlockedAt   DateTime?
+  user         User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("shadowban")
+}
+
+model Referral {
+  id         String    @id @default(cuid())
+  code       String    @unique
+  referrerId String
+  referredId String?
+  usedAt     DateTime?
+  createdAt  DateTime  @default(now())
+  referrer   User      @relation("Referrer", fields: [referrerId], references: [id], onDelete: Cascade)
+
+  @@index([code])
+  @@map("referral")
+}
+
+model MixerVerification {
+  uuid       String   @id
+  verifiedAt DateTime @default(now())
+
+  @@map("mixer_verification")
 }
 
 model Session {
