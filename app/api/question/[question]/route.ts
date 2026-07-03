@@ -16,6 +16,11 @@ export async function GET(
         include:{
           topic:true
         }
+      },
+      Submission:{
+        orderBy:{
+          createdAt:'desc'
+        }
       }
     }
   });

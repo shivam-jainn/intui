@@ -1,25 +1,29 @@
 import { NextRequest, NextResponse } from "next/server";
 import { GoogleAuth } from "google-auth-library";
 import { executorService } from "@/lib/executor-config";
+import { prisma } from "@/prisma/db";
+import { auth } from "@/lib/auth";
 
 export async function POST(req: NextRequest) {
+  const session = await auth.api.getSession({ headers: req.headers });
+
   const { question_slug, code, language } = await req.json();
 
   if (!question_slug) {
     return NextResponse.json(
-      { message: "Cannot run code without the question slug" },
+      { message: "Missing question information. Please refresh the page and try again." },
       { status: 400 }
     );
   }
   if (!language) {
     return NextResponse.json(
-      { message: "Cannot run code without any language selected" },
+      { message: "Please select a programming language before submitting your code." },
       { status: 400 }
     );
   }
   if (!code || typeof code !== "string" || code.length < 10) {
     return NextResponse.json(
-      { message: "No valid code exists." },
+      { message: "Your code is empty or too short. Please write some code before submitting." },
       { status: 400 }
     );
   }
@@ -77,6 +81,32 @@ export async function POST(req: NextRequest) {
         throw new Error(`Execution Error: ${errorMessage} (HTTP ${response.status})`);
     }
 
+    // Save submission to DB if user is authenticated
+    if (session?.user?.id) {
+      try {
+        const question = await prisma.question.findUnique({
+          where: { slug: question_slug },
+          select: { id: true }
+        });
+
+        if (question) {
+          await prisma.submission.create({
+            data: {
+              questionId: question.id,
+              userId: session.user.id,
+              code,
+              language,
+              status: data.status || "Unknown",
+              timeTaken: data.timeTaken ?? null,
+              spaceTaken: data.memoryUsedKB ?? null,
+            }
+          });
+        }
+      } catch (dbError) {
+        console.error("Failed to save submission to DB:", dbError);
+      }
+    }
+
     return NextResponse.json(
       { 
         message: data.message,
@@ -89,9 +119,27 @@ export async function POST(req: NextRequest) {
     );
   } catch (error: any) {
     console.error("Submission error:", error.message);
-    return NextResponse.json(
-      { message: error.message || "Some error occurred. Please try again later." },
-      { status: 500 }
-    );
+    if (error.message?.includes("Target audience")) {
+      return NextResponse.json(
+        { message: "Service configuration error. Please contact support." },
+        { status: 500 }
+      );
+    } else if (error.message?.includes("fetch")) {
+      return NextResponse.json(
+        { message: "Unable to reach the execution service. Please try again later." },
+        { status: 500 }
+      );
+    } else if (error.message?.includes("Execution Error:")) {
+      const executionErrorMsg = error.message.replace("Execution Error: ", "").replace(/ \(HTTP \d+\)$/, "");
+      return NextResponse.json(
+        { message: executionErrorMsg },
+        { status: 400 }
+      );
+    } else {
+      return NextResponse.json(
+        { message: "An unexpected error occurred while submitting your code. Please try again." },
+        { status: 500 }
+      );
+    }
   }
 }

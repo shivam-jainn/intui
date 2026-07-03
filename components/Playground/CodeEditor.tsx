@@ -106,15 +106,11 @@ const CodeEditor = ({
 
       const data = await response.json();
       
-      if (!response.ok) {
-        setUiError(data.message || data.error || "Execution failed");
-      }
-      
       setSubmission(false);
       setResultData(data);
       setTestTab("results");
     } catch (error: any) {
-      setUiError("Network error: Could not reach execution server.");
+      setUiError("Unable to connect to the execution server. Check your internet connection and try again.");
     } finally {
       setIsLoading(false);
     }
@@ -138,15 +134,11 @@ const CodeEditor = ({
 
       const data = await response.json();
 
-      if (!response.ok) {
-        setUiError(data.message || data.error || "Submission failed");
-      }
-
       setSubmission(true);
       setResultData(data);
       setTestTab("results");
     } catch (error: any) {
-      setUiError("Network error: Could not reach submission server.");
+      setUiError("Unable to connect to the submission server. Check your internet connection and try again.");
     } finally {
       setIsLoading(false);
     }

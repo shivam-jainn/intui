@@ -21,8 +21,7 @@ export class FsStorage implements StorageService {
   }
 
   async download(filePath: string): Promise<Buffer> {
-    const fullPath = this.getFullPath(filePath);
-    return await fs.readFile(fullPath);
+    return await fs.readFile(path.join(this.baseDir, filePath));
   }
 
   async delete(filePath: string): Promise<void> {

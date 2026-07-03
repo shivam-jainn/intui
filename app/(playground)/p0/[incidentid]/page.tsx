@@ -16,7 +16,18 @@ import MultiFileEditor from "@/components/Incident/MultiFileEditor";
 import AIChatPanel from "@/components/Incident/AIChatPanel";
 import IncidentRunBar from "@/components/Incident/IncidentRunBar";
 import IncidentTestResults from "@/components/Incident/IncidentTestResults";
+import IncidentSubmissions from "@/components/Incident/IncidentSubmissions";
 import type { IncidentFile } from "@/app/api/incident/[incidentid]/files/route";
+
+interface IncidentSubmission {
+  id: number;
+  code: string;
+  language: string;
+  status: string;
+  timeTaken: number | null;
+  spaceTaken: number | null;
+  createdAt: string;
+}
 
 interface IncidentData {
   report: string;
@@ -33,10 +44,11 @@ export default function IncidentPlaygroundPage({
   const incidentId = params.incidentid;
 
   const [incidentData, setIncidentData] = useState<IncidentData | null>(null);
+  const [submissions, setSubmissions] = useState<IncidentSubmission[]>([]);
   const [language, setLanguage] = useState("python");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [leftTab, setLeftTab] = useState<"description" | "files">("description");
+  const [leftTab, setLeftTab] = useState<"description" | "files" | "submissions">("description");
 
   const [, setFiles] = useAtom(incidentFilesAtom);
   const [, setActiveFile] = useAtom(activeFilePathAtom);
@@ -75,8 +87,23 @@ export default function IncidentPlaygroundPage({
     }
   }
 
+  async function fetchSubmissions() {
+    try {
+      const res = await fetch(
+        `/api/incident/${encodeURIComponent(incidentId)}/submissions`
+      );
+      if (res.ok) {
+        const data = await res.json();
+        setSubmissions(data);
+      }
+    } catch {
+      // Silently fail - submissions are optional
+    }
+  }
+
   useEffect(() => {
     fetchIncident(language);
+    fetchSubmissions();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [incidentId, language]);
 
@@ -106,7 +133,7 @@ export default function IncidentPlaygroundPage({
       }}
     >
       <PanelGroup direction="horizontal">
-        {/* Left panel: description + file tree */}
+        {/* Left panel: description + file tree + submissions */}
         <Panel defaultSize={22} minSize={15} maxSize={35}>
           <Box
             style={{
@@ -120,7 +147,7 @@ export default function IncidentPlaygroundPage({
               gap={0}
               style={{ borderBottom: "1px solid var(--mantine-color-dark-5)" }}
             >
-              {(["description", "files"] as const).map((tab) => (
+              {(["description", "files", "submissions"] as const).map((tab) => (
                 <Box
                   key={tab}
                   px="md"
@@ -152,8 +179,10 @@ export default function IncidentPlaygroundPage({
                   report={incidentData.report}
                   incidentName={incidentId}
                 />
-              ) : (
+              ) : leftTab === "files" ? (
                 <FileTree />
+              ) : (
+                <IncidentSubmissions submissions={submissions} />
               )}
             </Box>
           </Box>
