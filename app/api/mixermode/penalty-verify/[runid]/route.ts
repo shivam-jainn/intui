@@ -9,36 +9,39 @@ export async function POST(
     const { runid } = params;
     const { uuid } = await req.json();
 
-    if (!uuid || uuid === "client-check") {
-      // Client-side "I Accept" button — just verify UUID exists
-      if (uuid === "client-check") {
-        return NextResponse.json({ verified: true, message: "Penalty acknowledged" });
-      }
+    // Frontend polls with "client-check" — skip UUID validation,
+    // just return whether the terminal script already registered.
+    if (uuid === "client-check") {
+      const run = await prisma.mixerRun.findUnique({ where: { id: runid } });
+      return NextResponse.json({
+        verified: run?.status === "penalized",
+      });
+    }
+
+    if (!uuid) {
       return NextResponse.json({ error: "Missing uuid" }, { status: 400 });
     }
 
+    // Auto-register device if the terminal script was run —
+    // no need for a separate verification step.
     const verification = await prisma.mixerVerification.findUnique({
       where: { uuid },
     });
-
     if (!verification) {
-      return NextResponse.json(
-        { error: "Device not verified. Run verification first." },
-        { status: 403 }
-      );
+      await prisma.mixerVerification.create({
+        data: { uuid, verifiedAt: new Date() },
+      });
     }
 
     const run = await prisma.mixerRun.findUnique({ where: { id: runid } });
+    if (run?.status === "penalized") {
+      return NextResponse.json({ verified: true, message: "Already penalized" });
+    }
     if (!run) {
-      // Run might not exist if start API failed — still accept penalty
       return NextResponse.json({
         verified: true,
         message: "Penalty accepted. You may now continue.",
       });
-    }
-
-    if (run.status === "penalized") {
-      return NextResponse.json({ verified: true, message: "Already penalized" });
     }
 
     await prisma.mixerRun.update({

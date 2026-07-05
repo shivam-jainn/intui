@@ -3,7 +3,7 @@ import { prisma } from "@/prisma/db";
 
 export async function POST(req: NextRequest) {
   try {
-    const { uuid } = await req.json();
+    const { uuid, userId } = await req.json();
     if (!uuid) {
       return NextResponse.json({ error: "Missing uuid" }, { status: 400 });
     }
@@ -17,7 +17,7 @@ export async function POST(req: NextRequest) {
     }
 
     await prisma.mixerVerification.create({
-      data: { uuid, verifiedAt: new Date() },
+      data: { uuid, userId: userId || null, verifiedAt: new Date() },
     });
 
     return NextResponse.json({ verified: true });
@@ -30,15 +30,23 @@ export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
     const uuid = searchParams.get("uuid");
-    if (!uuid) {
-      return NextResponse.json({ verified: false });
+    const userId = searchParams.get("userId");
+
+    if (uuid) {
+      const record = await prisma.mixerVerification.findUnique({
+        where: { uuid },
+      });
+      return NextResponse.json({ verified: !!record });
     }
 
-    const record = await prisma.mixerVerification.findUnique({
-      where: { uuid },
-    });
+    if (userId) {
+      const record = await prisma.mixerVerification.findFirst({
+        where: { userId },
+      });
+      return NextResponse.json({ verified: !!record });
+    }
 
-    return NextResponse.json({ verified: !!record });
+    return NextResponse.json({ verified: false });
   } catch {
     return NextResponse.json({ verified: false });
   }

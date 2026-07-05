@@ -119,6 +119,7 @@ model Referral {
 
 model MixerVerification {
   uuid       String   @id
+  userId     String?
   verifiedAt DateTime @default(now())
 
   @@map("mixer_verification")
