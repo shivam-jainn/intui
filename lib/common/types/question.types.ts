@@ -36,7 +36,17 @@ export const DSA_GENRES: GenreConfig[] = [
   {
     id: 'graph',
     label: 'Graph',
-    patterns: ['graph', 'dijkstra', 'bellman-ford', 'shortest path', 'bfs', 'dfs', 'currency arbitrage', 'negative cycle detection', 'logarithmic transformation'],
+    patterns: [
+      'graph',
+      'dijkstra',
+      'bellman-ford',
+      'shortest path',
+      'bfs',
+      'dfs',
+      'currency arbitrage',
+      'negative cycle detection',
+      'logarithmic transformation',
+    ],
   },
   {
     id: 'tree',

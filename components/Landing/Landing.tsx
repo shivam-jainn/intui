@@ -1,10 +1,10 @@
 'use client';
 
 import React, { Fragment, useEffect, useRef } from 'react';
-import { Text, Box, Container } from '@mantine/core';
 import { useRouter } from 'next/navigation';
-import styles from './Landing.module.css';
+import { Box, Container, Text } from '@mantine/core';
 import { colors } from '@/lib/theme/colors';
+import styles from './Landing.module.css';
 
 const FEATURES = [
   {
@@ -33,8 +33,7 @@ const FEATURES = [
   },
   {
     title: 'Contests & Bounties',
-    description:
-      'Join employer-sponsored coding challenges and fast-track your path to an offer.',
+    description: 'Join employer-sponsored coding challenges and fast-track your path to an offer.',
     gradient: `linear-gradient(135deg, ${colors.accent[600]} 0%, ${colors.accent[400]} 100%)`,
     wide: false,
     icon: (
@@ -153,11 +152,7 @@ const Landing: React.FC = () => {
           >
             Get Started
           </button>
-          <button
-            onClick={scrollToFeatures}
-            type="button"
-            className={styles.btnGhost}
-          >
+          <button onClick={scrollToFeatures} type="button" className={styles.btnGhost}>
             Why Intui?
           </button>
         </div>
@@ -258,10 +253,7 @@ const Landing: React.FC = () => {
           {/* Feature grid */}
           <div className={styles.bentoGrid}>
             {FEATURES.map((f) => (
-              <div
-                key={f.title}
-                className={styles.featureCard}
-              >
+              <div key={f.title} className={styles.featureCard}>
                 <div
                   style={{
                     width: 44,

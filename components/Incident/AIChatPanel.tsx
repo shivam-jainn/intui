@@ -1,5 +1,11 @@
-"use client";
+'use client';
 
+import React, { useEffect, useRef, useState } from 'react';
+import { IconBrandGoogleFilled, IconRobot, IconSend, IconUser, IconX } from '@tabler/icons-react';
+import { useAtom } from 'jotai';
+import Markdown from 'react-markdown';
+import rehypeHighlight from 'rehype-highlight';
+import remarkGfm from 'remark-gfm';
 import {
   ActionIcon,
   Badge,
@@ -17,116 +23,95 @@ import {
   ThemeIcon,
   Title,
   Tooltip,
-} from "@mantine/core";
-import { useAtom } from "jotai";
+} from '@mantine/core';
+import { useLocalStorage } from '@mantine/hooks';
 import {
   activeFilePathAtom,
   fileContentsAtom,
   incidentFilesAtom,
-} from "@/contexts/IncidentContext";
-import {
-  IconBrandGoogleFilled,
-  IconRobot,
-  IconSend,
-  IconUser,
-  IconX,
-} from "@tabler/icons-react";
-import React, { useEffect, useRef, useState } from "react";
-import { useLocalStorage } from "@mantine/hooks";
-import Markdown from "react-markdown";
-import rehypeHighlight from "rehype-highlight";
-import remarkGfm from "remark-gfm";
+} from '@/contexts/IncidentContext';
 
 interface Message {
   id: string;
-  role: "user" | "assistant";
+  role: 'user' | 'assistant';
   content: string;
 }
 
 const MODEL_OPTIONS = [
   {
-    group: "Google",
+    group: 'Google',
     items: [
-      { value: "gemini-2.0-flash", label: "Gemini 2.0 Flash" },
-      { value: "gemini-2.5-pro", label: "Gemini 2.5 Pro" },
-      { value: "gemini-1.5-pro", label: "Gemini 1.5 Pro" },
+      { value: 'gemini-2.0-flash', label: 'Gemini 2.0 Flash' },
+      { value: 'gemini-2.5-pro', label: 'Gemini 2.5 Pro' },
+      { value: 'gemini-1.5-pro', label: 'Gemini 1.5 Pro' },
     ],
   },
   {
-    group: "xAI",
+    group: 'xAI',
     items: [
-      { value: "grok-3", label: "Grok 3" },
-      { value: "grok-3-mini", label: "Grok 3 Mini" },
-      { value: "grok-2", label: "Grok 2" },
+      { value: 'grok-3', label: 'Grok 3' },
+      { value: 'grok-3-mini', label: 'Grok 3 Mini' },
+      { value: 'grok-2', label: 'Grok 2' },
     ],
   },
   {
-    group: "Groq",
+    group: 'Groq',
     items: [
-      { value: "llama-3.3-70b-versatile", label: "Llama 3.3 70B Versatile" },
-      { value: "llama-3.1-8b-instant", label: "Llama 3.1 8B Instant" },
-      { value: "mixtral-8x7b-32768", label: "Mixtral 8x7B 32K" },
+      { value: 'llama-3.3-70b-versatile', label: 'Llama 3.3 70B Versatile' },
+      { value: 'llama-3.1-8b-instant', label: 'Llama 3.1 8B Instant' },
+      { value: 'mixtral-8x7b-32768', label: 'Mixtral 8x7B 32K' },
     ],
   },
 ];
 
 const PROVIDER_LINKS: Record<string, string> = {
-  "gemini-2.0-flash": "https://aistudio.google.com/apikey",
-  "gemini-2.5-pro": "https://aistudio.google.com/apikey",
-  "gemini-1.5-pro": "https://aistudio.google.com/apikey",
-  "grok-3": "https://console.x.ai",
-  "grok-3-mini": "https://console.x.ai",
-  "grok-2": "https://console.x.ai",
-  "llama-3.3-70b-versatile": "https://console.groq.com/keys",
-  "llama-3.1-8b-instant": "https://console.groq.com/keys",
-  "mixtral-8x7b-32768": "https://console.groq.com/keys",
+  'gemini-2.0-flash': 'https://aistudio.google.com/apikey',
+  'gemini-2.5-pro': 'https://aistudio.google.com/apikey',
+  'gemini-1.5-pro': 'https://aistudio.google.com/apikey',
+  'grok-3': 'https://console.x.ai',
+  'grok-3-mini': 'https://console.x.ai',
+  'grok-2': 'https://console.x.ai',
+  'llama-3.3-70b-versatile': 'https://console.groq.com/keys',
+  'llama-3.1-8b-instant': 'https://console.groq.com/keys',
+  'mixtral-8x7b-32768': 'https://console.groq.com/keys',
 };
 
-function getProvider(model: string): "google" | "xai" | "groq" {
-  if (model.includes("llama") || model.includes("mixtral")) return "groq";
-  if (model.startsWith("grok")) return "xai";
-  return "google";
+function getProvider(model: string): 'google' | 'xai' | 'groq' {
+  if (model.includes('llama') || model.includes('mixtral')) return 'groq';
+  if (model.startsWith('grok')) return 'xai';
+  return 'google';
 }
 
 function MessageBubble({ message }: { message: Message }) {
-  const isUser = message.role === "user";
+  const isUser = message.role === 'user';
   return (
     <Box
       style={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: isUser ? "flex-end" : "flex-start",
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: isUser ? 'flex-end' : 'flex-start',
         gap: 4,
       }}
     >
-      <Group gap={6} justify={isUser ? "flex-end" : "flex-start"}>
-        <ThemeIcon
-          size="xs"
-          variant="light"
-          color={isUser ? "blue" : "violet"}
-          radius="xl"
-        >
+      <Group gap={6} justify={isUser ? 'flex-end' : 'flex-start'}>
+        <ThemeIcon size="xs" variant="light" color={isUser ? 'blue' : 'violet'} radius="xl">
           {isUser ? <IconUser size={10} /> : <IconRobot size={10} />}
         </ThemeIcon>
         <Text size="xs" c="dimmed">
-          {isUser ? "You" : "AI Interviewer"}
+          {isUser ? 'You' : 'AI Interviewer'}
         </Text>
       </Group>
       <Paper
         p="sm"
         withBorder
         style={{
-          maxWidth: "92%",
-          backgroundColor: isUser
-            ? "var(--mantine-color-blue-9)"
-            : "var(--mantine-color-dark-6)",
-          borderColor: isUser
-            ? "var(--mantine-color-blue-7)"
-            : "var(--mantine-color-dark-4)",
+          maxWidth: '92%',
+          backgroundColor: isUser ? 'var(--mantine-color-blue-9)' : 'var(--mantine-color-dark-6)',
+          borderColor: isUser ? 'var(--mantine-color-blue-7)' : 'var(--mantine-color-dark-4)',
         }}
       >
         {isUser ? (
-          <Text size="sm" style={{ whiteSpace: "pre-wrap", wordBreak: "break-word" }}>
+          <Text size="sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
             {message.content}
           </Text>
         ) : (
@@ -134,14 +119,11 @@ function MessageBubble({ message }: { message: Message }) {
             style={{
               fontSize: 13,
               lineHeight: 1.6,
-              wordBreak: "break-word",
+              wordBreak: 'break-word',
             }}
             className="ai-response-markdown"
           >
-            <Markdown
-              remarkPlugins={[remarkGfm]}
-              rehypePlugins={[rehypeHighlight]}
-            >
+            <Markdown remarkPlugins={[remarkGfm]} rehypePlugins={[rehypeHighlight]}>
               {message.content}
             </Markdown>
           </Box>
@@ -162,12 +144,12 @@ export default function AIChatPanel({ incidentName, incidentReport }: AIChatPane
   const [fileContents] = useAtom(fileContentsAtom);
 
   const [model, setModel] = useLocalStorage({
-    key: "ai-chat-model",
-    defaultValue: "gemini-2.0-flash",
+    key: 'ai-chat-model',
+    defaultValue: 'gemini-2.0-flash',
   });
   const [apiKey, setApiKey] = useLocalStorage({
     key: `ai-api-key-${getProvider(model)}`,
-    defaultValue: "",
+    defaultValue: '',
   });
 
   function buildSystemPrompt() {
@@ -183,7 +165,7 @@ Be concise and conversational.`;
   }
 
   const [messages, setMessages] = useState<Message[]>([]);
-  const [input, setInput] = useState("");
+  const [input, setInput] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -202,18 +184,18 @@ Be concise and conversational.`;
   const provider = getProvider(model);
 
   function getActiveCode(): string {
-    if (!activeFile) return "";
+    if (!activeFile) return '';
     const fileData = files.find((f) => f.path === activeFile);
-    return fileContents[activeFile] ?? fileData?.content ?? "";
+    return fileContents[activeFile] ?? fileData?.content ?? '';
   }
 
   function injectCode() {
     const code = getActiveCode();
     if (!code) return;
-    const fileName = activeFile?.split("/").pop() ?? "code";
+    const fileName = activeFile?.split('/').pop() ?? 'code';
     setInput(
       (prev) =>
-        `${prev ? prev + "\n\n" : ""}Here is my current \`${fileName}\`:\n\`\`\`\n${code}\n\`\`\``
+        `${prev ? prev + '\n\n' : ''}Here is my current \`${fileName}\`:\n\`\`\`\n${code}\n\`\`\``
     );
   }
 
@@ -221,18 +203,18 @@ Be concise and conversational.`;
     if (!input.trim() || isLoading) return;
     if (!apiKey.trim()) {
       setShowKeyInput(true);
-      setError("Please provide your API key first.");
+      setError('Please provide your API key first.');
       return;
     }
 
     const userMessage: Message = {
       id: Date.now().toString(),
-      role: "user",
+      role: 'user',
       content: input.trim(),
     };
 
     setMessages((prev) => [...prev, userMessage]);
-    setInput("");
+    setInput('');
     setIsLoading(true);
     setError(null);
     abortControllerRef.current = new AbortController();
@@ -243,9 +225,9 @@ Be concise and conversational.`;
         content: m.content,
       }));
 
-      const response = await fetch("/api/chat", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         signal: abortControllerRef.current.signal,
         body: JSON.stringify({
           messages: chatMessages,
@@ -261,17 +243,17 @@ Be concise and conversational.`;
       }
 
       const reader = response.body?.getReader();
-      if (!reader) throw new Error("No response body");
+      if (!reader) throw new Error('No response body');
 
       const assistantMessage: Message = {
         id: (Date.now() + 1).toString(),
-        role: "assistant",
-        content: "",
+        role: 'assistant',
+        content: '',
       };
       setMessages((prev) => [...prev, assistantMessage]);
 
       const decoder = new TextDecoder();
-      let streamedText = "";
+      let streamedText = '';
 
       while (true) {
         const { done, value } = await reader.read();
@@ -282,7 +264,7 @@ Be concise and conversational.`;
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
-          if (last?.role === "assistant") {
+          if (last?.role === 'assistant') {
             updated[updated.length - 1] = {
               ...last,
               content: last.content + chunk,
@@ -298,7 +280,7 @@ Be concise and conversational.`;
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
-          if (last?.role === "assistant") {
+          if (last?.role === 'assistant') {
             updated[updated.length - 1] = {
               ...last,
               content: last.content + finalChunk,
@@ -315,10 +297,8 @@ Be concise and conversational.`;
         setMessages((prev) => {
           const updated = [...prev];
           const last = updated[updated.length - 1];
-          if (last?.role === "assistant") {
-            const cleanedContent = last.content
-              .replace(/\[Provider error:[\s\S]+?\]/g, "")
-              .trim();
+          if (last?.role === 'assistant') {
+            const cleanedContent = last.content.replace(/\[Provider error:[\s\S]+?\]/g, '').trim();
 
             if (!cleanedContent) {
               updated.pop();
@@ -335,13 +315,13 @@ Be concise and conversational.`;
       }
 
       if (!streamedText.trim()) {
-        setError("The model returned an empty response. Check API key/model and try again.");
+        setError('The model returned an empty response. Check API key/model and try again.');
       }
     } catch (err: any) {
-      if (err?.name === "AbortError") {
-        setError("Request cancelled.");
+      if (err?.name === 'AbortError') {
+        setError('Request cancelled.');
       } else {
-        setError(err.message || "Failed to get AI response.");
+        setError(err.message || 'Failed to get AI response.');
       }
     } finally {
       abortControllerRef.current = null;
@@ -359,28 +339,25 @@ Be concise and conversational.`;
   }
 
   const keyLabel =
-    provider === "google"
-      ? "Google AI Studio API Key"
-      : provider === "xai"
-        ? "xAI API Key"
-        : "Groq API Key";
+    provider === 'google'
+      ? 'Google AI Studio API Key'
+      : provider === 'xai'
+        ? 'xAI API Key'
+        : 'Groq API Key';
   const keyPlaceholder =
-    provider === "google" ? "AIza..." : provider === "xai" ? "xai-..." : "gsk_...";
+    provider === 'google' ? 'AIza...' : provider === 'xai' ? 'xai-...' : 'gsk_...';
 
   return (
     <Box
       style={{
-        height: "100%",
-        display: "flex",
-        flexDirection: "column",
-        backgroundColor: "var(--mantine-color-dark-8)",
+        height: '100%',
+        display: 'flex',
+        flexDirection: 'column',
+        backgroundColor: 'var(--mantine-color-dark-8)',
       }}
     >
       {/* Header */}
-      <Box
-        p="sm"
-        style={{ borderBottom: "1px solid var(--mantine-color-dark-5)" }}
-      >
+      <Box p="sm" style={{ borderBottom: '1px solid var(--mantine-color-dark-5)' }}>
         <Group justify="space-between" mb="xs">
           <Group gap={6}>
             <Title order={6} style={{ fontSize: 13 }}>
@@ -390,23 +367,13 @@ Be concise and conversational.`;
           <Group gap={4}>
             {isLoading && (
               <Tooltip label="Stop response">
-                <ActionIcon
-                  size="xs"
-                  variant="subtle"
-                  color="red"
-                  onClick={stopStreaming}
-                >
+                <ActionIcon size="xs" variant="subtle" color="red" onClick={stopStreaming}>
                   <IconX size={12} />
                 </ActionIcon>
               </Tooltip>
             )}
             <Tooltip label="Clear chat">
-              <ActionIcon
-                size="xs"
-                variant="subtle"
-                color="gray"
-                onClick={clearChat}
-              >
+              <ActionIcon size="xs" variant="subtle" color="gray" onClick={clearChat}>
                 <IconX size={12} />
               </ActionIcon>
             </Tooltip>
@@ -431,14 +398,16 @@ Be concise and conversational.`;
               placeholder={keyPlaceholder}
               label={keyLabel}
               value={apiKey}
-              onChange={(e: React.ChangeEvent<HTMLInputElement>) => setApiKey(e.currentTarget.value)}
+              onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+                setApiKey(e.currentTarget.value)
+              }
               styles={{ label: { fontSize: 11 }, input: { fontSize: 12 } }}
             />
             <Group justify="space-between">
               <Text
                 size="xs"
                 c="blue"
-                style={{ cursor: "pointer", textDecoration: "underline" }}
+                style={{ cursor: 'pointer', textDecoration: 'underline' }}
                 component="a"
                 href={PROVIDER_LINKS[model]}
                 target="_blank"
@@ -446,11 +415,7 @@ Be concise and conversational.`;
               >
                 Get API key →
               </Text>
-              <Button
-                size="xs"
-                variant="light"
-                onClick={() => setShowKeyInput(false)}
-              >
+              <Button size="xs" variant="light" onClick={() => setShowKeyInput(false)}>
                 Done
               </Button>
             </Group>
@@ -459,24 +424,19 @@ Be concise and conversational.`;
           <Group gap={4}>
             <Badge
               size="xs"
-              color={apiKey ? "green" : "red"}
+              color={apiKey ? 'green' : 'red'}
               variant="dot"
-              style={{ cursor: "pointer" }}
+              style={{ cursor: 'pointer' }}
               onClick={() => setShowKeyInput(true)}
             >
-              {apiKey ? "API Key set" : "Set API Key"}
+              {apiKey ? 'API Key set' : 'Set API Key'}
             </Badge>
           </Group>
         )}
       </Box>
 
       {/* Messages */}
-      <ScrollArea
-        flex={1}
-        p="sm"
-        viewportRef={scrollRef}
-        style={{ flex: 1 }}
-      >
+      <ScrollArea flex={1} p="sm" viewportRef={scrollRef} style={{ flex: 1 }}>
         {messages.length === 0 ? (
           <Stack gap="sm" align="center" pt="xl">
             <ThemeIcon size="xl" variant="light" color="violet" radius="xl">
@@ -489,9 +449,7 @@ Be concise and conversational.`;
               size="xs"
               variant="light"
               color="violet"
-              onClick={() =>
-                setInput("Can you give me a hint about what the bug might be?")
-              }
+              onClick={() => setInput('Can you give me a hint about what the bug might be?')}
             >
               Get a hint
             </Button>
@@ -501,7 +459,7 @@ Be concise and conversational.`;
             {messages.map((msg) => (
               <MessageBubble key={msg.id} message={msg} />
             ))}
-            {isLoading && messages[messages.length - 1]?.role !== "assistant" && (
+            {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
               <Group gap={6}>
                 <Loader size="xs" color="violet" />
                 <Text size="xs" c="dimmed">
@@ -512,7 +470,7 @@ Be concise and conversational.`;
           </Stack>
         )}
         {error && (
-          <Paper p="xs" mt="sm" withBorder style={{ borderColor: "var(--mantine-color-red-7)" }}>
+          <Paper p="xs" mt="sm" withBorder style={{ borderColor: 'var(--mantine-color-red-7)' }}>
             <Text size="xs" c="red">
               {error}
             </Text>
@@ -521,15 +479,9 @@ Be concise and conversational.`;
       </ScrollArea>
 
       {/* Input area */}
-      <Box p="sm" style={{ borderTop: "1px solid var(--mantine-color-dark-5)" }}>
+      <Box p="sm" style={{ borderTop: '1px solid var(--mantine-color-dark-5)' }}>
         {activeFile && (
-          <Button
-            size="xs"
-            variant="solid"
-            color="blue"
-            mb="xs"
-            onClick={injectCode}
-          >
+          <Button size="xs" variant="solid" color="blue" mb="xs" onClick={injectCode}>
             Attach current file
           </Button>
         )}
@@ -539,12 +491,14 @@ Be concise and conversational.`;
             size="xs"
             placeholder="Ask about the bug, request hints..."
             value={input}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setInput(e.currentTarget.value)}
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
+              setInput(e.currentTarget.value)
+            }
             autosize
             minRows={2}
             maxRows={6}
             onKeyDown={(e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-              if (e.key === "Enter" && !e.shiftKey) {
+              if (e.key === 'Enter' && !e.shiftKey) {
                 e.preventDefault();
                 void sendMessage();
               }

@@ -1,5 +1,5 @@
-import { NextRequest, NextResponse } from "next/server";
-import { getStorage } from "@/lib/storage";
+import { NextRequest, NextResponse } from 'next/server';
+import { getStorage } from '@/lib/storage';
 
 export interface IncidentFile {
   path: string;
@@ -50,20 +50,23 @@ export async function GET(
   { params }: { params: Promise<{ incidentid: string }> }
 ) {
   const { incidentid } = await params;
-  const requestedLang = req.nextUrl.searchParams.get("language") ?? "python";
+  const requestedLang = req.nextUrl.searchParams.get('language') ?? 'python';
   const storage = getStorage();
 
   let manifest: IncidentManifest;
   try {
     const manifestBuffer = await storage.download(`incidents/${incidentid}/manifest.json`);
-    manifest = JSON.parse(manifestBuffer.toString("utf8")) as IncidentManifest;
+    manifest = JSON.parse(manifestBuffer.toString('utf8')) as IncidentManifest;
   } catch {
-    return NextResponse.json({ message: "Incident manifest not found" }, { status: 404 });
+    return NextResponse.json({ message: 'Incident manifest not found' }, { status: 404 });
   }
 
   const activeLang = selectLanguage(manifest, requestedLang);
   if (!activeLang) {
-    return NextResponse.json({ message: "No languages available for this incident" }, { status: 404 });
+    return NextResponse.json(
+      { message: 'No languages available for this incident' },
+      { status: 404 }
+    );
   }
 
   const files = manifest.filesByLanguage?.[activeLang] ?? [];
@@ -71,7 +74,7 @@ export async function GET(
     manifest.availableLanguages.length > 0
       ? manifest.availableLanguages
       : Object.keys(manifest.filesByLanguage ?? {});
-  const fallbackEntryFile = files.find((file) => !file.readonly)?.path ?? files[0]?.path ?? "";
+  const fallbackEntryFile = files.find((file) => !file.readonly)?.path ?? files[0]?.path ?? '';
   const entryFile = manifest.entryFileByLanguage?.[activeLang] ?? fallbackEntryFile;
 
   return NextResponse.json({

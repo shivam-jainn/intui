@@ -1,10 +1,10 @@
-"use client";
+'use client';
 
-import { Box, Text, Group, Stack, ThemeIcon, UnstyledButton } from "@mantine/core";
-import { useAtom } from "jotai";
-import { activeFilePathAtom, incidentFilesAtom } from "@/contexts/IncidentContext";
-import { IconFile, IconFolder, IconLock } from "@tabler/icons-react";
-import React, { useMemo } from "react";
+import React, { useMemo } from 'react';
+import { IconFile, IconFolder, IconLock } from '@tabler/icons-react';
+import { useAtom } from 'jotai';
+import { Box, Group, Stack, Text, ThemeIcon, UnstyledButton } from '@mantine/core';
+import { activeFilePathAtom, incidentFilesAtom } from '@/contexts/IncidentContext';
 
 interface TreeNode {
   name: string;
@@ -19,11 +19,11 @@ function buildTree(files: { path: string; readonly: boolean }[]): TreeNode[] {
   const dirMap: Record<string, TreeNode> = {};
 
   for (const file of files) {
-    const parts = file.path.split("/");
+    const parts = file.path.split('/');
     let current = root;
 
     for (let i = 0; i < parts.length - 1; i++) {
-      const dirPath = parts.slice(0, i + 1).join("/");
+      const dirPath = parts.slice(0, i + 1).join('/');
       if (!dirMap[dirPath]) {
         const node: TreeNode = {
           name: parts[i],
@@ -95,16 +95,16 @@ function TreeNodeItem({
       px={4}
       pl={depth * 16 + 4}
       style={{
-        borderRadius: "var(--mantine-radius-sm)",
-        backgroundColor: isActive ? "var(--mantine-color-blue-9)" : "transparent",
-        cursor: "pointer",
+        borderRadius: 'var(--mantine-radius-sm)',
+        backgroundColor: isActive ? 'var(--mantine-color-blue-9)' : 'transparent',
+        cursor: 'pointer',
       }}
     >
       <Group gap={4}>
-        <ThemeIcon size="xs" variant="transparent" color={node.readonly ? "gray" : "green"}>
+        <ThemeIcon size="xs" variant="transparent" color={node.readonly ? 'gray' : 'green'}>
           <IconFile size={13} />
         </ThemeIcon>
-        <Text size="xs" c={isActive ? "white" : "gray.3"} style={{ fontFamily: "monospace" }}>
+        <Text size="xs" c={isActive ? 'white' : 'gray.3'} style={{ fontFamily: 'monospace' }}>
           {node.name}
         </Text>
         {node.readonly && (
@@ -127,7 +127,7 @@ export default function FileTree() {
   );
 
   return (
-    <Stack gap={2} p="xs" style={{ overflowY: "auto", height: "100%" }}>
+    <Stack gap={2} p="xs" style={{ overflowY: 'auto', height: '100%' }}>
       <Text size="xs" fw={700} c="dimmed" mb={4} px={4}>
         FILES
       </Text>

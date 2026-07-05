@@ -1,19 +1,19 @@
-"use client";
+'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
+import { IconCheck, IconX } from '@tabler/icons-react';
 import { useAtom, useAtomValue } from 'jotai';
 import {
-  Text,
+  Badge,
   Box,
   Code,
-  Badge,
   Group,
-  Stack,
-  useMantineTheme,
-  ThemeIcon,
   Paper,
+  Stack,
+  Text,
+  ThemeIcon,
+  useMantineTheme,
 } from '@mantine/core';
-import { IconCheck, IconX } from '@tabler/icons-react';
 import { resultAtom, resultDataAtom, submissionAtom } from '@/contexts/TestCardContext';
 
 export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
@@ -42,13 +42,20 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
 
   const getStatusColor = (s: string) => {
     switch (s) {
-      case 'Accepted': return 'teal';
-      case 'Wrong Answer': return 'red';
-      case 'Time Limit Exceeded': return 'orange';
-      case 'Memory Limit Exceeded': return 'orange';
-      case 'Runtime Error': return 'red';
-      case 'Compilation Error': return 'red';
-      default: return 'gray';
+      case 'Accepted':
+        return 'teal';
+      case 'Wrong Answer':
+        return 'red';
+      case 'Time Limit Exceeded':
+        return 'orange';
+      case 'Memory Limit Exceeded':
+        return 'orange';
+      case 'Runtime Error':
+        return 'red';
+      case 'Compilation Error':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
@@ -162,7 +169,9 @@ function TestCaseContent({
     return (
       <Group justify="center" py="xl">
         <Stack align="center" gap={4}>
-          <Text size="sm" c="dimmed">No test cases available</Text>
+          <Text size="sm" c="dimmed">
+            No test cases available
+          </Text>
           <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
             Try running your code to see results
           </Text>
@@ -174,11 +183,7 @@ function TestCaseContent({
   return (
     <Stack gap={0}>
       {/* Case selector pills */}
-      <Group
-        gap={6}
-        p="10px 12px"
-        style={{ borderBottom: `1px solid ${theme.colors.dark[4]}` }}
-      >
+      <Group gap={6} p="10px 12px" style={{ borderBottom: `1px solid ${theme.colors.dark[4]}` }}>
         {testCases.map((_, i) => {
           const n = i + 1;
           const active = testcase === String(n);
@@ -263,38 +268,59 @@ function ResultsContent({
 }) {
   const getStatusColor = (s: string) => {
     switch (s) {
-      case 'Accepted': return 'teal';
-      case 'Wrong Answer': return 'red';
-      case 'Time Limit Exceeded': return 'orange';
-      case 'Memory Limit Exceeded': return 'orange';
-      case 'Runtime Error': return 'red';
-      case 'Compilation Error': return 'red';
-      default: return 'gray';
+      case 'Accepted':
+        return 'teal';
+      case 'Wrong Answer':
+        return 'red';
+      case 'Time Limit Exceeded':
+        return 'orange';
+      case 'Memory Limit Exceeded':
+        return 'orange';
+      case 'Runtime Error':
+        return 'red';
+      case 'Compilation Error':
+        return 'red';
+      default:
+        return 'gray';
     }
   };
 
   if (errorMessage && !resultData?.results?.length) {
-    let errorTitle = "Execution Error";
-    let errorHint = "";
+    let errorTitle = 'Execution Error';
+    let errorHint = '';
 
-    if (errorMessage.includes("Compilation Error") || errorMessage.includes("Compilation failed") || errorMessage.includes("syntax error") || errorMessage.includes("error:")) {
-      errorTitle = "Compilation Error";
-      errorHint = "Check your code for syntax errors and try again.";
-    } else if (errorMessage.includes("Runtime Error") || errorMessage.includes("segmentation fault")) {
-      errorTitle = "Runtime Error";
-      errorHint = "Your code crashed during execution. Check for null pointer access or infinite loops.";
-    } else if (errorMessage.includes("Time Limit Exceeded") || errorMessage.includes("timeout")) {
-      errorTitle = "Time Limit Exceeded";
-      errorHint = "Your code took too long to run. Optimize your algorithm or reduce unnecessary operations.";
-    } else if (errorMessage.includes("Memory Limit Exceeded")) {
-      errorTitle = "Memory Limit Exceeded";
-      errorHint = "Your code used too much memory. Reduce data structure sizes or optimize memory usage.";
-    } else if (errorMessage.includes("Network error") || errorMessage.includes("Unable to connect")) {
-      errorTitle = "Connection Error";
-      errorHint = "Unable to reach the execution service. Check your internet connection.";
-    } else if (errorMessage.includes("Configuration error")) {
-      errorTitle = "Service Error";
-      errorHint = "The execution service is misconfigured. Please contact support.";
+    if (
+      errorMessage.includes('Compilation Error') ||
+      errorMessage.includes('Compilation failed') ||
+      errorMessage.includes('syntax error') ||
+      errorMessage.includes('error:')
+    ) {
+      errorTitle = 'Compilation Error';
+      errorHint = 'Check your code for syntax errors and try again.';
+    } else if (
+      errorMessage.includes('Runtime Error') ||
+      errorMessage.includes('segmentation fault')
+    ) {
+      errorTitle = 'Runtime Error';
+      errorHint =
+        'Your code crashed during execution. Check for null pointer access or infinite loops.';
+    } else if (errorMessage.includes('Time Limit Exceeded') || errorMessage.includes('timeout')) {
+      errorTitle = 'Time Limit Exceeded';
+      errorHint =
+        'Your code took too long to run. Optimize your algorithm or reduce unnecessary operations.';
+    } else if (errorMessage.includes('Memory Limit Exceeded')) {
+      errorTitle = 'Memory Limit Exceeded';
+      errorHint =
+        'Your code used too much memory. Reduce data structure sizes or optimize memory usage.';
+    } else if (
+      errorMessage.includes('Network error') ||
+      errorMessage.includes('Unable to connect')
+    ) {
+      errorTitle = 'Connection Error';
+      errorHint = 'Unable to reach the execution service. Check your internet connection.';
+    } else if (errorMessage.includes('Configuration error')) {
+      errorTitle = 'Service Error';
+      errorHint = 'The execution service is misconfigured. Please contact support.';
     }
 
     return (
@@ -337,7 +363,9 @@ function ResultsContent({
     return (
       <Group justify="center" py="xl">
         <Stack align="center" gap={4}>
-          <Text size="sm" c="dimmed">Run your code to see results</Text>
+          <Text size="sm" c="dimmed">
+            Run your code to see results
+          </Text>
           <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
             Click "Run" to test against sample cases or "Submit" to evaluate
           </Text>
@@ -362,24 +390,26 @@ function ResultsContent({
             {status === 'Accepted' ? <IconCheck size={12} /> : <IconX size={12} />}
           </ThemeIcon>
           <Box>
-            <Text size="xs" fw={600} lh={1.2}>{status}</Text>
+            <Text size="xs" fw={600} lh={1.2}>
+              {status}
+            </Text>
             {totalCount > 0 && (
-              <Text c="dimmed" lh={1.2} style={{ fontSize: 10 }}>{passedCount}/{totalCount} passed</Text>
+              <Text c="dimmed" lh={1.2} style={{ fontSize: 10 }}>
+                {passedCount}/{totalCount} passed
+              </Text>
             )}
           </Box>
         </Group>
         {resultData.timeTaken && (
-          <Badge size="xs" variant="light" color="dimmed">{resultData.timeTaken}ms</Badge>
+          <Badge size="xs" variant="light" color="dimmed">
+            {resultData.timeTaken}ms
+          </Badge>
         )}
       </Group>
 
       {/* Case selector pills */}
       {!isSubmission && (
-        <Group
-          gap={6}
-      p="10px 12px"
-      style={{ borderBottom: `1px solid ${theme.colors.dark[4]}` }}
-    >
+        <Group gap={6} p="10px 12px" style={{ borderBottom: `1px solid ${theme.colors.dark[4]}` }}>
           {resultData.results.map((r: any, i: number) => {
             const n = i + 1;
             const active = testcase === String(n);
@@ -400,11 +430,11 @@ function ResultsContent({
                   fontSize: 11,
                   fontWeight: active ? 700 : 500,
                   background: active
-                    ? (passed ? theme.colors.teal[6] : theme.colors.red[6])
+                    ? passed
+                      ? theme.colors.teal[6]
+                      : theme.colors.red[6]
                     : theme.colors.dark[5],
-                  color: active
-                    ? theme.white
-                    : (passed ? theme.colors.teal[4] : theme.colors.red[4]),
+                  color: active ? theme.white : passed ? theme.colors.teal[4] : theme.colors.red[4],
                   transition: 'all 0.12s ease',
                   userSelect: 'none',
                 }}
@@ -421,7 +451,9 @@ function ResultsContent({
       {!isSubmission ? (
         <Stack gap={0} p="10px 12px">
           <Group gap={6} mb={6}>
-            <Text fw={600} c="dimmed" tt="uppercase" style={{ fontSize: 10 }}>Output</Text>
+            <Text fw={600} c="dimmed" tt="uppercase" style={{ fontSize: 10 }}>
+              Output
+            </Text>
             <Badge
               size="sm"
               color={isSuccess ? 'teal' : 'red'}
@@ -473,11 +505,18 @@ function ResultsContent({
       ) : (
         <Group justify="center" py="xl" style={{ minHeight: 80 }}>
           <Stack align="center" gap={6}>
-            <ThemeIcon size={36} radius="xl" color={status === 'Accepted' ? 'teal' : 'orange'} variant="filled">
+            <ThemeIcon
+              size={36}
+              radius="xl"
+              color={status === 'Accepted' ? 'teal' : 'orange'}
+              variant="filled"
+            >
               {status === 'Accepted' ? <IconCheck size={18} /> : <IconX size={18} />}
             </ThemeIcon>
             <Text size="xs" fw={500}>
-              {status === 'Accepted' ? 'All test cases passed!' : `${passedCount}/${totalCount} test cases passed`}
+              {status === 'Accepted'
+                ? 'All test cases passed!'
+                : `${passedCount}/${totalCount} test cases passed`}
             </Text>
           </Stack>
         </Group>

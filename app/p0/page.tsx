@@ -1,8 +1,8 @@
 import React from 'react';
-import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
-import { auth } from '@/lib/auth';
+import { redirect } from 'next/navigation';
 import P0SimulationHome from '@/components/P0Simulation/P0SimulationHome';
+import { auth } from '@/lib/auth';
 
 export default async function P0Page() {
   const session = await auth.api.getSession({

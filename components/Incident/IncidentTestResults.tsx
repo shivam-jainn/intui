@@ -1,9 +1,9 @@
-"use client";
+'use client';
 
-import { Box, Badge, Stack, Text, Code, Group, ThemeIcon, ScrollArea } from "@mantine/core";
-import { useAtom } from "jotai";
-import { incidentResultAtom } from "@/contexts/IncidentContext";
-import { IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck, IconX } from '@tabler/icons-react';
+import { useAtom } from 'jotai';
+import { Badge, Box, Code, Group, ScrollArea, Stack, Text, ThemeIcon } from '@mantine/core';
+import { incidentResultAtom } from '@/contexts/IncidentContext';
 
 export default function IncidentTestResults() {
   const [result] = useAtom(incidentResultAtom);
@@ -18,19 +18,27 @@ export default function IncidentTestResults() {
     );
   }
 
-  const hasCountFields =
-    typeof result.passed === "number" ||
-    typeof result.failed === "number";
+  const hasCountFields = typeof result.passed === 'number' || typeof result.failed === 'number';
 
-  const passedCount = typeof result.passed === "number" ? result.passed : 0;
-  const failedCount = typeof result.failed === "number" ? result.failed : 0;
+  const passedCount = typeof result.passed === 'number' ? result.passed : 0;
+  const failedCount = typeof result.failed === 'number' ? result.failed : 0;
   const totalCount = passedCount + failedCount;
 
-  const passedBool = typeof result.passed === "boolean" ? result.passed : undefined;
-  const statusText = typeof result.status === "string" ? result.status : undefined;
+  const passedBool = typeof result.passed === 'boolean' ? result.passed : undefined;
+  const statusText = typeof result.status === 'string' ? result.status : undefined;
 
-  const stdout = typeof result.stdout === "string" ? result.stdout : (typeof result.output === "string" ? result.output : "");
-  const stderr = typeof result.stderr === "string" ? result.stderr : (typeof result.error === "string" ? result.error : "");
+  const stdout =
+    typeof result.stdout === 'string'
+      ? result.stdout
+      : typeof result.output === 'string'
+        ? result.output
+        : '';
+  const stderr =
+    typeof result.stderr === 'string'
+      ? result.stderr
+      : typeof result.error === 'string'
+        ? result.error
+        : '';
 
   // Heuristic for unittest summary in stderr if passed/failed counts are missing
   let parsedPassed = passedCount;
@@ -42,11 +50,11 @@ export default function IncidentTestResults() {
     const ranMatch = stderr.match(/Ran (\d+) tests/);
     if (ranMatch) {
       const ran = parseInt(ranMatch[1], 10);
-      if (stderr.includes("OK")) {
+      if (stderr.includes('OK')) {
         parsedPassed = ran;
         parsedFailed = 0;
         summaryMatched = true;
-      } else if (stderr.includes("FAILED")) {
+      } else if (stderr.includes('FAILED')) {
         const failMatch = stderr.match(/FAILED \(failures=(\d+)(?:, errors=(\d+))?\)/);
         if (failMatch) {
           const fails = parseInt(failMatch[1], 10);
@@ -63,9 +71,11 @@ export default function IncidentTestResults() {
   const finalFailed = summaryMatched ? parsedFailed : failedCount;
   const finalTotal = finalPassed + finalFailed;
 
-  const allPassed = summaryMatched 
-    ? (finalFailed === 0 && finalTotal > 0)
-    : (hasCountFields ? (failedCount === 0 && totalCount > 0) : (passedBool === true));
+  const allPassed = summaryMatched
+    ? finalFailed === 0 && finalTotal > 0
+    : hasCountFields
+      ? failedCount === 0 && totalCount > 0
+      : passedBool === true;
 
   // Determine if this is a "valid" failure or a system error
   // If we matched the unittest summary, it's a test result, not a crash.
@@ -76,14 +86,21 @@ export default function IncidentTestResults() {
       <Stack gap="sm" p="md">
         {/* Summary */}
         <Group gap="xs">
-          <Badge color={allPassed ? "green" : "red"} size="lg" variant="filled">
+          <Badge color={allPassed ? 'green' : 'red'} size="lg" variant="filled">
             {summaryMatched || hasCountFields
-              ? (allPassed ? "All Tests Passed" : `${summaryMatched ? finalFailed : failedCount} / ${summaryMatched ? finalTotal : totalCount} Failed`)
-              : (allPassed ? "Passed" : (statusText ? statusText : "Failed"))}
+              ? allPassed
+                ? 'All Tests Passed'
+                : `${summaryMatched ? finalFailed : failedCount} / ${summaryMatched ? finalTotal : totalCount} Failed`
+              : allPassed
+                ? 'Passed'
+                : statusText
+                  ? statusText
+                  : 'Failed'}
           </Badge>
           {(summaryMatched || (hasCountFields && totalCount > 0)) && (
             <Text size="sm" c="dimmed">
-              {summaryMatched ? finalPassed : finalPassed} passed, {summaryMatched ? finalFailed : failedCount} failed
+              {summaryMatched ? finalPassed : finalPassed} passed,{' '}
+              {summaryMatched ? finalFailed : failedCount} failed
             </Text>
           )}
         </Group>
@@ -98,11 +115,11 @@ export default function IncidentTestResults() {
               block
               style={{
                 fontSize: 11,
-                backgroundColor: "var(--mantine-color-dark-8)",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                maxHeight: "300px",
-                overflowY: "auto",
+                backgroundColor: 'var(--mantine-color-dark-8)',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                maxHeight: '300px',
+                overflowY: 'auto',
               }}
             >
               {stdout}
@@ -113,19 +130,19 @@ export default function IncidentTestResults() {
         {/* Stderr - Only show as Error if it's not just the unittest output */}
         {stderr && (
           <Box>
-            <Text size="xs" fw={600} c={isSystemError ? "red" : "dimmed"} mb={4}>
-              {isSystemError ? "ERRORS" : "TEST LOGS"}
+            <Text size="xs" fw={600} c={isSystemError ? 'red' : 'dimmed'} mb={4}>
+              {isSystemError ? 'ERRORS' : 'TEST LOGS'}
             </Text>
             <Code
               block
               style={{
                 fontSize: 11,
-                backgroundColor: "var(--mantine-color-dark-8)",
-                color: isSystemError ? "var(--mantine-color-red-4)" : "var(--mantine-color-gray-5)",
-                whiteSpace: "pre-wrap",
-                wordBreak: "break-word",
-                maxHeight: "300px",
-                overflowY: "auto",
+                backgroundColor: 'var(--mantine-color-dark-8)',
+                color: isSystemError ? 'var(--mantine-color-red-4)' : 'var(--mantine-color-gray-5)',
+                whiteSpace: 'pre-wrap',
+                wordBreak: 'break-word',
+                maxHeight: '300px',
+                overflowY: 'auto',
               }}
             >
               {stderr}
@@ -144,13 +161,17 @@ export default function IncidentTestResults() {
                 <Group key={i} gap="xs" wrap="nowrap">
                   <ThemeIcon
                     size="xs"
-                    color={tc.passed ? "green" : "red"}
+                    color={tc.passed ? 'green' : 'red'}
                     variant="light"
                     radius="xl"
                   >
                     {tc.passed ? <IconCheck size={10} /> : <IconX size={10} />}
                   </ThemeIcon>
-                  <Text size="xs" c={tc.passed ? "green" : "red"} style={{ fontFamily: "monospace" }}>
+                  <Text
+                    size="xs"
+                    c={tc.passed ? 'green' : 'red'}
+                    style={{ fontFamily: 'monospace' }}
+                  >
                     {tc.name ?? `Test ${i + 1}`}
                   </Text>
                   {tc.message && (

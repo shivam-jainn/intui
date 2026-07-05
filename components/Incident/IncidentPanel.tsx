@@ -1,18 +1,13 @@
-"use client";
+'use client';
 
-import {
-  Badge,
-  Box,
-  Group,
-  ScrollArea,
-  Text,
-  Title,
-} from "@mantine/core";
-import Markdown from "react-markdown";
-import remarkGfm from "remark-gfm";
-import rehypeRaw from "rehype-raw";
+import Markdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import { Badge, Box, Group, ScrollArea, Text, Title } from '@mantine/core';
+
 import 'katex/dist/katex.min.css';
-import React from "react";
+
+import React from 'react';
 
 interface IncidentPanelProps {
   report: string;
@@ -23,29 +18,26 @@ export default function IncidentPanel({ report, incidentName }: IncidentPanelPro
   // Parse challenge type and difficulty from report header comments
   const challengeTypeMatch = report.match(/^# CHALLENGE TYPE\s*\n(.+)/m);
   const difficultyMatch = report.match(/^# DIFFICULTY\s*\n(.+)/m);
-  const challengeType = challengeTypeMatch?.[1]?.trim() ?? "Incident";
-  const difficulty = difficultyMatch?.[1]?.trim() ?? "Unknown";
+  const challengeType = challengeTypeMatch?.[1]?.trim() ?? 'Incident';
+  const difficulty = difficultyMatch?.[1]?.trim() ?? 'Unknown';
 
   const difficultyColor =
-    difficulty === "Easy"
-      ? "green"
-      : difficulty === "Medium"
-      ? "yellow"
-      : difficulty === "Hard"
-      ? "red"
-      : "gray";
+    difficulty === 'Easy'
+      ? 'green'
+      : difficulty === 'Medium'
+        ? 'yellow'
+        : difficulty === 'Hard'
+          ? 'red'
+          : 'gray';
 
   return (
-    <Box style={{ height: "100%", display: "flex", flexDirection: "column" }}>
-      <Box
-        p="sm"
-        style={{ borderBottom: "1px solid var(--mantine-color-dark-5)" }}
-      >
+    <Box style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+      <Box p="sm" style={{ borderBottom: '1px solid var(--mantine-color-dark-5)' }}>
         <Title order={5} mb={4}>
           {incidentName
-            .split("-")
+            .split('-')
             .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-            .join(" ")}
+            .join(' ')}
         </Title>
         <Group gap={6}>
           <Badge size="sm" color="red" variant="light">
@@ -62,7 +54,7 @@ export default function IncidentPanel({ report, incidentName }: IncidentPanelPro
           style={{
             fontSize: 13,
             lineHeight: 1.7,
-            color: "var(--mantine-color-gray-3)",
+            color: 'var(--mantine-color-gray-3)',
           }}
         >
           <Markdown
@@ -95,7 +87,7 @@ export default function IncidentPanel({ report, incidentName }: IncidentPanelPro
                 </Text>
               ),
               code: ({ children, className }) => {
-                const isBlock = className?.includes("language-");
+                const isBlock = className?.includes('language-');
                 if (isBlock) {
                   return (
                     <Box
@@ -103,12 +95,12 @@ export default function IncidentPanel({ report, incidentName }: IncidentPanelPro
                       p="sm"
                       mb="sm"
                       style={{
-                        backgroundColor: "var(--mantine-color-dark-8)",
-                        borderRadius: "var(--mantine-radius-sm)",
-                        overflowX: "auto",
+                        backgroundColor: 'var(--mantine-color-dark-8)',
+                        borderRadius: 'var(--mantine-radius-sm)',
+                        overflowX: 'auto',
                         fontSize: 12,
-                        fontFamily: "monospace",
-                        border: "1px solid var(--mantine-color-dark-4)",
+                        fontFamily: 'monospace',
+                        border: '1px solid var(--mantine-color-dark-4)',
                       }}
                     >
                       <code>{children}</code>
@@ -121,10 +113,10 @@ export default function IncidentPanel({ report, incidentName }: IncidentPanelPro
                     px={4}
                     py={1}
                     style={{
-                      backgroundColor: "var(--mantine-color-dark-6)",
-                      borderRadius: "var(--mantine-radius-xs)",
+                      backgroundColor: 'var(--mantine-color-dark-6)',
+                      borderRadius: 'var(--mantine-radius-xs)',
                       fontSize: 12,
-                      fontFamily: "monospace",
+                      fontFamily: 'monospace',
                     }}
                   >
                     {children}

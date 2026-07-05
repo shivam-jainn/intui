@@ -1,6 +1,6 @@
-import { StorageService } from "../storage-services";
-import fs from "fs/promises";
-import path from "path";
+import fs from 'fs/promises';
+import path from 'path';
+import { StorageService } from '../storage-services';
 
 export class FsStorage implements StorageService {
   private baseDir: string;

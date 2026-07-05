@@ -1,5 +1,5 @@
-import { prisma } from "@/prisma/db";
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/prisma/db';
 
 export async function GET(
   req: NextRequest,
@@ -18,7 +18,7 @@ export async function GET(
 
   const submissions = await prisma.incidentSubmission.findMany({
     where: { incidentId: incident.id },
-    orderBy: { createdAt: "desc" },
+    orderBy: { createdAt: 'desc' },
   });
 
   return NextResponse.json(submissions);

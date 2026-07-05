@@ -1,27 +1,26 @@
-import { AwsStorage } from "./providers/aws";
-import { GcpStorage } from "./providers/gcp";
-import { FsStorage } from "./providers/fs";
-import { StorageService } from "./storage-services";
+import { AwsStorage } from './providers/aws';
+import { FsStorage } from './providers/fs';
+import { GcpStorage } from './providers/gcp';
+import { StorageService } from './storage-services';
 
 type CommonConfig = {
-  config?: any; 
+  config?: any;
   bucketName: string;
-}
+};
 
 type AwsConfig = CommonConfig & {
-  provider: "aws";
-
+  provider: 'aws';
 };
 
 type GcpConfig = CommonConfig & {
-  provider: "gcp";
-  credentials : Record<string,string>;
+  provider: 'gcp';
+  credentials: Record<string, string>;
 };
 
 type FsConfig = {
-  provider: "fs";
+  provider: 'fs';
   baseDir: string;
-}
+};
 
 type StorageConfig = AwsConfig | GcpConfig | FsConfig;
 
@@ -29,19 +28,18 @@ export class Storage {
   private storageService: StorageService;
 
   constructor(config: StorageConfig) {
-
-    if(!('provider' in config)){
+    if (!('provider' in config)) {
       throw new Error(`Provide Provider in Config`);
     }
 
-    if (config.provider === "aws") {
-      this.storageService = new AwsStorage(); 
-    } else if (config.provider === "gcp") {
+    if (config.provider === 'aws') {
+      this.storageService = new AwsStorage();
+    } else if (config.provider === 'gcp') {
       if (!config.bucketName) {
-        throw new Error("Bucket name is required for GCP.");
+        throw new Error('Bucket name is required for GCP.');
       }
-      this.storageService = new GcpStorage(config.config, config.bucketName,config.credentials);
-    } else if (config.provider === "fs") {
+      this.storageService = new GcpStorage(config.config, config.bucketName, config.credentials);
+    } else if (config.provider === 'fs') {
       this.storageService = new FsStorage(config.baseDir);
     } else {
       throw new Error(`Unsupported storage provider: ${config}`);

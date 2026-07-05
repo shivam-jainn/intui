@@ -1,4 +1,4 @@
-import { NextRequest, NextResponse } from "next/server";
+import { NextRequest, NextResponse } from 'next/server';
 
 function generateVerifyScript(baseUrl: string, userId?: string): string {
   const userIdParam = userId ? `&userId=${userId}` : '';
@@ -102,19 +102,14 @@ echo ""
 `;
 }
 
-type ScriptFn = (
-  baseUrl: string,
-  runid: string,
-  readUuid: string,
-  verifyCall: string
-) => string;
+type ScriptFn = (baseUrl: string, runid: string, readUuid: string, verifyCall: string) => string;
 
 // ── EASY pool ───────────────────────────────────────────────────
 
 const easyWallpaper: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("EASY PENALTY")}
+${headerBlock('EASY PENALTY')}
 
 WALLPAPER_PATH="/tmp/intui_wallpaper_$(date +%s).png"
 
@@ -136,7 +131,7 @@ ${vc}
 const easyDesktopNoise: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("EASY PENALTY")}
+${headerBlock('EASY PENALTY')}
 
 DESKTOP="$HOME/Desktop"
 if [ ! -d "$DESKTOP" ]; then
@@ -158,7 +153,7 @@ ${vc}
 const easyBeeps: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("EASY PENALTY")}
+${headerBlock('EASY PENALTY')}
 
 SHELL_RC=""
 if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
@@ -187,7 +182,7 @@ ${vc}
 const mediumAliases: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("MEDIUM PENALTY")}
+${headerBlock('MEDIUM PENALTY')}
 
 SHELL_RC=""
 if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
@@ -224,7 +219,7 @@ ${vc}
 const mediumSlowMode: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("MEDIUM PENALTY")}
+${headerBlock('MEDIUM PENALTY')}
 
 SHELL_RC=""
 if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
@@ -252,7 +247,7 @@ ${vc}
 const mediumFortune: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("MEDIUM PENALTY")}
+${headerBlock('MEDIUM PENALTY')}
 
 SHELL_RC=""
 if [ -f "$HOME/.zshrc" ]; then SHELL_RC="$HOME/.zshrc"
@@ -282,7 +277,7 @@ ${vc}
 const hardFileFlood: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("HARD PENALTY")}
+${headerBlock('HARD PENALTY')}
 
 CHAOS_DIR="/tmp/intui_chaos_$(date +%s)"
 mkdir -p "$CHAOS_DIR"
@@ -309,7 +304,7 @@ ${vc}
 const hardDesktopSwarm: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("HARD PENALTY")}
+${headerBlock('HARD PENALTY')}
 
 DESKTOP="$HOME/Desktop"
 if [ ! -d "$DESKTOP" ]; then
@@ -345,7 +340,7 @@ ${vc}
 const hardBrowserChaos: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("HARD PENALTY")}
+${headerBlock('HARD PENALTY')}
 
 URL="https://www.youtube.com/watch?v=dQw4w9WgXcQ"
 
@@ -382,7 +377,7 @@ ${vc}
 const extremeChaosCombo: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("HARD PENALTY")}
+${headerBlock('HARD PENALTY')}
 
 DESKTOP="$HOME/Desktop"
 [ ! -d "$DESKTOP" ] && DESKTOP="$HOME"
@@ -456,7 +451,7 @@ ${vc}
 const nightmareTotal: ScriptFn = (baseUrl, runid, ru, vc) => `#!/bin/bash
 set -e
 ${ru}
-${headerBlock("HARD PENALTY")}
+${headerBlock('HARD PENALTY')}
 
 # ── 1. Wallpaper ──
 WP="/tmp/intui_nm_$(date +%s).png"
@@ -562,11 +557,7 @@ const pools: Record<string, ScriptFn[]> = {
 
 // ── Generator ────────────────────────────────────────────────────
 
-function generatePenaltyScript(
-  baseUrl: string,
-  difficulty: string,
-  runid: string
-): string {
+function generatePenaltyScript(baseUrl: string, difficulty: string, runid: string): string {
   const ru = readUuidBlock(baseUrl);
   const vc = verifyBlock(baseUrl, runid);
   const pool = pools[difficulty];
@@ -579,11 +570,10 @@ function generatePenaltyScript(
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
-  const difficulty = searchParams.get("difficulty");
-  const runid = searchParams.get("runid");
-  const userId = searchParams.get("userId") || undefined;
-  const baseUrl =
-    process.env.NEXT_PUBLIC_BETTER_AUTH_URL || "http://localhost:3001";
+  const difficulty = searchParams.get('difficulty');
+  const runid = searchParams.get('runid');
+  const userId = searchParams.get('userId') || undefined;
+  const baseUrl = process.env.NEXT_PUBLIC_BETTER_AUTH_URL || 'http://localhost:3001';
 
   let script: string;
 
@@ -595,9 +585,9 @@ export async function GET(req: NextRequest) {
 
   return new NextResponse(script, {
     headers: {
-      "Content-Type": "text/x-shellscript; charset=utf-8",
-      "Content-Disposition": 'inline; filename="intui-mixer.sh"',
-      "Cache-Control": "no-store",
+      'Content-Type': 'text/x-shellscript; charset=utf-8',
+      'Content-Disposition': 'inline; filename="intui-mixer.sh"',
+      'Cache-Control': 'no-store',
     },
   });
 }

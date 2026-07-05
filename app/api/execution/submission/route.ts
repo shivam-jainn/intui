@@ -1,8 +1,8 @@
-import { NextRequest, NextResponse } from "next/server";
-import { GoogleAuth } from "google-auth-library";
-import { executorService } from "@/lib/executor-config";
-import { prisma } from "@/prisma/db";
-import { auth } from "@/lib/auth";
+import { NextRequest, NextResponse } from 'next/server';
+import { GoogleAuth } from 'google-auth-library';
+import { auth } from '@/lib/auth';
+import { executorService } from '@/lib/executor-config';
+import { prisma } from '@/prisma/db';
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
@@ -11,29 +11,26 @@ export async function POST(req: NextRequest) {
 
   if (!question_slug) {
     return NextResponse.json(
-      { message: "Missing question information. Please refresh the page and try again." },
+      { message: 'Missing question information. Please refresh the page and try again.' },
       { status: 400 }
     );
   }
   if (!language) {
     return NextResponse.json(
-      { message: "Please select a programming language before submitting your code." },
+      { message: 'Please select a programming language before submitting your code.' },
       { status: 400 }
     );
   }
-  if (!code || typeof code !== "string" || code.length < 10) {
+  if (!code || typeof code !== 'string' || code.length < 10) {
     return NextResponse.json(
-      { message: "Your code is empty or too short. Please write some code before submitting." },
+      { message: 'Your code is empty or too short. Please write some code before submitting.' },
       { status: 400 }
     );
   }
 
   const { valid, message } = executorService.validateConfig();
   if (!valid) {
-    return NextResponse.json(
-      { message: message || "Configuration error." },
-      { status: 500 }
-    );
+    return NextResponse.json({ message: message || 'Configuration error.' }, { status: 500 });
   }
 
   const { url, isDevelopment, targetAudience } = executorService.getConfig();
@@ -42,34 +39,34 @@ export async function POST(req: NextRequest) {
     questionName: question_slug,
     userCode: code,
     language: language,
-    isSubmission : true
+    isSubmission: true,
   };
 
   try {
     let headers: Record<string, string> = {
-      "Content-Type": "application/json",
+      'Content-Type': 'application/json',
     };
 
     if (!isDevelopment) {
       if (!targetAudience) {
-          throw new Error("Target audience must be defined for production execution authentication.");
+        throw new Error('Target audience must be defined for production execution authentication.');
       }
 
       const auth = new GoogleAuth({
         credentials: {
           client_email: process.env.EXEC_CLIENT_EMAIL,
-          private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, "\n"),
-        }
+          private_key: process.env.EXEC_PRIVATE_KEY?.replace(/\\n/g, '\n'),
+        },
       });
 
       const idTokenClient = await auth.getIdTokenClient(targetAudience);
       const idToken = await idTokenClient.idTokenProvider.fetchIdToken(targetAudience);
 
-      headers["Authorization"] = `Bearer ${idToken}`;
+      headers['Authorization'] = `Bearer ${idToken}`;
     }
 
     const response = await fetch(url, {
-      method: "POST",
+      method: 'POST',
       headers,
       body: JSON.stringify(requestBody),
     });
@@ -77,8 +74,8 @@ export async function POST(req: NextRequest) {
     const data = await response.json();
 
     if (!response.ok) {
-        const errorMessage = data?.error || "Unknown error occurred";
-        throw new Error(`Execution Error: ${errorMessage} (HTTP ${response.status})`);
+      const errorMessage = data?.error || 'Unknown error occurred';
+      throw new Error(`Execution Error: ${errorMessage} (HTTP ${response.status})`);
     }
 
     // Save submission to DB if user is authenticated
@@ -86,7 +83,7 @@ export async function POST(req: NextRequest) {
       try {
         const question = await prisma.question.findUnique({
           where: { slug: question_slug },
-          select: { id: true }
+          select: { id: true },
         });
 
         if (question) {
@@ -96,48 +93,47 @@ export async function POST(req: NextRequest) {
               userId: session.user.id,
               code,
               language,
-              status: data.status || "Unknown",
+              status: data.status || 'Unknown',
               timeTaken: data.timeTaken ?? null,
               spaceTaken: data.memoryUsedKB ?? null,
-            }
+            },
           });
         }
       } catch (dbError) {
-        console.error("Failed to save submission to DB:", dbError);
+        console.error('Failed to save submission to DB:', dbError);
       }
     }
 
     return NextResponse.json(
-      { 
+      {
         message: data.message,
-        results : data.results,
+        results: data.results,
         status: data.status,
-        timeTaken : data.timeTaken,
-        memoryUsed : data.memoryUsedKB
+        timeTaken: data.timeTaken,
+        memoryUsed: data.memoryUsedKB,
       },
       { status: response.status }
     );
   } catch (error: any) {
-    console.error("Submission error:", error.message);
-    if (error.message?.includes("Target audience")) {
+    console.error('Submission error:', error.message);
+    if (error.message?.includes('Target audience')) {
       return NextResponse.json(
-        { message: "Service configuration error. Please contact support." },
+        { message: 'Service configuration error. Please contact support.' },
         { status: 500 }
       );
-    } else if (error.message?.includes("fetch")) {
+    } else if (error.message?.includes('fetch')) {
       return NextResponse.json(
-        { message: "Unable to reach the execution service. Please try again later." },
+        { message: 'Unable to reach the execution service. Please try again later.' },
         { status: 500 }
       );
-    } else if (error.message?.includes("Execution Error:")) {
-      const executionErrorMsg = error.message.replace("Execution Error: ", "").replace(/ \(HTTP \d+\)$/, "");
-      return NextResponse.json(
-        { message: executionErrorMsg },
-        { status: 400 }
-      );
+    } else if (error.message?.includes('Execution Error:')) {
+      const executionErrorMsg = error.message
+        .replace('Execution Error: ', '')
+        .replace(/ \(HTTP \d+\)$/, '');
+      return NextResponse.json({ message: executionErrorMsg }, { status: 400 });
     } else {
       return NextResponse.json(
-        { message: "An unexpected error occurred while submitting your code. Please try again." },
+        { message: 'An unexpected error occurred while submitting your code. Please try again.' },
         { status: 500 }
       );
     }

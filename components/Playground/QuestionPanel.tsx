@@ -1,13 +1,30 @@
-"use client";
-import { Stack, Title, Group, Badge, Container, SegmentedControl, Accordion, Text, Box, Card, ScrollArea, Code, ThemeIcon } from '@mantine/core';
+'use client';
+
 import React, { useState } from 'react';
 import Markdown from 'react-markdown';
 import rehypeKatex from 'rehype-katex';
-import remarkMath from 'remark-math';
-import remarkGfm from 'remark-gfm';
 import rehypeRaw from 'rehype-raw';
+import remarkGfm from 'remark-gfm';
+import remarkMath from 'remark-math';
+import {
+  Accordion,
+  Badge,
+  Box,
+  Card,
+  Code,
+  Container,
+  Group,
+  ScrollArea,
+  SegmentedControl,
+  Stack,
+  Text,
+  ThemeIcon,
+  Title,
+} from '@mantine/core';
+
 import 'katex/dist/katex.min.css';
-import { IconClock, IconDeviceDesktop, IconCheck, IconX } from '@tabler/icons-react';
+
+import { IconCheck, IconClock, IconDeviceDesktop, IconX } from '@tabler/icons-react';
 
 type MarkdownComponentsType = {
   [key: string]: React.FC<any>;
@@ -54,7 +71,11 @@ const MarkdownComponents: MarkdownComponentsType = {
           px={4}
           bg="dark.6"
           color="white"
-          style={{ borderRadius: 'var(--mantine-radius-sm)', fontSize: '0.9em', fontFamily: 'monospace' }}
+          style={{
+            borderRadius: 'var(--mantine-radius-sm)',
+            fontSize: '0.9em',
+            fontFamily: 'monospace',
+          }}
         >
           {children}
         </Box>
@@ -72,9 +93,9 @@ const MarkdownComponents: MarkdownComponentsType = {
 };
 
 const difficultyColor: Record<string, string> = {
-  Easy: "blue",
-  Medium: "yellow",
-  Hard: "red",
+  Easy: 'blue',
+  Medium: 'yellow',
+  Hard: 'red',
 };
 
 interface Submission {
@@ -128,7 +149,7 @@ export default function QuestionPanel({
             <Title order={1}>{questionTitle}</Title>
 
             <Group align="flex-start" gap="xs">
-              <Badge size="lg" color={difficultyColor[difficulty] ?? "gray"} variant="light">
+              <Badge size="lg" color={difficultyColor[difficulty] ?? 'gray'} variant="light">
                 {difficulty}
               </Badge>
               {companies.map((company, index) => (
@@ -209,7 +230,9 @@ export default function QuestionPanel({
                   borderRadius: 'var(--mantine-radius-md)',
                 }}
               >
-                <Text c="dimmed" size="sm">No submissions yet. Submit your code to see it here.</Text>
+                <Text c="dimmed" size="sm">
+                  No submissions yet. Submit your code to see it here.
+                </Text>
               </Box>
             ) : (
               <Stack gap="md">
@@ -236,7 +259,11 @@ export default function QuestionPanel({
                             <IconX size={14} />
                           )}
                         </ThemeIcon>
-                        <Text size="sm" fw={600} c={submission.status === 'Accepted' ? 'green' : 'red'}>
+                        <Text
+                          size="sm"
+                          fw={600}
+                          c={submission.status === 'Accepted' ? 'green' : 'red'}
+                        >
                           {submission.status}
                         </Text>
                       </Group>
@@ -255,8 +282,16 @@ export default function QuestionPanel({
                         overflow: 'auto',
                       }}
                     >
-                      <Code block style={{ fontSize: 11, background: 'transparent', color: 'var(--mantine-color-gray-3)' }}>
-                        {submission.code.slice(0, 300)}{submission.code.length > 300 ? '...' : ''}
+                      <Code
+                        block
+                        style={{
+                          fontSize: 11,
+                          background: 'transparent',
+                          color: 'var(--mantine-color-gray-3)',
+                        }}
+                      >
+                        {submission.code.slice(0, 300)}
+                        {submission.code.length > 300 ? '...' : ''}
                       </Code>
                     </Box>
 
@@ -264,13 +299,17 @@ export default function QuestionPanel({
                       <Group gap={4}>
                         <IconClock size={14} color="var(--mantine-color-dimmed)" />
                         <Text size="xs" c="dimmed">
-                          {submission.timeTaken !== null ? `${submission.timeTaken.toFixed(2)}s` : 'N/A'}
+                          {submission.timeTaken !== null
+                            ? `${submission.timeTaken.toFixed(2)}s`
+                            : 'N/A'}
                         </Text>
                       </Group>
                       <Group gap={4}>
                         <IconDeviceDesktop size={14} color="var(--mantine-color-dimmed)" />
                         <Text size="xs" c="dimmed">
-                          {submission.spaceTaken !== null ? `${submission.spaceTaken.toFixed(1)} MB` : 'N/A'}
+                          {submission.spaceTaken !== null
+                            ? `${submission.spaceTaken.toFixed(1)} MB`
+                            : 'N/A'}
                         </Text>
                       </Group>
                     </Group>

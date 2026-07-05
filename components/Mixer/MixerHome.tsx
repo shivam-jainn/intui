@@ -1,18 +1,9 @@
-"use client";
-import React, { useEffect, useMemo, useState } from 'react';
-import {
-  Container,
-  Title,
-  Text,
-  Button,
-  Group,
-  Badge,
-  Loader,
-  Center,
-  Stack,
-} from '@mantine/core';
-import { IconArrowRight, IconPlayerPlayFilled } from '@tabler/icons-react';
+'use client';
+
+import React, { useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { IconArrowRight, IconPlayerPlayFilled } from '@tabler/icons-react';
+import { Badge, Button, Center, Container, Group, Loader, Stack, Text, Title } from '@mantine/core';
 import {
   Difficulty,
   DIFFICULTY_VALUES,
@@ -20,66 +11,23 @@ import {
   DSA_GENRES,
   type GenreConfig,
 } from '@/lib/common/types/question.types';
-
-type Topic = { topic: { name: string } };
-
-type Question = {
-  id: number;
-  displayOrder: number;
-  slug: string;
-  name: string;
-  difficulty: Difficulty;
-  topics: Topic[];
-};
+import { useQuestions } from '@/lib/hooks/useQuestions';
+import type { Question } from '@/lib/hooks/useQuestions';
 
 function matchesGenre(question: Question, genre: GenreConfig) {
   const topicValues = question.topics.map((t) => t.topic.name.toLowerCase());
   return genre.patterns.some((p) => topicValues.some((v) => v.includes(p)));
 }
 
-
 export default function StoryMode() {
   const router = useRouter();
-  const [questions, setQuestions] = useState<Question[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const { data: questionsData, isLoading: loading, error } = useQuestions();
+  const questions = React.useMemo(
+    () => (Array.isArray(questionsData) ? questionsData : []),
+    [questionsData]
+  );
   const [activeGenre, setActiveGenre] = useState<string | null>(null);
   const [activeDifficulty, setActiveDifficulty] = useState<Difficulty | null>(null);
-
-  useEffect(() => {
-    let mounted = true;
-
-    fetch('/api/questions')
-      .then(async (response) => {
-        if (!response.ok) {
-          throw new Error('Failed to load episodes');
-        }
-        return response.json();
-      })
-      .then((data: Question[]) => {
-        if (!mounted) {
-          return;
-        }
-        setQuestions(Array.isArray(data) ? data : []);
-        setError(null);
-      })
-      .catch(() => {
-        if (!mounted) {
-          return;
-        }
-        setError('Unable to load storyline episodes right now.');
-      })
-      .finally(() => {
-        if (!mounted) {
-          return;
-        }
-        setLoading(false);
-      });
-
-    return () => {
-      mounted = false;
-    };
-  }, []);
 
   const episodes = useMemo(() => {
     return [...questions].sort((a, b) => a.displayOrder - b.displayOrder);
@@ -121,21 +69,64 @@ export default function StoryMode() {
 
   return (
     <div style={{ minHeight: '100vh', background: '#08080d', position: 'relative' }}>
-
       {/* Ambient glow orbs */}
-      <div style={{ position: 'fixed', inset: 0, pointerEvents: 'none', zIndex: 0, overflow: 'hidden' }}>
-        <div style={{ position: 'absolute', top: '-6%', left: '14%', width: 620, height: 620, borderRadius: '50%', background: 'rgba(99, 102, 241, 0.14)', filter: 'blur(120px)' }} />
-        <div style={{ position: 'absolute', top: '35%', right: '8%', width: 440, height: 440, borderRadius: '50%', background: 'rgba(236, 72, 153, 0.09)', filter: 'blur(100px)' }} />
-        <div style={{ position: 'absolute', bottom: '8%', left: '28%', width: 500, height: 500, borderRadius: '50%', background: 'rgba(16, 185, 129, 0.07)', filter: 'blur(110px)' }} />
+      <div
+        style={{
+          position: 'fixed',
+          inset: 0,
+          pointerEvents: 'none',
+          zIndex: 0,
+          overflow: 'hidden',
+        }}
+      >
+        <div
+          style={{
+            position: 'absolute',
+            top: '-6%',
+            left: '14%',
+            width: 620,
+            height: 620,
+            borderRadius: '50%',
+            background: 'rgba(99, 102, 241, 0.14)',
+            filter: 'blur(120px)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            top: '35%',
+            right: '8%',
+            width: 440,
+            height: 440,
+            borderRadius: '50%',
+            background: 'rgba(236, 72, 153, 0.09)',
+            filter: 'blur(100px)',
+          }}
+        />
+        <div
+          style={{
+            position: 'absolute',
+            bottom: '8%',
+            left: '28%',
+            width: 500,
+            height: 500,
+            borderRadius: '50%',
+            background: 'rgba(16, 185, 129, 0.07)',
+            filter: 'blur(110px)',
+          }}
+        />
       </div>
 
       <Container size="xl" style={{ padding: '36px 20px 64px', position: 'relative', zIndex: 1 }}>
-
         {loading ? (
-          <Center py={80}><Loader color="indigo" /></Center>
+          <Center py={80}>
+            <Loader color="indigo" />
+          </Center>
         ) : error ? (
-          <div style={glassStyle({ borderColor: 'rgba(239,68,68,0.3)', radius: 14, pad: '20px 24px' })}>
-            <Text c="red.4">{error}</Text>
+          <div
+            style={glassStyle({ borderColor: 'rgba(239,68,68,0.3)', radius: 14, pad: '20px 24px' })}
+          >
+            <Text c="red.4">{(error as Error)?.message}</Text>
           </div>
         ) : episodes.length === 0 ? (
           <div style={glassStyle({ radius: 14, pad: '20px 24px' })}>
@@ -143,7 +134,6 @@ export default function StoryMode() {
           </div>
         ) : (
           <Stack gap={44}>
-
             {/* ── Featured hero ── */}
             {featuredEpisode && (
               <div style={glassStyle({ radius: 20, pad: '44px 48px' })}>
@@ -153,12 +143,23 @@ export default function StoryMode() {
                 <Title
                   order={1}
                   c="white"
-                  style={{ fontSize: 'clamp(26px, 4vw, 44px)', lineHeight: 1.08, fontWeight: 700, letterSpacing: '-0.02em' }}
+                  style={{
+                    fontSize: 'clamp(26px, 4vw, 44px)',
+                    lineHeight: 1.08,
+                    fontWeight: 700,
+                    letterSpacing: '-0.02em',
+                  }}
                 >
                   Question {featuredEpisode.displayOrder}: {featuredEpisode.name}
                 </Title>
-                <Text c="gray.4" mt={12} mb={20} style={{ maxWidth: 540, lineHeight: 1.7, fontSize: 15 }}>
-                  Start here. Each question builds on the last — solve them in sequence to develop sharp pattern recognition.
+                <Text
+                  c="gray.4"
+                  mt={12}
+                  mb={20}
+                  style={{ maxWidth: 540, lineHeight: 1.7, fontSize: 15 }}
+                >
+                  Start here. Each question builds on the last — solve them in sequence to develop
+                  sharp pattern recognition.
                 </Text>
                 <Group gap={8} mb={24}>
                   <Badge variant="light" color={difficultyColor[featuredEpisode.difficulty]}>
@@ -169,7 +170,10 @@ export default function StoryMode() {
                       key={topic.topic.name}
                       variant="outline"
                       color="gray"
-                      style={{ borderColor: 'rgba(255,255,255,0.14)', color: 'rgba(255,255,255,0.55)' }}
+                      style={{
+                        borderColor: 'rgba(255,255,255,0.14)',
+                        color: 'rgba(255,255,255,0.55)',
+                      }}
                     >
                       {topic.topic.name}
                     </Badge>
@@ -202,10 +206,14 @@ export default function StoryMode() {
             {/* ── Filters ── */}
             <div style={glassStyle({ radius: 14, pad: '16px 20px' })}>
               <Group justify="space-between" align="flex-start" gap="xl">
-
                 {/* Genre filter */}
                 <div>
-                  <Text size="xs" c="gray.6" mb={10} style={{ textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}>
+                  <Text
+                    size="xs"
+                    c="gray.6"
+                    mb={10}
+                    style={{ textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}
+                  >
                     Pattern
                   </Text>
                   <Group gap={6}>
@@ -227,7 +235,12 @@ export default function StoryMode() {
 
                 {/* Difficulty filter */}
                 <div>
-                  <Text size="xs" c="gray.6" mb={10} style={{ textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}>
+                  <Text
+                    size="xs"
+                    c="gray.6"
+                    mb={10}
+                    style={{ textTransform: 'uppercase', letterSpacing: '0.07em', fontWeight: 600 }}
+                  >
                     Difficulty
                   </Text>
                   <Group gap={6}>
@@ -247,7 +260,6 @@ export default function StoryMode() {
                     ))}
                   </Group>
                 </div>
-
               </Group>
             </div>
 
@@ -255,11 +267,7 @@ export default function StoryMode() {
             {genreRails.map((rail) => (
               <section key={rail.id}>
                 <Group justify="space-between" mb={16} align="baseline">
-                  <Text
-                    fw={600}
-                    c="white"
-                    style={{ fontSize: 16, letterSpacing: '-0.01em' }}
-                  >
+                  <Text fw={600} c="white" style={{ fontSize: 16, letterSpacing: '-0.01em' }}>
                     {rail.label}
                   </Text>
                   <Text size="xs" c="gray.6">
@@ -288,10 +296,8 @@ export default function StoryMode() {
                 </div>
               </section>
             ))}
-
           </Stack>
         )}
-
       </Container>
     </div>
   );
@@ -342,7 +348,6 @@ function FilterPill({
   );
 }
 
-
 function glassStyle({
   radius = 16,
   pad = '28px 32px',
@@ -358,13 +363,7 @@ function glassStyle({
   };
 }
 
-function QuestionCard({
-  question,
-  onClick,
-}: {
-  question: Question;
-  onClick: () => void;
-}) {
+function QuestionCard({ question, onClick }: { question: Question; onClick: () => void }) {
   const [hovered, setHovered] = React.useState(false);
 
   return (
@@ -395,13 +394,7 @@ function QuestionCard({
         </Badge>
       </Group>
 
-      <Text
-        fw={600}
-        c="gray.0"
-        mb={10}
-        lineClamp={2}
-        style={{ fontSize: 13.5, lineHeight: 1.35 }}
-      >
+      <Text fw={600} c="gray.0" mb={10} lineClamp={2} style={{ fontSize: 13.5, lineHeight: 1.35 }}>
         {question.name}
       </Text>
 
@@ -412,7 +405,11 @@ function QuestionCard({
             variant="outline"
             color="gray"
             size="xs"
-            style={{ borderColor: 'rgba(255,255,255,0.12)', color: 'rgba(255,255,255,0.38)', fontSize: 10.5 }}
+            style={{
+              borderColor: 'rgba(255,255,255,0.12)',
+              color: 'rgba(255,255,255,0.38)',
+              fontSize: 10.5,
+            }}
           >
             {topic.topic.name}
           </Badge>

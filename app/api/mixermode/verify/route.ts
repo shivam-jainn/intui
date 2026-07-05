@@ -1,11 +1,11 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/prisma/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/prisma/db';
 
 export async function POST(req: NextRequest) {
   try {
     const { uuid, userId } = await req.json();
     if (!uuid) {
-      return NextResponse.json({ error: "Missing uuid" }, { status: 400 });
+      return NextResponse.json({ error: 'Missing uuid' }, { status: 400 });
     }
 
     const existing = await prisma.mixerVerification.findUnique({
@@ -13,7 +13,7 @@ export async function POST(req: NextRequest) {
     });
 
     if (existing) {
-      return NextResponse.json({ verified: true, message: "Already verified" });
+      return NextResponse.json({ verified: true, message: 'Already verified' });
     }
 
     await prisma.mixerVerification.create({
@@ -22,15 +22,15 @@ export async function POST(req: NextRequest) {
 
     return NextResponse.json({ verified: true });
   } catch {
-    return NextResponse.json({ error: "Verification failed" }, { status: 500 });
+    return NextResponse.json({ error: 'Verification failed' }, { status: 500 });
   }
 }
 
 export async function GET(req: NextRequest) {
   try {
     const { searchParams } = new URL(req.url);
-    const uuid = searchParams.get("uuid");
-    const userId = searchParams.get("userId");
+    const uuid = searchParams.get('uuid');
+    const userId = searchParams.get('userId');
 
     if (uuid) {
       const record = await prisma.mixerVerification.findUnique({

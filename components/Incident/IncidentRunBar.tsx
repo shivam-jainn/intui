@@ -1,25 +1,16 @@
-"use client";
+'use client';
 
-import {
-  Badge,
-  Button,
-  Card,
-  Group,
-  Select,
-  Text,
-  Notification,
-  Stack,
-} from "@mantine/core";
-import { useAtom } from "jotai";
+import { useState } from 'react';
+import { IconPlayerPlay } from '@tabler/icons-react';
+import { useAtom } from 'jotai';
+import { Badge, Button, Card, Group, Notification, Select, Stack, Text } from '@mantine/core';
 import {
   activeFilePathAtom,
   fileContentsAtom,
   incidentFilesAtom,
   incidentResultAtom,
   incidentRunningAtom,
-} from "@/contexts/IncidentContext";
-import { useState } from "react";
-import { IconPlayerPlay } from "@tabler/icons-react";
+} from '@/contexts/IncidentContext';
 
 interface IncidentRunBarProps {
   incidentSlug: string;
@@ -47,7 +38,7 @@ export default function IncidentRunBar({
   function getSubmitCode(): { code: string; filePath: string } {
     const target = activeFile || entryFile;
     const fileData = files.find((f) => f.path === target && !f.readonly);
-    const code = fileContents[target] ?? fileData?.content ?? "";
+    const code = fileContents[target] ?? fileData?.content ?? '';
     return { code, filePath: target };
   }
 
@@ -58,7 +49,7 @@ export default function IncidentRunBar({
     const { code, filePath } = getSubmitCode();
 
     if (!code || code.trim().length < 5) {
-      setError("No code to run. Select or edit a source file first.");
+      setError('No code to run. Select or edit a source file first.');
       setRunning(false);
       return;
     }
@@ -71,9 +62,9 @@ export default function IncidentRunBar({
         language: file.language,
       }));
 
-      const response = await fetch("/api/incident", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
+      const response = await fetch('/api/incident', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           incident_slug: incidentSlug,
           code,
@@ -86,13 +77,13 @@ export default function IncidentRunBar({
       const data = await response.json();
 
       if (!response.ok) {
-        setError(data.message || data.error || "Run failed");
+        setError(data.message || data.error || 'Run failed');
         return;
       }
 
       setResult(data);
     } catch (err: any) {
-      setError("Network error: could not reach execution server.");
+      setError('Network error: could not reach execution server.');
     } finally {
       setRunning(false);
     }
@@ -108,11 +99,11 @@ export default function IncidentRunBar({
       <Card
         p="xs"
         style={{
-          display: "flex",
-          flexDirection: "row",
-          alignItems: "center",
-          justifyContent: "space-between",
-          borderBottom: "1px solid var(--mantine-color-dark-5)",
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          borderBottom: '1px solid var(--mantine-color-dark-5)',
           borderRadius: 0,
         }}
       >
@@ -126,9 +117,7 @@ export default function IncidentRunBar({
             styles={{ input: { fontSize: 12 } }}
           />
           <Badge size="sm" variant="outline" color="gray">
-            {activeFile
-              ? activeFile.split("/").pop()
-              : entryFile.split("/").pop() || "no file"}
+            {activeFile ? activeFile.split('/').pop() : entryFile.split('/').pop() || 'no file'}
           </Badge>
         </Group>
 
