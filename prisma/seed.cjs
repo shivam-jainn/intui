@@ -86,15 +86,6 @@ async function seedQuestions() {
     folderMetadataList.push({ index, folder, metadata, folderPath });
   }
 
-  // Clean up questions in DB that are not in the local seed files
-  await prisma.question.deleteMany({
-    where: {
-      slug: {
-        notIn: Array.from(slugsToKeep),
-      },
-    },
-  });
-
   // Temporarily set all remaining questions' displayOrder to avoid unique constraint issues
   const existingQuestions = await prisma.question.findMany({ select: { id: true } });
   for (const eq of existingQuestions) {
@@ -176,16 +167,6 @@ async function seedIncidents() {
     slugsToKeep.add(metadata.slug);
     folderMetadataList.push({ folder, metadata });
   }
-
-  // Clean up incidents in DB that are not in the local seed files
-  await prisma.incident.deleteMany({
-    where: {
-      slug: {
-        notIn: Array.from(slugsToKeep),
-      },
-    },
-  });
-
   for (const { folder, metadata } of folderMetadataList) {
     const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : 'Medium';
     const difficulty = capitalize(metadata.difficulty);
