@@ -8,9 +8,11 @@ import {
   activeFilePathAtom,
   fileContentsAtom,
   incidentFilesAtom,
+  incidentLeftTabAtom,
   incidentResultAtom,
   incidentRunningAtom,
 } from '@/contexts/IncidentContext';
+import { useQueryClient } from '@tanstack/react-query';
 
 interface IncidentRunBarProps {
   incidentSlug: string;
@@ -31,8 +33,10 @@ export default function IncidentRunBar({
   const [activeFile] = useAtom(activeFilePathAtom);
   const [fileContents] = useAtom(fileContentsAtom);
   const [, setResult] = useAtom(incidentResultAtom);
+  const [, setLeftTab] = useAtom(incidentLeftTabAtom);
   const [running, setRunning] = useAtom(incidentRunningAtom);
   const [error, setError] = useState<string | null>(null);
+  const queryClient = useQueryClient();
 
   // The entry file to submit is the active editable file, fallback to declared entryFile
   function getSubmitCode(): { code: string; filePath: string } {
@@ -82,6 +86,8 @@ export default function IncidentRunBar({
       }
 
       setResult(data);
+      setLeftTab('submissions');
+      queryClient.invalidateQueries({ queryKey: ['incident-submissions', incidentSlug] });
     } catch (err: any) {
       setError('Network error: could not reach execution server.');
     } finally {

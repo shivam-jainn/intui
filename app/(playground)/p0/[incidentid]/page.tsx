@@ -15,6 +15,7 @@ import {
   activeFilePathAtom,
   fileContentsAtom,
   incidentFilesAtom,
+  incidentLeftTabAtom,
 } from '@/contexts/IncidentContext';
 import { useIncidentFiles } from '@/lib/hooks/useIncidentFiles';
 import { useIncidentSubmissions } from '@/lib/hooks/useIncidentSubmissions';
@@ -23,9 +24,7 @@ export default function IncidentPlaygroundPage({ params }: { params: { incidenti
   const incidentId = params.incidentid;
 
   const [language, setLanguage] = React.useState('python');
-  const [leftTab, setLeftTab] = React.useState<'description' | 'files' | 'submissions'>(
-    'description'
-  );
+  const [leftTab, setLeftTab] = useAtom(incidentLeftTabAtom);
 
   const [, setFiles] = useAtom(incidentFilesAtom);
   const [, setActiveFile] = useAtom(activeFilePathAtom);

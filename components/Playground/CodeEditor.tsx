@@ -18,6 +18,8 @@ import { Language } from '@/lib/common/types/playground.types';
 import { useDriverCode } from '@/lib/hooks/useDriverCode';
 import Timer, { TimerHandle } from '@/components/Timer/Timer';
 import { useTimerContext } from '@/components/Timer/TimerContext';
+import { useQueryClient } from '@tanstack/react-query';
+import { questionTabAtom } from '@/contexts/TestCardContext';
 
 interface CodeEditorProps {
   questionSlug: string;
@@ -30,7 +32,9 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
   const [testTab, setTestTab] = useAtom(resultAtom);
   const [_, setResultData] = useAtom(resultDataAtom);
   const [__, setSubmission] = useAtom(submissionAtom);
+  const [, setQuestionTab] = useAtom(questionTabAtom);
   const { timerRef } = useTimerContext();
+  const queryClient = useQueryClient();
 
   const { data: driver, error: driverError } = useDriverCode(
     decodeURIComponent(questionSlug),
@@ -133,6 +137,9 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
       setSubmission(true);
       setResultData(data);
       setTestTab('results');
+      setQuestionTab('submission');
+
+      queryClient.invalidateQueries({ queryKey: ['question', decodeURIComponent(questionSlug)] });
 
       await timerRef.current?.submitMixerRun();
     } catch (error: any) {

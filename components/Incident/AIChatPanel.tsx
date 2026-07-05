@@ -91,35 +91,36 @@ function MessageBubble({ message }: { message: Message }) {
         flexDirection: 'column',
         alignItems: isUser ? 'flex-end' : 'flex-start',
         gap: 4,
+        marginBottom: 16,
       }}
     >
       <Group gap={6} justify={isUser ? 'flex-end' : 'flex-start'}>
-        <ThemeIcon size="xs" variant="light" color={isUser ? 'blue' : 'violet'} radius="xl">
-          {isUser ? <IconUser size={10} /> : <IconRobot size={10} />}
-        </ThemeIcon>
-        <Text size="xs" c="dimmed">
-          {isUser ? 'You' : 'AI Interviewer'}
-        </Text>
+        <div style={{ color: isUser ? 'var(--primary-red)' : 'var(--primary-orange)' }}>
+          {isUser ? <IconUser size={12} /> : <IconRobot size={12} />}
+        </div>
+        <span className="pixel-font" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
+          {isUser ? 'YOU' : 'AI'}
+        </span>
       </Group>
-      <Paper
-        p="sm"
-        withBorder
+      <div
+        className="pixel-border-sm"
         style={{
+          padding: '12px',
           maxWidth: '92%',
-          backgroundColor: isUser ? 'var(--mantine-color-blue-9)' : 'var(--mantine-color-dark-6)',
-          borderColor: isUser ? 'var(--mantine-color-blue-7)' : 'var(--mantine-color-dark-4)',
+          background: isUser ? 'var(--blood-dark)' : 'var(--bg-raised)',
         }}
       >
         {isUser ? (
-          <Text size="sm" style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+          <div className="pixel-font" style={{ fontSize: 10, whiteSpace: 'pre-wrap', wordBreak: 'break-word', lineHeight: 1.6 }}>
             {message.content}
-          </Text>
+          </div>
         ) : (
           <Box
             style={{
-              fontSize: 13,
+              fontSize: 12,
               lineHeight: 1.6,
               wordBreak: 'break-word',
+              color: 'var(--text-primary)'
             }}
             className="ai-response-markdown"
           >
@@ -128,7 +129,7 @@ function MessageBubble({ message }: { message: Message }) {
             </Markdown>
           </Box>
         )}
-      </Paper>
+      </div>
     </Box>
   );
 }
@@ -353,16 +354,16 @@ Be concise and conversational.`;
         height: '100%',
         display: 'flex',
         flexDirection: 'column',
-        backgroundColor: 'var(--mantine-color-dark-8)',
+        backgroundColor: 'var(--bg-base)',
       }}
     >
       {/* Header */}
-      <Box p="sm" style={{ borderBottom: '1px solid var(--mantine-color-dark-5)' }}>
+      <Box p="sm" style={{ borderBottom: '1px solid var(--border-default)', background: 'var(--bg-raised)' }}>
         <Group justify="space-between" mb="xs">
           <Group gap={6}>
-            <Title order={6} style={{ fontSize: 13 }}>
-              Rubber Duck
-            </Title>
+            <div className="pixel-font" style={{ fontSize: 12, color: 'var(--primary-red)' }}>
+              DEBUG ASSISTANT
+            </div>
           </Group>
           <Group gap={4}>
             {isLoading && (
@@ -479,11 +480,11 @@ Be concise and conversational.`;
       </ScrollArea>
 
       {/* Input area */}
-      <Box p="sm" style={{ borderTop: '1px solid var(--mantine-color-dark-5)' }}>
+      <Box p="sm" style={{ borderTop: '1px solid var(--border-default)', background: 'var(--bg-raised)' }}>
         {activeFile && (
-          <Button size="xs" variant="solid" color="blue" mb="xs" onClick={injectCode}>
-            Attach current file
-          </Button>
+          <button className="pixel-font pixel-btn-ghost-sm" style={{ marginBottom: 12 }} onClick={injectCode}>
+            ATTACH CURRENT FILE
+          </button>
         )}
         <Group gap="xs" align="flex-end">
           <Textarea
@@ -503,23 +504,20 @@ Be concise and conversational.`;
                 void sendMessage();
               }
             }}
-            styles={{ input: { fontSize: 12 } }}
+            styles={{ input: { fontSize: 12, backgroundColor: 'var(--surface-default)', borderColor: 'var(--border-default)', color: 'var(--text-primary)' } }}
           />
-          <ActionIcon
-            type="button"
-            size="md"
-            color="blue"
-            variant="filled"
+          <button
+            className="pixel-btn-sm"
             onClick={() => void sendMessage()}
-            loading={isLoading}
-            disabled={!input.trim()}
+            disabled={!input.trim() || isLoading}
+            style={{ height: '32px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
           >
-            <IconSend size={14} />
-          </ActionIcon>
+            {isLoading ? '...' : <IconSend size={14} />}
+          </button>
         </Group>
-        <Text size="xs" c="dimmed" mt={4}>
-          Shift+Enter for newline · Enter to send
-        </Text>
+        <div className="pixel-font" style={{ color: 'var(--text-muted)', fontSize: 8, marginTop: 8 }}>
+          SHIFT+ENTER FOR NEWLINE · ENTER TO SEND
+        </div>
       </Box>
     </Box>
   );

@@ -1,8 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { GoogleAuth } from 'google-auth-library';
 import { executorService } from '@/lib/executor-config';
+import { auth } from '@/lib/auth';
+import { prisma } from '@/prisma/db';
 
 export async function POST(req: NextRequest) {
+  const session = await auth.api.getSession({ headers: req.headers });
   const { incident_slug, code, language, entryFile, files } = await req.json();
 
   if (!incident_slug) {
@@ -89,6 +92,31 @@ export async function POST(req: NextRequest) {
       output: data.output,
       error: data.error,
     };
+
+    if (session?.user?.id) {
+      try {
+        const incident = await prisma.incident.findUnique({
+          where: { slug: incident_slug },
+          select: { id: true },
+        });
+
+        if (incident) {
+          await prisma.incidentSubmission.create({
+            data: {
+              incidentId: incident.id,
+              userId: session.user.id,
+              code,
+              language,
+              status: data.status || 'Unknown',
+              timeTaken: data.timeTaken ?? null,
+              spaceTaken: data.memoryUsedKB ?? null,
+            },
+          });
+        }
+      } catch (dbError) {
+        console.error('Failed to save incident submission to DB:', dbError);
+      }
+    }
 
     return NextResponse.json(responseBody, { status: response.status });
   } catch (error: any) {

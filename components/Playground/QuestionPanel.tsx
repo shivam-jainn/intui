@@ -21,6 +21,8 @@ import {
   ThemeIcon,
   Title,
 } from '@mantine/core';
+import { useAtom } from 'jotai';
+import { questionTabAtom } from '@/contexts/TestCardContext';
 
 import 'katex/dist/katex.min.css';
 
@@ -123,7 +125,7 @@ export default function QuestionPanel({
   topics: any[];
   submissions?: Submission[];
 }) {
-  const [tab, setTab] = useState<string>('description');
+  const [tab, setTab] = useAtom(questionTabAtom);
 
   return (
     <Stack h="100%" style={{ maxHeight: '100%' }}>
