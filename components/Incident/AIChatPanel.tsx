@@ -12,7 +12,6 @@ import {
   Box,
   Button,
   Group,
-  Loader,
   Paper,
   PasswordInput,
   ScrollArea,
@@ -462,9 +461,9 @@ Be concise and conversational.`;
             ))}
             {isLoading && messages[messages.length - 1]?.role !== 'assistant' && (
               <Group gap={6}>
-                <Loader size="xs" color="violet" />
-                <Text size="xs" c="dimmed">
-                  Thinking...
+                <span className="animate-pulse" style={{ width: 8, height: 8, background: 'var(--primary-red)' }} />
+                <Text size="xs" c="dimmed" className="pixel-font" style={{ fontSize: 10 }}>
+                  THINKING...
                 </Text>
               </Group>
             )}

@@ -13,6 +13,17 @@ enum Difficulty {
   Hard
 }
 
+enum BadgeType {
+  STREAK_1
+  STREAK_5
+  STREAK_10
+  SPEED_P0_15M
+  SPEED_P0_10M
+  SPEED_P0_5M
+  SPEED_P0_3M
+  SPEED_P0_1M
+}
+
 model Question {
   id          Int               @id @default(autoincrement())
   displayOrder Int              @unique
@@ -72,6 +83,10 @@ model User {
   IncidentSubmission   IncidentSubmission[]
   shadowban     Shadowban?
   referrals     Referral[]       @relation("Referrer")
+  currentStreak   Int         @default(0)
+  longestStreak   Int         @default(0)
+  lastActivityAt  DateTime?
+  badges          UserBadge[]
 
   @@unique([email])
   @@map("user")
@@ -216,4 +231,15 @@ model IncidentSubmission {
   user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@map("incident_submission")
+}
+
+model UserBadge {
+  id        Int       @id @default(autoincrement())
+  userId    String
+  badgeType BadgeType
+  earnedAt  DateTime  @default(now())
+  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeType])
+  @@map("user_badge")
 }

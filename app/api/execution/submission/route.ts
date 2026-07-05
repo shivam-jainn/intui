@@ -3,6 +3,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { auth } from '@/lib/auth';
 import { executorService } from '@/lib/executor-config';
 import { prisma } from '@/prisma/db';
+import { updateStreakAndCheckBadges } from '@/lib/badges';
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
@@ -98,6 +99,10 @@ export async function POST(req: NextRequest) {
               spaceTaken: data.memoryUsedKB ?? null,
             },
           });
+
+          if (data.status === 'Accepted') {
+            await updateStreakAndCheckBadges(session.user.id);
+          }
         }
       } catch (dbError) {
         console.error('Failed to save submission to DB:', dbError);

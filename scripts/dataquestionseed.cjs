@@ -23,29 +23,38 @@ async function main() {
     }
 
     const metadata = JSON.parse(fs.readFileSync(metadataPath, 'utf8'));
-    const displayOrder = Number.isInteger(metadata.displayOrder)
-      ? metadata.displayOrder
-      : index + 1;
+    const displayOrder = index + 1;
     const description = fs.existsSync(questionMdPath) 
       ? fs.readFileSync(questionMdPath, 'utf8') 
       : "";
 
     console.log(`Seeding question: ${metadata.title} (${metadata.slug})`);
 
+    const rawDifficulty = metadata.difficulty || "Medium";
+    const difficulty = rawDifficulty.charAt(0).toUpperCase() + rawDifficulty.slice(1).toLowerCase();
+
+    const existing = await prisma.question.findUnique({ where: { slug: metadata.slug } });
+    let finalDisplayOrder;
+    if (existing) {
+      finalDisplayOrder = existing.displayOrder;
+    } else {
+      const maxQuestion = await prisma.question.findFirst({ orderBy: { displayOrder: 'desc' } });
+      finalDisplayOrder = maxQuestion ? maxQuestion.displayOrder + 1 : index + 1;
+    }
+
     // Create or update the question
     const question = await prisma.question.upsert({
       where: { slug: metadata.slug },
       update: {
-        displayOrder,
         name: metadata.title,
-        difficulty: metadata.difficulty,
+        difficulty: difficulty,
         description: description,
       },
       create: {
-        displayOrder,
+        displayOrder: finalDisplayOrder,
         slug: metadata.slug,
         name: metadata.title,
-        difficulty: metadata.difficulty,
+        difficulty: difficulty,
         description: description,
       },
     });

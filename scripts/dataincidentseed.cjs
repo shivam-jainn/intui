@@ -22,12 +22,15 @@ async function main() {
 
     console.log(`Seeding incident: ${metadata.title} (${metadata.slug})`);
 
+    const rawDifficulty = metadata.difficulty || "Medium";
+    const difficulty = rawDifficulty.charAt(0).toUpperCase() + rawDifficulty.slice(1).toLowerCase();
+
     await prisma.incident.upsert({
       where: { slug: metadata.slug },
       update: {
         title: metadata.title,
         severity: metadata.severity,
-        difficulty: metadata.difficulty,
+        difficulty: difficulty,
         service: metadata.service,
         summary: metadata.summary,
         slaMinutes: metadata.slaMinutes,
@@ -36,7 +39,7 @@ async function main() {
         slug: metadata.slug,
         title: metadata.title,
         severity: metadata.severity,
-        difficulty: metadata.difficulty,
+        difficulty: difficulty,
         service: metadata.service,
         summary: metadata.summary,
         slaMinutes: metadata.slaMinutes,

@@ -3,6 +3,7 @@ import { GoogleAuth } from 'google-auth-library';
 import { executorService } from '@/lib/executor-config';
 import { auth } from '@/lib/auth';
 import { prisma } from '@/prisma/db';
+import { checkSpeedBadges, updateStreakAndCheckBadges } from '@/lib/badges';
 
 export async function POST(req: NextRequest) {
   const session = await auth.api.getSession({ headers: req.headers });
@@ -97,7 +98,7 @@ export async function POST(req: NextRequest) {
       try {
         const incident = await prisma.incident.findUnique({
           where: { slug: incident_slug },
-          select: { id: true },
+          select: { id: true, severity: true },
         });
 
         if (incident) {
@@ -112,6 +113,13 @@ export async function POST(req: NextRequest) {
               spaceTaken: data.memoryUsedKB ?? null,
             },
           });
+
+          if (data.status === 'Accepted') {
+            await updateStreakAndCheckBadges(session.user.id);
+            if (incident.severity === 'P0' && typeof data.timeTaken === 'number') {
+              await checkSpeedBadges(session.user.id, data.timeTaken);
+            }
+          }
         }
       } catch (dbError) {
         console.error('Failed to save incident submission to DB:', dbError);

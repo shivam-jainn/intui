@@ -4,7 +4,7 @@ import React from 'react';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 const Skeleton = ({ className }: { className?: string }) => (
-  <div className={`animate-pulse bg-gray-700/50 rounded-md ${className}`} />
+  <div className={`animate-pulse pixel-border bg-[#1a1b1e] ${className}`} style={{ animationDuration: '1.5s' }} />
 );
 
 const PlaygroundSkeleton = () => {

@@ -29,29 +29,39 @@ async function hasValidSession(request: NextRequest): Promise<boolean> {
 }
 
 export async function middleware(request: NextRequest) {
-  // only protect p0 and its nested routes
-  const shouldProtect =
-    request.nextUrl.pathname === '/p0' || request.nextUrl.pathname.startsWith('/p0/');
+  const pathname = request.nextUrl.pathname;
 
-  // Allow static assets and API calls to pass through without auth
-  const isStaticFile = request.nextUrl.pathname.match(
+  // Allow static assets and Next internal files to pass through without auth
+  const isStaticFile = pathname.match(
     /\.(png|jpg|jpeg|gif|svg|ico|css|js|woff|woff2|ttf|otf|eot)$/i
-  );
-  const isApiRoute = request.nextUrl.pathname.startsWith('/api');
+  ) || pathname.startsWith('/_next');
+  
+  const isApiRoute = pathname.startsWith('/api');
 
-  if (!shouldProtect || isStaticFile || isApiRoute) {
+  if (isStaticFile || isApiRoute) {
     return NextResponse.next();
   }
 
   const validSession = await hasValidSession(request);
+  const publicRoutes = ['/', '/signin', '/signup'];
 
   if (!validSession) {
-    return NextResponse.redirect(new URL('/signin', request.url));
+    // If not signed in, only allow public routes
+    if (!publicRoutes.includes(pathname)) {
+      return NextResponse.redirect(new URL('/signin', request.url));
+    }
+  } else {
+    // If signed in and trying to access auth pages, redirect to dashboard
+    if (pathname === '/signin' || pathname === '/signup') {
+      return NextResponse.redirect(new URL('/p0', request.url));
+    }
   }
 
   return NextResponse.next();
 }
 
 export const config = {
-  matcher: ['/p0', '/p0/:path*'],
+  matcher: [
+    '/((?!_next/static|_next/image|favicon.ico).*)',
+  ],
 };

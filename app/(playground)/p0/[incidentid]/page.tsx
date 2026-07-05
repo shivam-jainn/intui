@@ -3,7 +3,7 @@
 import React, { useEffect } from 'react';
 import { useAtom } from 'jotai';
 import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
-import { Box, Center, Group, Loader, Text } from '@mantine/core';
+import { Box, Center, Group, Text } from '@mantine/core';
 import AIChatPanel from '@/components/Incident/AIChatPanel';
 import FileTree from '@/components/Incident/FileTree';
 import IncidentPanel from '@/components/Incident/IncidentPanel';
@@ -58,7 +58,9 @@ export default function IncidentPlaygroundPage({ params }: { params: { incidenti
   if (filesLoading) {
     return (
       <Center style={{ height: 'calc(100vh - 80px)' }}>
-        <Loader size="lg" color="blue" />
+        <div className="pixel-border animate-pulse" style={{ padding: '20px 40px', background: 'var(--surface-default)' }}>
+          <Text className="pixel-font" style={{ color: 'var(--primary-red)' }}>LOADING DATABANKS...</Text>
+        </div>
       </Center>
     );
   }

@@ -135,17 +135,7 @@ export default function IncidentRunBar({
               </option>
             ))}
           </select>
-          <span 
-            className="pixel-font pixel-border-sm"
-            style={{
-              padding: '6px 10px',
-              background: 'var(--bg-overlay)',
-              color: 'var(--text-muted)',
-              fontSize: '10px',
-            }}
-          >
-            {activeFile ? activeFile.split('/').pop() : entryFile.split('/').pop() || 'no file'}
-          </span>
+
         </Group>
 
         <button

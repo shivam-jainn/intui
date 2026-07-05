@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Skeleton } from '@mantine/core';
+
 import { useCachedSession } from '@/lib/hooks/useSession';
 import Landing from '../Landing/Landing';
 import MixerHome from '../Mixer/MixerHome';
@@ -11,9 +11,9 @@ export default function Home() {
 
   if (isPending) {
     return (
-      <div style={{ padding: '2rem' }}>
-        <Skeleton height={400} radius="xl" mb="md" />
-        <Skeleton height={200} radius="xl" />
+      <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+        <div className="pixel-border animate-pulse" style={{ height: 400, background: 'var(--surface-default)' }} />
+        <div className="pixel-border animate-pulse" style={{ height: 200, background: 'var(--surface-default)' }} />
       </div>
     );
   }

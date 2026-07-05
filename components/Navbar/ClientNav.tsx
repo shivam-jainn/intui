@@ -3,13 +3,15 @@
 import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Skeleton } from '@mantine/core';
+
 import { useCachedSession } from '@/lib/hooks/useSession';
 import Intui from './Intui';
 import Profile from './Profile';
 import classes from './Navbar.module.css';
 import Timer from '@/components/Timer/Timer';
 import { useTimerContext } from '@/components/Timer/TimerContext';
+import { useQuery } from '@tanstack/react-query';
+import { Text } from '@mantine/core';
 
 interface ClientNavbarProps {
   initialSession: any;
@@ -27,6 +29,20 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
 
   const currentSession = isPending ? initialSession : data;
   const isLoggedIn = currentSession?.user != null;
+
+  const { data: profileData } = useQuery({
+    queryKey: ['userProfile'],
+    queryFn: async () => {
+      const res = await fetch('/api/user/profile');
+      if (!res.ok) {
+        const errorText = await res.text();
+        console.error("Profile Fetch Error:", errorText);
+        throw new Error('Failed to fetch profile: ' + errorText);
+      }
+      return res.json();
+    },
+    enabled: isLoggedIn,
+  });
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -55,21 +71,8 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
           </a>
 
           <nav className={classes.navLinks}>
-            {isLoggedIn && (
-              <>
-                <Link
-                  href="/"
-                  className={`pixel-font ${classes.link} ${isActive('/') ? classes.linkActive : ''}`}
-                >
-                  Home
-                </Link>
-                <Link
-                  href="/p0"
-                  className={`pixel-font ${classes.link} ${isActive('/p0') ? classes.linkActive : ''}`}
-                >
-                  P0
-                </Link>
-              </>
+            {isLoggedIn && isQuestionPage && (
+              <Timer ref={timerRef} />
             )}
           </nav>
 
@@ -81,19 +84,21 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
               flexShrink: 0,
             }}
           >
-            {/* Timer */}
-            {isLoggedIn && isQuestionPage && (
-              <div style={{ marginRight: '64px', display: 'flex' }}>
-                <Timer ref={timerRef} />
-              </div>
-            )}
-
             {/* Auth Section */}
             <div className={classes.desktopAuthContainer}>
               {isPending ? (
-                <Skeleton height={32} width={120} radius="xl" />
+                <div className="pixel-border animate-pulse" style={{ height: 32, width: 120, background: 'var(--surface-default)' }} />
               ) : isLoggedIn ? (
-                <Profile avatar={currentSession.user.image} />
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  {profileData && (
+                    <div className="pixel-border" style={{ padding: '4px 8px', background: 'var(--surface-default)' }}>
+                      <Text className="pixel-font" size="xs" c="var(--primary-red)" fw="bold">
+                        {profileData.currentStreak} 🔥
+                      </Text>
+                    </div>
+                  )}
+                  <Profile avatar={currentSession.user.image} />
+                </div>
               ) : (
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button

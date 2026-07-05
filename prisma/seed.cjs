@@ -72,34 +72,61 @@ async function seedQuestions() {
     .filter((folder) => fs.statSync(path.join(baseDir, folder)).isDirectory())
     .sort((a, b) => a.localeCompare(b));
 
+  const slugsToKeep = new Set();
+  const folderMetadataList = [];
+
   for (const [index, folder] of questionFolders.entries()) {
     const folderPath = path.join(baseDir, folder);
     const metadata = loadJsonIfExists(path.join(folderPath, 'metadata.json'));
-
     if (!metadata) {
       console.warn(`Skipping ${folder}: metadata.json missing`);
       continue;
     }
+    slugsToKeep.add(metadata.slug);
+    folderMetadataList.push({ index, folder, metadata, folderPath });
+  }
 
+  // Clean up questions in DB that are not in the local seed files
+  await prisma.question.deleteMany({
+    where: {
+      slug: {
+        notIn: Array.from(slugsToKeep),
+      },
+    },
+  });
+
+  // Temporarily set all remaining questions' displayOrder to avoid unique constraint issues
+  const existingQuestions = await prisma.question.findMany({ select: { id: true } });
+  for (const eq of existingQuestions) {
+    await prisma.question.update({
+      where: { id: eq.id },
+      data: { displayOrder: -eq.id },
+    });
+  }
+
+  for (const { index, folder, metadata, folderPath } of folderMetadataList) {
     const questionMdPath = path.join(folderPath, 'Question.md');
     const displayOrder = Number.isInteger(metadata.displayOrder) ? metadata.displayOrder : index + 1;
     const description = fs.existsSync(questionMdPath) ? fs.readFileSync(questionMdPath, 'utf8') : '';
 
     console.log(`Seeding question: ${metadata.title} (${metadata.slug})`);
 
+    const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : 'Medium';
+    const difficulty = capitalize(metadata.difficulty);
+
     const question = await prisma.question.upsert({
       where: { slug: metadata.slug },
       update: {
         displayOrder,
         name: metadata.title,
-        difficulty: metadata.difficulty,
+        difficulty,
         description,
       },
       create: {
         displayOrder,
         slug: metadata.slug,
         name: metadata.title,
-        difficulty: metadata.difficulty,
+        difficulty,
         description,
       },
     });
@@ -137,13 +164,31 @@ async function seedIncidents() {
     .filter((folder) => fs.statSync(path.join(baseDir, folder)).isDirectory())
     .sort((a, b) => a.localeCompare(b));
 
+  const slugsToKeep = new Set();
+  const folderMetadataList = [];
+
   for (const folder of folders) {
     const metadata = loadJsonIfExists(path.join(baseDir, folder, 'metadata.json'));
-
     if (!metadata) {
       console.warn(`Skipping ${folder}: metadata.json missing`);
       continue;
     }
+    slugsToKeep.add(metadata.slug);
+    folderMetadataList.push({ folder, metadata });
+  }
+
+  // Clean up incidents in DB that are not in the local seed files
+  await prisma.incident.deleteMany({
+    where: {
+      slug: {
+        notIn: Array.from(slugsToKeep),
+      },
+    },
+  });
+
+  for (const { folder, metadata } of folderMetadataList) {
+    const capitalize = (s) => s ? s.charAt(0).toUpperCase() + s.slice(1).toLowerCase() : 'Medium';
+    const difficulty = capitalize(metadata.difficulty);
 
     console.log(`Seeding incident: ${metadata.title} (${metadata.slug})`);
 
@@ -152,7 +197,7 @@ async function seedIncidents() {
       update: {
         title: metadata.title,
         severity: metadata.severity,
-        difficulty: metadata.difficulty,
+        difficulty,
         service: metadata.service,
         summary: metadata.summary,
         slaMinutes: metadata.slaMinutes,
@@ -161,7 +206,7 @@ async function seedIncidents() {
         slug: metadata.slug,
         title: metadata.title,
         severity: metadata.severity,
-        difficulty: metadata.difficulty,
+        difficulty,
         service: metadata.service,
         summary: metadata.summary,
         slaMinutes: metadata.slaMinutes,
