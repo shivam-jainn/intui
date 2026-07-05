@@ -8,6 +8,8 @@ import { useCachedSession } from '@/lib/hooks/useSession';
 import Intui from './Intui';
 import Profile from './Profile';
 import classes from './Navbar.module.css';
+import Timer from '@/components/Timer/Timer';
+import { useTimerContext } from '@/components/Timer/TimerContext';
 
 interface ClientNavbarProps {
   initialSession: any;
@@ -17,6 +19,11 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { data, isPending } = useCachedSession();
+  const { timerRef } = useTimerContext();
+
+
+  const isQuestionPage =
+  /^\/(?!p0$)[^/]+$/.test(pathname) || /^\/p0\/[^/]+$/.test(pathname);
 
   const currentSession = isPending ? initialSession : data;
   const isLoggedIn = currentSession?.user != null;
@@ -39,7 +46,7 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
             style={{
               display: 'flex',
               alignItems: 'center',
-              color: '#fff',
+              color: 'var(--primary-red)',
               textDecoration: 'none',
               flexShrink: 0,
             }}
@@ -52,13 +59,13 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
               <>
                 <Link
                   href="/"
-                  className={`${classes.link} ${isActive('/') ? classes.linkActive : ''}`}
+                  className={`pixel-font ${classes.link} ${isActive('/') ? classes.linkActive : ''}`}
                 >
                   Home
                 </Link>
                 <Link
                   href="/p0"
-                  className={`${classes.link} ${isActive('/p0') ? classes.linkActive : ''}`}
+                  className={`pixel-font ${classes.link} ${isActive('/p0') ? classes.linkActive : ''}`}
                 >
                   P0
                 </Link>
@@ -74,6 +81,13 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
               flexShrink: 0,
             }}
           >
+            {/* Timer */}
+            {isLoggedIn && isQuestionPage && (
+              <div style={{ marginRight: '64px', display: 'flex' }}>
+                <Timer ref={timerRef} />
+              </div>
+            )}
+
             {/* Auth Section */}
             <div className={classes.desktopAuthContainer}>
               {isPending ? (
@@ -84,15 +98,17 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
                 <div style={{ display: 'flex', gap: '8px' }}>
                   <button
                     type="button"
-                    className={classes.btnLogin}
+                    className={`pixel-btn-ghost ${classes.mobileBtn}`}
                     onClick={() => router.push('/signin')}
+                    style={{ fontSize: '0.6rem', padding: '0.5rem' }}
                   >
                     Log in
                   </button>
                   <button
                     type="button"
-                    className={classes.btnSignup}
+                    className={`pixel-btn ${classes.mobileBtn}`}
                     onClick={() => router.push('/signup')}
+                    style={{ fontSize: '0.6rem', padding: '0.5rem' }}
                   >
                     Sign up
                   </button>

@@ -96,42 +96,61 @@ export default function IncidentRunBar({
 
   return (
     <Stack gap={0}>
-      <Card
-        p="xs"
+      <div
         style={{
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
           justifyContent: 'space-between',
-          borderBottom: '1px solid var(--mantine-color-dark-5)',
-          borderRadius: 0,
+          flexWrap: 'wrap',
+          background: 'var(--bg-raised)',
+          borderBottom: '1px solid var(--border-default)',
+          padding: '10px 14px',
+          gap: 12,
         }}
       >
         <Group gap="xs">
-          <Select
-            size="xs"
-            data={langOptions}
+          <select
+            className="pixel-font pixel-border-sm"
             value={language}
-            onChange={(v: string | null) => v && onLanguageChange(v)}
-            w={110}
-            styles={{ input: { fontSize: 12 } }}
-          />
-          <Badge size="sm" variant="outline" color="gray">
+            onChange={(e) => onLanguageChange(e.target.value)}
+            style={{
+              padding: '6px 10px',
+              background: 'var(--surface-default)',
+              color: 'var(--text-primary)',
+              fontSize: '10px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {langOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <span 
+            className="pixel-font pixel-border-sm"
+            style={{
+              padding: '6px 10px',
+              background: 'var(--bg-overlay)',
+              color: 'var(--text-muted)',
+              fontSize: '10px',
+            }}
+          >
             {activeFile ? activeFile.split('/').pop() : entryFile.split('/').pop() || 'no file'}
-          </Badge>
+          </span>
         </Group>
 
-        <Button
-          size="xs"
-          leftSection={<IconPlayerPlay size={12} />}
+        <button
           onClick={handleRun}
-          loading={running}
-          color="green"
-          variant="filled"
+          className="pixel-font pixel-btn-sm"
+          disabled={!language || running}
+          style={{ height: '32px', fontSize: '12px' }}
         >
-          Run Tests
-        </Button>
-      </Card>
+          {running ? 'RUNNING...' : 'RUN TESTS'}
+        </button>
+      </div>
 
       {error && (
         <Notification

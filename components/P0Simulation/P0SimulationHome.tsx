@@ -18,8 +18,9 @@ export default function P0SimulationHome() {
   const incidents = React.useMemo(() => incidentsData ?? [], [incidentsData]);
 
   return (
-    <div style={{ minHeight: '100vh', background: colors.bg.base, position: 'relative' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', position: 'relative' }}>
       {/* Ambient glows */}
+      <div className="global-noise" />
       <div
         style={{
           position: 'fixed',
@@ -37,20 +38,8 @@ export default function P0SimulationHome() {
             width: 600,
             height: 600,
             borderRadius: '50%',
-            background: `rgba(250,82,82,0.10)`,
+            background: `rgba(230,30,30,0.10)`,
             filter: 'blur(120px)',
-          }}
-        />
-        <div
-          style={{
-            position: 'absolute',
-            top: '40%',
-            right: '5%',
-            width: 400,
-            height: 400,
-            borderRadius: '50%',
-            background: `rgba(249,115,22,0.07)`,
-            filter: 'blur(100px)',
           }}
         />
         <div
@@ -61,7 +50,7 @@ export default function P0SimulationHome() {
             width: 480,
             height: 480,
             borderRadius: '50%',
-            background: `rgba(250,82,82,0.05)`,
+            background: `rgba(255,90,0,0.05)`,
             filter: 'blur(110px)',
           }}
         />
@@ -79,14 +68,13 @@ export default function P0SimulationHome() {
         {/* Header */}
         <div style={{ marginBottom: 48 }}>
           <div
+            className="pixel-border"
             style={{
               display: 'inline-flex',
               alignItems: 'center',
               gap: 8,
               background: `rgba(250,82,82,0.12)`,
-              border: `1px solid rgba(250,82,82,0.25)`,
-              borderRadius: 999,
-              padding: '4px 14px',
+              padding: '8px 14px',
               marginBottom: 20,
             }}
           >
@@ -94,41 +82,41 @@ export default function P0SimulationHome() {
               style={{
                 width: 7,
                 height: 7,
-                borderRadius: '50%',
                 background: colors.danger[500],
                 display: 'inline-block',
                 boxShadow: `0 0 8px ${colors.danger[500]}`,
+                animation: 'blink 1s infinite'
               }}
             />
             <span
+              className="pixel-font"
               style={{
-                fontSize: 12,
+                fontSize: 10,
                 color: colors.danger[400],
                 fontWeight: 600,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
               }}
             >
-              Live Incidents
+              LIVE INCIDENTS
             </span>
           </div>
           <h1
+            className="pixel-font"
             style={{
               fontSize: 'clamp(28px, 4vw, 48px)',
               fontWeight: 900,
-              color: colors.text.primary,
+              color: 'var(--primary-red)',
               margin: 0,
               lineHeight: 1.08,
-              letterSpacing: '-0.03em',
             }}
           >
-            Incident Command Center
+            COMMAND CENTER
           </h1>
           <p
+            className="pixel-font"
             style={{
               marginTop: 12,
-              fontSize: 16,
-              color: colors.text.muted,
+              fontSize: 10,
+              color: 'var(--text-muted)',
               maxWidth: 520,
               lineHeight: 1.7,
             }}
@@ -150,10 +138,10 @@ export default function P0SimulationHome() {
             {[1, 2].map((i) => (
               <div
                 key={i}
+                className="pixel-border"
                 style={{
                   height: 220,
-                  borderRadius: 16,
-                  background: colors.border.subtle,
+                  background: 'var(--surface-default)',
                   animation: 'pulse 1.5s ease-in-out infinite',
                 }}
               />
@@ -161,27 +149,25 @@ export default function P0SimulationHome() {
           </div>
         ) : error ? (
           <div
+            className="pixel-border"
             style={{
               background: `rgba(250,82,82,0.1)`,
-              border: `1px solid rgba(250,82,82,0.3)`,
-              borderRadius: 12,
               padding: '20px 24px',
             }}
           >
-            <p style={{ color: colors.danger[400], margin: 0 }}>
+            <p className="pixel-font" style={{ color: colors.danger[400], margin: 0 }}>
               Failed to load incidents: {(error as Error)?.message}
             </p>
           </div>
         ) : incidents.length === 0 ? (
           <div
+            className="pixel-border"
             style={{
-              background: colors.surface.default,
-              border: `1px solid ${colors.border.default}`,
-              borderRadius: 12,
+              background: 'var(--surface-default)',
               padding: '20px 24px',
             }}
           >
-            <p style={{ color: colors.text.secondary, margin: 0 }}>No incidents found.</p>
+            <p className="pixel-font" style={{ color: 'var(--text-secondary)', margin: 0 }}>No incidents found.</p>
           </div>
         ) : (
           <div
@@ -207,6 +193,10 @@ export default function P0SimulationHome() {
           0%, 100% { opacity: 1; }
           50% { opacity: 0.4; }
         }
+        @keyframes blink {
+          0%, 100% { opacity: 1; }
+          50% { opacity: 0.3; }
+        }
       `}</style>
     </div>
   );
@@ -220,15 +210,13 @@ function IncidentCard({ incident, onClick }: { incident: Incident; onClick: () =
       onClick={onClick}
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      className="pixel-border"
       style={{
-        background: hovered ? colors.surface.hover : colors.surface.default,
-        border: `1px solid ${hovered ? 'rgba(250,82,82,0.4)' : colors.border.default}`,
-        borderRadius: 16,
+        background: hovered ? 'var(--surface-hover)' : 'var(--surface-default)',
         padding: '28px 28px 24px',
         cursor: 'pointer',
         transition: 'all 0.18s ease',
         transform: hovered ? 'translateY(-3px)' : 'none',
-        boxShadow: hovered ? `0 12px 40px rgba(250,82,82,0.12)` : 'none',
         display: 'flex',
         flexDirection: 'column',
         gap: 14,
@@ -237,34 +225,31 @@ function IncidentCard({ incident, onClick }: { incident: Incident; onClick: () =
       {/* Top row: severity + difficulty */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
         <span
+          className="pixel-font"
           style={{
-            padding: '3px 10px',
-            borderRadius: 999,
+            padding: '4px 8px',
             background: `rgba(250,82,82,0.15)`,
             border: `1px solid rgba(250,82,82,0.35)`,
             color: colors.danger[400],
-            fontSize: 11,
-            fontWeight: 700,
-            letterSpacing: '0.06em',
+            fontSize: 8,
           }}
         >
           {incident.severity}
         </span>
         <span
+          className="pixel-font"
           style={{
-            padding: '3px 10px',
-            borderRadius: 999,
-            background: colors.border.subtle,
-            border: `1px solid ${colors.border.default}`,
+            padding: '4px 8px',
+            background: 'var(--surface-default)',
+            border: `1px solid var(--border-default)`,
             color: difficultyColor[incident.difficulty] ?? colors.text.secondary,
-            fontSize: 11,
-            fontWeight: 600,
+            fontSize: 8,
           }}
         >
           {incident.difficulty}
         </span>
         <div style={{ flex: 1 }} />
-        <span style={{ fontSize: 11, color: colors.text.muted, fontFamily: 'monospace' }}>
+        <span className="pixel-font" style={{ fontSize: 8, color: 'var(--text-muted)' }}>
           INC-{String(incident.id).padStart(3, '0')}
         </span>
       </div>
@@ -272,13 +257,12 @@ function IncidentCard({ incident, onClick }: { incident: Incident; onClick: () =
       {/* Title */}
       <div>
         <h3
+          className="pixel-font"
           style={{
             margin: 0,
-            fontSize: 18,
-            fontWeight: 700,
-            color: colors.text.primary,
-            letterSpacing: '-0.02em',
-            lineHeight: 1.3,
+            fontSize: 12,
+            color: 'var(--text-primary)',
+            lineHeight: 1.5,
           }}
         >
           {incident.title}
@@ -287,10 +271,11 @@ function IncidentCard({ incident, onClick }: { incident: Incident; onClick: () =
 
       {/* Summary */}
       <p
+        className="pixel-font"
         style={{
           margin: 0,
-          fontSize: 13,
-          color: colors.text.muted,
+          fontSize: 8,
+          color: 'var(--text-muted)',
           lineHeight: 1.75,
           display: '-webkit-box',
           WebkitLineClamp: 3,
@@ -309,43 +294,20 @@ function IncidentCard({ incident, onClick }: { incident: Incident; onClick: () =
           justifyContent: 'space-between',
           marginTop: 'auto',
           paddingTop: 8,
-          borderTop: `1px solid ${colors.border.subtle}`,
+          borderTop: `1px solid var(--border-subtle)`,
         }}
       >
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={colors.text.secondary}
-            strokeWidth="2"
-          >
-            <rect x="2" y="3" width="20" height="14" rx="2" />
-            <path d="M8 21h8M12 17v4" />
-          </svg>
-          <span style={{ fontSize: 12, color: colors.text.secondary, fontWeight: 500 }}>
-            {incident.service}
+          <span className="pixel-font" style={{ fontSize: 8, color: 'var(--text-secondary)' }}>
+            &gt; {incident.service}
           </span>
         </div>
         <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
-          <svg
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke={colors.danger[400]}
-            strokeWidth="2"
-          >
-            <circle cx="12" cy="12" r="10" />
-            <polyline points="12 6 12 12 16 14" />
-          </svg>
           <span
+            className="pixel-font"
             style={{
-              fontSize: 12,
+              fontSize: 8,
               color: colors.danger[400],
-              fontFamily: 'monospace',
-              fontWeight: 700,
             }}
           >
             SLA {incident.slaMinutes}m

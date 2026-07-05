@@ -30,96 +30,84 @@ export default function IncidentSubmissions({
 
   if (enriched.length === 0) {
     return (
-      <Box p="md">
-        <Box
-          p="xl"
-          ta="center"
-          style={{
-            border: '1px dashed var(--mantine-color-dark-4)',
-            borderRadius: 'var(--mantine-radius-md)',
-          }}
-        >
-          <Text c="dimmed" size="sm">
-            No submissions yet. Run your code to see it here.
-          </Text>
-        </Box>
-      </Box>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '30px 0' }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div className="pixel-font" style={{ fontSize: 10, marginBottom: 4 }}>NO SUBMISSIONS</div>
+          <div style={{ fontSize: 11, fontStyle: 'italic' }}>Run your code to see it here</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <ScrollArea flex={1} p="sm">
-      <Stack gap="md">
-        {enriched.map((submission) => (
-          <Card
-            key={submission.id}
-            padding="md"
-            radius="md"
-            style={{
-              border: `1px solid ${submission.status === 'Accepted' ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-dark-4)'}`,
-              background: 'var(--mantine-color-dark-7)',
-            }}
-          >
-            <Group justify="space-between" mb="xs">
-              <Group gap="xs">
-                <ThemeIcon
-                  size="sm"
-                  variant="light"
-                  color={submission.status === 'Accepted' ? 'green' : 'red'}
-                >
-                  {submission.status === 'Accepted' ? <IconCheck size={14} /> : <IconX size={14} />}
-                </ThemeIcon>
-                <Text size="sm" fw={600} c={submission.status === 'Accepted' ? 'green' : 'red'}>
-                  {submission.status}
-                </Text>
-              </Group>
-              <Badge size="sm" variant="outline" color="gray">
-                {submission.language}
-              </Badge>
-            </Group>
-
-            <Box
-              p="xs"
-              mb="xs"
+    <div style={{ flex: 1, padding: '16px', overflowY: 'auto', background: 'var(--bg-base)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        {enriched.map((submission) => {
+          const isAccepted = submission.status === 'Accepted';
+          return (
+            <div
+              key={submission.id}
+              className="pixel-border-sm"
               style={{
-                background: 'var(--mantine-color-dark-8)',
-                borderRadius: 'var(--mantine-radius-sm)',
-                maxHeight: 120,
-                overflow: 'auto',
+                padding: '12px',
+                background: 'var(--bg-raised)',
+                borderLeft: `2px solid ${isAccepted ? '#4CAF50' : 'var(--primary-red)'}`,
               }}
             >
-              <Code
-                block
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '8px', flexWrap: 'wrap', gap: '8px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '8px', height: '8px', background: isAccepted ? '#4CAF50' : 'var(--primary-red)' }}></div>
+                  <span className="pixel-font" style={{ color: isAccepted ? '#4CAF50' : 'var(--primary-red)', fontSize: '12px' }}>
+                    {submission.status.toUpperCase()}
+                  </span>
+                </div>
+                <span className="pixel-font" style={{ color: 'var(--text-muted)', fontSize: '10px' }}>
+                  {submission.language.toUpperCase()}
+                </span>
+              </div>
+
+              <div
+                className="pixel-border-sm"
                 style={{
-                  fontSize: 11,
-                  background: 'transparent',
-                  color: 'var(--mantine-color-gray-3)',
+                  padding: '8px',
+                  marginBottom: '8px',
+                  background: 'var(--surface-default)',
+                  maxHeight: '120px',
+                  overflow: 'auto',
                 }}
               >
-                {submission.code.slice(0, 300)}
-                {submission.code.length > 300 ? '...' : ''}
-              </Code>
-            </Box>
+                <pre
+                  style={{
+                    fontSize: '11px',
+                    color: 'var(--text-secondary)',
+                    margin: 0,
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                  }}
+                >
+                  {submission.code.slice(0, 300)}
+                  {submission.code.length > 300 ? '...' : ''}
+                </pre>
+              </div>
 
-            <Group gap="lg">
-              <Group gap={4}>
-                <IconClock size={14} color="var(--mantine-color-dimmed)" />
-                <Text size="xs" c="dimmed">
-                  {submission.timeTaken !== null ? `${submission.timeTaken.toFixed(2)}s` : 'N/A'}
-                </Text>
-              </Group>
-              <Group gap={4}>
-                <IconDeviceDesktop size={14} color="var(--mantine-color-dimmed)" />
-                <Text size="xs" c="dimmed">
-                  {submission.spaceTaken !== null
-                    ? `${submission.spaceTaken.toFixed(1)} MB`
-                    : 'N/A'}
-                </Text>
-              </Group>
-            </Group>
-          </Card>
-        ))}
-      </Stack>
-    </ScrollArea>
+              <div style={{ display: 'flex', gap: '16px' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <IconClock size={12} color="var(--text-muted)" />
+                  <span className="pixel-font" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                    {submission.timeTaken !== null ? `${submission.timeTaken.toFixed(2)}s` : 'N/A'}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+                  <IconDeviceDesktop size={12} color="var(--text-muted)" />
+                  <span className="pixel-font" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+                    {submission.spaceTaken !== null ? `${submission.spaceTaken.toFixed(1)} MB` : 'N/A'}
+                  </span>
+                </div>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
   );
 }

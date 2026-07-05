@@ -82,109 +82,129 @@ export default function IncidentTestResults() {
   const isSystemError = !summaryMatched && stderr && !hasCountFields && !passedBool;
 
   return (
-    <ScrollArea h="100%">
-      <Stack gap="sm" p="md">
+    <div style={{ height: '100%', overflowY: 'auto', background: 'var(--bg-base)' }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px', padding: '16px' }}>
         {/* Summary */}
-        <Group gap="xs">
-          <Badge color={allPassed ? 'green' : 'red'} size="lg" variant="filled">
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <span
+            className="pixel-font"
+            style={{
+              background: allPassed ? '#4CAF50' : 'var(--primary-red)',
+              color: '#fff',
+              padding: '6px 12px',
+              fontSize: '12px',
+            }}
+          >
             {summaryMatched || hasCountFields
               ? allPassed
-                ? 'All Tests Passed'
-                : `${summaryMatched ? finalFailed : failedCount} / ${summaryMatched ? finalTotal : totalCount} Failed`
+                ? 'ALL TESTS PASSED'
+                : `${summaryMatched ? finalFailed : failedCount} / ${summaryMatched ? finalTotal : totalCount} FAILED`
               : allPassed
-                ? 'Passed'
+                ? 'PASSED'
                 : statusText
-                  ? statusText
-                  : 'Failed'}
-          </Badge>
+                  ? statusText.toUpperCase()
+                  : 'FAILED'}
+          </span>
           {(summaryMatched || (hasCountFields && totalCount > 0)) && (
-            <Text size="sm" c="dimmed">
-              {summaryMatched ? finalPassed : finalPassed} passed,{' '}
-              {summaryMatched ? finalFailed : failedCount} failed
-            </Text>
+            <div className="pixel-font" style={{ fontSize: '10px', color: 'var(--text-muted)' }}>
+              {summaryMatched ? finalPassed : finalPassed} PASSED,{' '}
+              {summaryMatched ? finalFailed : failedCount} FAILED
+            </div>
           )}
-        </Group>
+        </div>
 
         {/* Stdout */}
         {stdout && (
-          <Box>
-            <Text size="xs" fw={600} c="dimmed" mb={4}>
+          <div>
+            <div className="pixel-font" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>
               OUTPUT
-            </Text>
-            <Code
-              block
+            </div>
+            <pre
+              className="pixel-border-sm"
               style={{
-                fontSize: 11,
-                backgroundColor: 'var(--mantine-color-dark-8)',
+                fontSize: '12px',
+                backgroundColor: 'var(--surface-default)',
+                color: 'var(--text-primary)',
+                padding: '12px',
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 maxHeight: '300px',
                 overflowY: 'auto',
+                margin: 0,
               }}
             >
               {stdout}
-            </Code>
-          </Box>
+            </pre>
+          </div>
         )}
 
-        {/* Stderr - Only show as Error if it's not just the unittest output */}
+        {/* Stderr */}
         {stderr && (
-          <Box>
-            <Text size="xs" fw={600} c={isSystemError ? 'red' : 'dimmed'} mb={4}>
+          <div>
+            <div className="pixel-font" style={{ fontSize: '10px', color: isSystemError ? 'var(--primary-red)' : 'var(--text-muted)', marginBottom: '8px' }}>
               {isSystemError ? 'ERRORS' : 'TEST LOGS'}
-            </Text>
-            <Code
-              block
+            </div>
+            <pre
+              className="pixel-border-sm"
               style={{
-                fontSize: 11,
-                backgroundColor: 'var(--mantine-color-dark-8)',
-                color: isSystemError ? 'var(--mantine-color-red-4)' : 'var(--mantine-color-gray-5)',
+                fontSize: '12px',
+                backgroundColor: 'var(--surface-default)',
+                color: isSystemError ? 'var(--primary-red)' : 'var(--text-secondary)',
+                padding: '12px',
                 whiteSpace: 'pre-wrap',
                 wordBreak: 'break-word',
                 maxHeight: '300px',
                 overflowY: 'auto',
+                margin: 0,
+                borderLeft: isSystemError ? '2px solid var(--primary-red)' : 'none',
               }}
             >
               {stderr}
-            </Code>
-          </Box>
+            </pre>
+          </div>
         )}
 
         {/* Individual test cases */}
         {result.test_results && Array.isArray(result.test_results) && (
-          <Box>
-            <Text size="xs" fw={600} c="dimmed" mb={4}>
+          <div>
+            <div className="pixel-font" style={{ fontSize: '10px', color: 'var(--text-muted)', marginBottom: '8px' }}>
               TEST CASES
-            </Text>
-            <Stack gap={4}>
+            </div>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
               {result.test_results.map((tc: any, i: number) => (
-                <Group key={i} gap="xs" wrap="nowrap">
-                  <ThemeIcon
-                    size="xs"
-                    color={tc.passed ? 'green' : 'red'}
-                    variant="light"
-                    radius="xl"
-                  >
-                    {tc.passed ? <IconCheck size={10} /> : <IconX size={10} />}
-                  </ThemeIcon>
-                  <Text
-                    size="xs"
-                    c={tc.passed ? 'green' : 'red'}
-                    style={{ fontFamily: 'monospace' }}
-                  >
-                    {tc.name ?? `Test ${i + 1}`}
-                  </Text>
-                  {tc.message && (
-                    <Text size="xs" c="dimmed" truncate>
-                      — {tc.message}
-                    </Text>
-                  )}
-                </Group>
+                <div key={i} style={{ display: 'flex', alignItems: 'flex-start', gap: '10px' }}>
+                  <div
+                    style={{
+                      width: '12px',
+                      height: '12px',
+                      background: tc.passed ? '#4CAF50' : 'var(--primary-red)',
+                      marginTop: '4px',
+                      flexShrink: 0,
+                    }}
+                  />
+                  <div>
+                    <div
+                      className="pixel-font"
+                      style={{
+                        fontSize: '10px',
+                        color: tc.passed ? '#4CAF50' : 'var(--primary-red)',
+                        marginBottom: tc.message ? '4px' : '0',
+                      }}
+                    >
+                      {tc.name ?? `TEST ${i + 1}`}
+                    </div>
+                    {tc.message && (
+                      <div style={{ fontSize: '12px', color: 'var(--text-secondary)' }}>
+                        {tc.message}
+                      </div>
+                    )}
+                  </div>
+                </div>
               ))}
-            </Stack>
-          </Box>
+            </div>
+          </div>
         )}
-      </Stack>
-    </ScrollArea>
+      </div>
+    </div>
   );
 }

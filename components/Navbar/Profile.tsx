@@ -1,7 +1,7 @@
 'use client';
 
 import React from 'react';
-import { Avatar, Button, Popover, Stack, Text } from '@mantine/core';
+import { Avatar, Popover, Stack, Text } from '@mantine/core';
 import { signOut } from '@/lib/auth-client';
 import { useInvalidateSession } from '@/lib/hooks/useSession';
 
@@ -31,28 +31,27 @@ export default function Profile({ avatar, name }: { avatar: string; name?: strin
         <Avatar
           src={avatar}
           alt="User"
-          radius="xl"
-          style={{ cursor: 'pointer' }}
+          radius="0"
+          style={{ cursor: 'pointer', border: '2px solid var(--primary-red)' }}
           onClick={() => setOpened((o) => !o)}
         />
       </Popover.Target>
 
-      <Popover.Dropdown p="sm">
+      <Popover.Dropdown p="sm" style={{ background: 'var(--surface-default)', border: '1px solid var(--primary-red)' }}>
         <Stack gap="xs">
           {name && (
-            <Text fw={500} size="sm">
+            <Text fw={500} size="sm" c="var(--text-primary)" className="pixel-font" style={{ fontSize: '0.6rem' }}>
               {name}
             </Text>
           )}
-          <Button
-            loading={isSigningOut}
-            variant="light"
-            color="red"
-            size="xs"
+          <button
+            disabled={isSigningOut}
+            className="pixel-btn"
+            style={{ fontSize: '0.6rem', padding: '0.5rem', width: '100%' }}
             onClick={handleSignOut}
           >
-            Log out
-          </Button>
+            {isSigningOut ? 'LOGGING OUT...' : 'LOG OUT'}
+          </button>
         </Stack>
       </Popover.Dropdown>
     </Popover>

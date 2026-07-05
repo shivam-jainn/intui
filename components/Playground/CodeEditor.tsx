@@ -16,7 +16,8 @@ import { langAtom } from '@/contexts/LanguageContext';
 import { resultAtom, resultDataAtom, submissionAtom } from '@/contexts/TestCardContext';
 import { Language } from '@/lib/common/types/playground.types';
 import { useDriverCode } from '@/lib/hooks/useDriverCode';
-import Timer, { TimerHandle } from '../Timer/Timer';
+import Timer, { TimerHandle } from '@/components/Timer/Timer';
+import { useTimerContext } from '@/components/Timer/TimerContext';
 
 interface CodeEditorProps {
   questionSlug: string;
@@ -29,7 +30,7 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
   const [testTab, setTestTab] = useAtom(resultAtom);
   const [_, setResultData] = useAtom(resultDataAtom);
   const [__, setSubmission] = useAtom(submissionAtom);
-  const timerRef = useRef<TimerHandle>(null);
+  const { timerRef } = useTimerContext();
 
   const { data: driver, error: driverError } = useDriverCode(
     decodeURIComponent(questionSlug),
@@ -151,41 +152,67 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
         height: '100%',
       }}
     >
-      <Card
-        w="100%"
-        p="sm"
+      <div
         style={{
+          width: '100%',
+          padding: '6px 14px',
           display: 'flex',
           flexDirection: 'row',
           alignItems: 'center',
-          gap: 10,
+          gap: 12,
+          background: 'var(--bg-raised)',
+          borderBottom: '1px solid var(--border-default)',
         }}
       >
-        <Select
-          placeholder="Select Language"
-          data={languageOptions}
-          value={language}
-          onChange={(value) => setLanguage(value as Language)}
-          style={{ width: 110 }}
-          size="xs"
-        />
-
-        <Button onClick={resetCode} variant="subtle" size="compact-sm" px={6}>
-          <GrPowerReset />
-        </Button>
-
-        <div style={{ flex: 1 }} />
-
-        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
-          <Timer ref={timerRef} />
-          <Button variant="secondary" size="xs" onClick={handleRunCode} loading={isLoading}>
-            Run
-          </Button>
-          <Button size="xs" onClick={handleSubmission}>
-            Submit
-          </Button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <select
+            className="pixel-font pixel-border-sm"
+            value={language}
+            onChange={(e) => setLanguage(e.target.value as Language)}
+            style={{
+              padding: '6px 10px',
+              background: 'var(--surface-default)',
+              color: 'var(--text-primary)',
+              fontSize: '10px',
+              outline: 'none',
+              cursor: 'pointer',
+            }}
+          >
+            {languageOptions.map((opt) => (
+              <option key={opt.value} value={opt.value}>
+                {opt.label}
+              </option>
+            ))}
+          </select>
+          <button 
+            className="pixel-btn-ghost-sm" 
+            onClick={resetCode} 
+            style={{ padding: '6px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}
+            title="Reset Code"
+          >
+            <GrPowerReset size={14} />
+          </button>
         </div>
-      </Card>
+
+        <div style={{ flex: 1, minWidth: '10px' }} />
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: 10 }}>
+          <button
+            className="pixel-font pixel-btn-ghost-sm"
+            onClick={handleRunCode}
+            disabled={isLoading}
+          >
+            RUN
+          </button>
+          <button
+            className="pixel-font pixel-btn-sm"
+            onClick={handleSubmission}
+            disabled={isLoading}
+          >
+            SUBMIT
+          </button>
+        </div>
+      </div>
 
       {uiError && (
         <Notification

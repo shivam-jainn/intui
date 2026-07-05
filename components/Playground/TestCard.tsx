@@ -62,23 +62,22 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
   const canSwitchTab = isResultDataAvailable || errorMessage;
 
   return (
-    <Paper
+    <div
       style={{
         display: 'flex',
         flexDirection: 'column',
         height: '100%',
         overflow: 'hidden',
+        background: 'var(--bg-base)',
       }}
-      withBorder
-      radius={0}
     >
       {/* Header: tabs */}
-      <Group
-        gap={0}
+      <div
         style={{
-          borderBottom: `1px solid ${theme.colors.dark[4]}`,
+          display: 'flex',
+          borderBottom: '2px solid var(--border-default)',
           flexShrink: 0,
-          background: theme.colors.dark[8],
+          background: 'var(--bg-raised)',
         }}
       >
         {(['testcases', 'results'] as const).map((t) => {
@@ -88,43 +87,45 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
             <button
               key={t}
               onClick={() => !disabled && setTab(t)}
+              className="pixel-font"
               style={{
                 flex: 1,
-                padding: '8px 0',
-                background: 'transparent',
+                padding: '10px 0',
+                background: active ? 'var(--blood-dark)' : 'transparent',
                 border: 'none',
                 cursor: disabled ? 'not-allowed' : 'pointer',
-                borderBottom: `2px solid ${active ? theme.colors.blue[5] : 'transparent'}`,
-                opacity: disabled ? 0.35 : active ? 1 : 0.65,
-                color: active ? theme.white : theme.colors.gray[4],
-                fontSize: 12,
-                fontWeight: active ? 600 : 400,
+                borderBottom: active ? '2px solid var(--primary-red)' : '2px solid transparent',
+                opacity: disabled ? 0.35 : 1,
+                color: active ? 'var(--text-primary)' : 'var(--text-secondary)',
+                fontSize: 10,
                 transition: 'all 0.15s ease',
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
                 gap: 6,
+                outline: 'none',
               }}
             >
-              {t === 'testcases' ? 'Test Cases' : 'Results'}
+              {t === 'testcases' ? 'TEST CASES' : 'RESULTS'}
               {t === 'results' && isResultDataAvailable && (
-                <Badge
-                  size="xs"
-                  color={status === 'Accepted' ? 'teal' : 'red'}
-                  variant="filled"
-                  p={0}
-                  style={{ height: 16, minWidth: 16, fontSize: 9, lineHeight: '16px' }}
+                <span
+                  style={{
+                    background: status === 'Accepted' ? 'var(--primary-red)' : 'var(--border-focus)',
+                    color: '#fff',
+                    padding: '2px 6px',
+                    fontSize: 8,
+                  }}
                 >
                   {passedCount}/{totalCount}
-                </Badge>
+                </span>
               )}
             </button>
           );
         })}
-      </Group>
+      </div>
 
       {/* Content */}
-      <Box style={{ flex: 1, overflow: 'auto' }}>
+      <div style={{ flex: 1, overflow: 'auto' }}>
         {tab === 'testcases' ? (
           <TestCaseContent
             testCases={testCases}
@@ -147,8 +148,8 @@ export default function TestCard({ testCases = [] }: { testCases?: string[] }) {
             theme={theme}
           />
         )}
-      </Box>
-    </Paper>
+      </div>
+    </div>
   );
 }
 
@@ -167,30 +168,27 @@ function TestCaseContent({
 }) {
   if (testCases.length === 0) {
     return (
-      <Group justify="center" py="xl">
-        <Stack align="center" gap={4}>
-          <Text size="sm" c="dimmed">
-            No test cases available
-          </Text>
-          <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-            Try running your code to see results
-          </Text>
-        </Stack>
-      </Group>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '30px 0' }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div className="pixel-font" style={{ fontSize: 10, marginBottom: 4 }}>NO TEST CASES</div>
+          <div style={{ fontSize: 11, fontStyle: 'italic' }}>Run your code to see results</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Stack gap={0}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Case selector pills */}
-      <Group gap={6} p="10px 12px" style={{ borderBottom: `1px solid ${theme.colors.dark[4]}` }}>
+      <div style={{ display: 'flex', gap: 6, padding: '10px 12px', borderBottom: '1px solid var(--border-default)', overflowX: 'auto' }}>
         {testCases.map((_, i) => {
           const n = i + 1;
           const active = testcase === String(n);
           return (
-            <Box
+            <button
               key={n}
               onClick={() => setTestCase(String(n))}
+              className="pixel-font"
               style={{
                 cursor: 'pointer',
                 height: 28,
@@ -198,44 +196,45 @@ function TestCaseContent({
                 display: 'flex',
                 alignItems: 'center',
                 justifyContent: 'center',
-                borderRadius: theme.radius.sm,
-                fontSize: 11,
-                fontWeight: active ? 700 : 500,
-                background: active ? theme.colors.blue[6] : theme.colors.dark[5],
-                color: active ? theme.white : theme.colors.gray[4],
+                borderRadius: 0,
+                fontSize: 10,
+                background: active ? 'var(--primary-red)' : 'var(--bg-overlay)',
+                color: active ? '#fff' : 'var(--text-secondary)',
+                border: active ? '1px solid var(--primary-red)' : '1px solid var(--border-default)',
                 transition: 'all 0.12s ease',
                 userSelect: 'none',
+                outline: 'none',
               }}
             >
               {n}
-            </Box>
+            </button>
           );
         })}
-      </Group>
+      </div>
 
       {/* Input block */}
-      <Box p="10px 12px">
-        <Text fw={600} c="dimmed" tt="uppercase" mb={6} component="span" style={{ fontSize: 10 }}>
-          Case {testcase} — Input
-        </Text>
-        <Code
-          block
+      <div style={{ padding: '10px 12px' }}>
+        <div className="pixel-font" style={{ color: 'var(--text-muted)', fontSize: 10, marginBottom: 8 }}>
+          CASE {testcase} — INPUT
+        </div>
+        <pre
+          className="pixel-border-sm"
           style={{
-            backgroundColor: theme.colors.dark[8],
-            color: theme.colors.gray[1],
+            backgroundColor: 'var(--surface-default)',
+            color: 'var(--text-primary)',
             padding: '10px 12px',
             fontSize: 12,
             lineHeight: '1.6',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
-            borderRadius: theme.radius.sm,
-            border: `1px solid ${theme.colors.dark[5]}`,
+            margin: 0,
+            borderLeft: '2px solid var(--border-focus)',
           }}
         >
           {testCases[Number(testcase) - 1] || 'No input'}
-        </Code>
-      </Box>
-    </Stack>
+        </pre>
+      </div>
+    </div>
   );
 }
 
@@ -269,155 +268,123 @@ function ResultsContent({
   const getStatusColor = (s: string) => {
     switch (s) {
       case 'Accepted':
-        return 'teal';
+        return '#4CAF50';
       case 'Wrong Answer':
-        return 'red';
-      case 'Time Limit Exceeded':
-        return 'orange';
-      case 'Memory Limit Exceeded':
-        return 'orange';
       case 'Runtime Error':
-        return 'red';
       case 'Compilation Error':
-        return 'red';
+        return 'var(--primary-red)';
       default:
-        return 'gray';
+        return 'var(--primary-orange)';
     }
   };
+
+  const statusColor = getStatusColor(status);
 
   if (errorMessage && !resultData?.results?.length) {
     let errorTitle = 'Execution Error';
     let errorHint = '';
 
-    if (
-      errorMessage.includes('Compilation Error') ||
-      errorMessage.includes('Compilation failed') ||
-      errorMessage.includes('syntax error') ||
-      errorMessage.includes('error:')
-    ) {
-      errorTitle = 'Compilation Error';
+    if (errorMessage.includes('Compilation Error') || errorMessage.includes('syntax error') || errorMessage.includes('error:')) {
+      errorTitle = 'COMPILATION ERROR';
       errorHint = 'Check your code for syntax errors and try again.';
-    } else if (
-      errorMessage.includes('Runtime Error') ||
-      errorMessage.includes('segmentation fault')
-    ) {
-      errorTitle = 'Runtime Error';
-      errorHint =
-        'Your code crashed during execution. Check for null pointer access or infinite loops.';
+    } else if (errorMessage.includes('Runtime Error') || errorMessage.includes('segmentation fault')) {
+      errorTitle = 'RUNTIME ERROR';
+      errorHint = 'Your code crashed during execution. Check for null pointer access or infinite loops.';
     } else if (errorMessage.includes('Time Limit Exceeded') || errorMessage.includes('timeout')) {
-      errorTitle = 'Time Limit Exceeded';
-      errorHint =
-        'Your code took too long to run. Optimize your algorithm or reduce unnecessary operations.';
+      errorTitle = 'TIME LIMIT EXCEEDED';
+      errorHint = 'Your code took too long to run. Optimize your algorithm or reduce unnecessary operations.';
     } else if (errorMessage.includes('Memory Limit Exceeded')) {
-      errorTitle = 'Memory Limit Exceeded';
-      errorHint =
-        'Your code used too much memory. Reduce data structure sizes or optimize memory usage.';
-    } else if (
-      errorMessage.includes('Network error') ||
-      errorMessage.includes('Unable to connect')
-    ) {
-      errorTitle = 'Connection Error';
-      errorHint = 'Unable to reach the execution service. Check your internet connection.';
-    } else if (errorMessage.includes('Configuration error')) {
-      errorTitle = 'Service Error';
-      errorHint = 'The execution service is misconfigured. Please contact support.';
+      errorTitle = 'MEMORY LIMIT EXCEEDED';
+    } else {
+      errorTitle = 'SERVICE ERROR';
+      errorHint = 'Unable to reach the execution service.';
     }
 
     return (
-      <Stack p="12px">
-        <Group gap={6}>
-          <ThemeIcon size={20} radius="xl" color="red" variant="light">
-            <IconX size={12} />
-          </ThemeIcon>
-          <Text size="xs" fw={600} c="red">
-            {errorTitle}
-          </Text>
-        </Group>
-        <Code
-          block
+      <div style={{ padding: '12px', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '6px' }}>
+          <div style={{ width: '8px', height: '8px', background: 'var(--primary-red)' }}></div>
+          <span className="pixel-font" style={{ color: 'var(--primary-red)', fontSize: '12px' }}>{errorTitle}</span>
+        </div>
+        <pre
+          className="pixel-border-sm"
           style={{
-            backgroundColor: theme.colors.dark[8],
-            color: theme.colors.red[4],
+            backgroundColor: 'var(--surface-default)',
+            color: 'var(--primary-red)',
             padding: '10px 12px',
-            fontSize: 12,
+            fontSize: '12px',
             lineHeight: '1.5',
             whiteSpace: 'pre-wrap',
             wordBreak: 'break-word',
-            borderRadius: theme.radius.sm,
-            border: `1px solid ${theme.colors.dark[5]}`,
-            borderLeft: `3px solid ${theme.colors.red[6]}`,
+            margin: 0,
+            borderLeft: '2px solid var(--primary-red)',
           }}
         >
           {errorMessage}
-        </Code>
+        </pre>
         {errorHint && (
-          <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-            {errorHint}
-          </Text>
+          <div style={{ fontSize: '11px', color: 'var(--text-muted)', fontStyle: 'italic' }}>{errorHint}</div>
         )}
-      </Stack>
+      </div>
     );
   }
 
   if (!resultData?.results?.length) {
     return (
-      <Group justify="center" py="xl">
-        <Stack align="center" gap={4}>
-          <Text size="sm" c="dimmed">
-            Run your code to see results
-          </Text>
-          <Text size="xs" c="dimmed" style={{ fontStyle: 'italic' }}>
-            Click "Run" to test against sample cases or "Submit" to evaluate
-          </Text>
-        </Stack>
-      </Group>
+      <div style={{ display: 'flex', justifyContent: 'center', padding: '30px 0' }}>
+        <div style={{ textAlign: 'center', color: 'var(--text-muted)' }}>
+          <div className="pixel-font" style={{ fontSize: 10, marginBottom: 4 }}>NO RESULTS</div>
+          <div style={{ fontSize: 11, fontStyle: 'italic' }}>Run your code to see results</div>
+        </div>
+      </div>
     );
   }
 
   return (
-    <Stack gap={0}>
+    <div style={{ display: 'flex', flexDirection: 'column', gap: 0 }}>
       {/* Status bar */}
-      <Group
-        justify="space-between"
-        p="8px 12px"
+      <div
         style={{
-          borderBottom: `1px solid ${theme.colors.dark[4]}`,
-          background: theme.colors.dark[8],
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          padding: '10px 12px',
+          borderBottom: '1px solid var(--border-default)',
+          background: 'var(--bg-raised)',
         }}
       >
-        <Group gap={8}>
-          <ThemeIcon size={22} radius="xl" color={getStatusColor(status)} variant="filled">
-            {status === 'Accepted' ? <IconCheck size={12} /> : <IconX size={12} />}
-          </ThemeIcon>
-          <Box>
-            <Text size="xs" fw={600} lh={1.2}>
-              {status}
-            </Text>
+        <div style={{ display: 'flex', alignItems: 'center', gap: 8 }}>
+          <div style={{ width: '8px', height: '8px', background: statusColor }}></div>
+          <div>
+            <div className="pixel-font" style={{ fontSize: 12, color: statusColor, marginBottom: 2 }}>
+              {status.toUpperCase()}
+            </div>
             {totalCount > 0 && (
-              <Text c="dimmed" lh={1.2} style={{ fontSize: 10 }}>
-                {passedCount}/{totalCount} passed
-              </Text>
+              <div style={{ color: 'var(--text-muted)', fontSize: 10 }}>
+                {passedCount}/{totalCount} PASSED
+              </div>
             )}
-          </Box>
-        </Group>
+          </div>
+        </div>
         {resultData.timeTaken && (
-          <Badge size="xs" variant="light" color="dimmed">
+          <span className="pixel-font" style={{ color: 'var(--text-muted)', fontSize: 10 }}>
             {resultData.timeTaken}ms
-          </Badge>
+          </span>
         )}
-      </Group>
+      </div>
 
       {/* Case selector pills */}
       {!isSubmission && (
-        <Group gap={6} p="10px 12px" style={{ borderBottom: `1px solid ${theme.colors.dark[4]}` }}>
+        <div style={{ display: 'flex', gap: 6, padding: '10px 12px', borderBottom: '1px solid var(--border-default)', overflowX: 'auto' }}>
           {resultData.results.map((r: any, i: number) => {
             const n = i + 1;
             const active = testcase === String(n);
             const passed = r?.output === true;
             return (
-              <Box
+              <button
                 key={n}
                 onClick={() => setTestCase(String(n))}
+                className="pixel-font"
                 style={{
                   cursor: 'pointer',
                   height: 28,
@@ -425,102 +392,90 @@ function ResultsContent({
                   display: 'flex',
                   alignItems: 'center',
                   justifyContent: 'center',
-                  gap: 4,
-                  borderRadius: theme.radius.sm,
-                  fontSize: 11,
-                  fontWeight: active ? 700 : 500,
-                  background: active
-                    ? passed
-                      ? theme.colors.teal[6]
-                      : theme.colors.red[6]
-                    : theme.colors.dark[5],
-                  color: active ? theme.white : passed ? theme.colors.teal[4] : theme.colors.red[4],
+                  borderRadius: 0,
+                  fontSize: 10,
+                  background: active ? (passed ? '#4CAF50' : 'var(--primary-red)') : 'var(--bg-overlay)',
+                  color: active ? '#fff' : (passed ? '#4CAF50' : 'var(--primary-red)'),
+                  border: active ? '1px solid transparent' : '1px solid var(--border-default)',
                   transition: 'all 0.12s ease',
                   userSelect: 'none',
+                  outline: 'none',
                 }}
               >
-                {passed ? <IconCheck size={10} /> : <IconX size={10} />}
                 {n}
-              </Box>
+              </button>
             );
           })}
-        </Group>
+        </div>
       )}
 
       {/* Output / Expected */}
       {!isSubmission ? (
-        <Stack gap={0} p="10px 12px">
-          <Group gap={6} mb={6}>
-            <Text fw={600} c="dimmed" tt="uppercase" style={{ fontSize: 10 }}>
-              Output
-            </Text>
-            <Badge
-              size="sm"
-              color={isSuccess ? 'teal' : 'red'}
-              variant="light"
-              radius="sm"
-              style={{ height: 18, fontSize: 10, fontWeight: 600 }}
+        <div style={{ display: 'flex', flexDirection: 'column', gap: 0, padding: '10px 12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 6, marginBottom: 6 }}>
+            <span className="pixel-font" style={{ color: 'var(--text-muted)', fontSize: 10 }}>OUTPUT</span>
+            <span
+              className="pixel-font"
+              style={{
+                background: isSuccess ? '#4CAF50' : 'var(--primary-red)',
+                color: '#fff',
+                padding: '2px 6px',
+                fontSize: 8,
+              }}
             >
-              {isSuccess ? 'Pass' : 'Fail'}
-            </Badge>
-          </Group>
-          <Code
-            block
+              {isSuccess ? 'PASS' : 'FAIL'}
+            </span>
+          </div>
+          <pre
+            className="pixel-border-sm"
             style={{
-              backgroundColor: theme.colors.dark[8],
-              color: theme.colors.gray[1],
+              backgroundColor: 'var(--surface-default)',
+              color: 'var(--text-primary)',
               padding: '10px 12px',
               fontSize: 12,
               lineHeight: '1.5',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.dark[5]}`,
-              borderLeft: `3px solid ${isSuccess ? theme.colors.teal[5] : theme.colors.red[5]}`,
+              margin: 0,
+              borderLeft: `2px solid ${isSuccess ? '#4CAF50' : 'var(--primary-red)'}`,
             }}
           >
             {String(currentResult.result ?? 'No output')}
-          </Code>
+          </pre>
 
-          <Text fw={600} c="dimmed" tt="uppercase" mt={10} mb={6} style={{ fontSize: 10 }}>
-            Expected
-          </Text>
-          <Code
-            block
+          <div className="pixel-font" style={{ color: 'var(--text-muted)', fontSize: 10, marginTop: 12, marginBottom: 6 }}>
+            EXPECTED
+          </div>
+          <pre
+            className="pixel-border-sm"
             style={{
-              backgroundColor: theme.colors.dark[8],
-              color: theme.colors.gray[1],
+              backgroundColor: 'var(--surface-default)',
+              color: 'var(--text-primary)',
               padding: '10px 12px',
               fontSize: 12,
               lineHeight: '1.5',
               whiteSpace: 'pre-wrap',
               wordBreak: 'break-word',
-              borderRadius: theme.radius.sm,
-              border: `1px solid ${theme.colors.dark[5]}`,
+              margin: 0,
             }}
           >
             {String(currentResult.expected ?? 'No expected output')}
-          </Code>
-        </Stack>
+          </pre>
+        </div>
       ) : (
-        <Group justify="center" py="xl" style={{ minHeight: 80 }}>
-          <Stack align="center" gap={6}>
-            <ThemeIcon
-              size={36}
-              radius="xl"
-              color={status === 'Accepted' ? 'teal' : 'orange'}
-              variant="filled"
-            >
-              {status === 'Accepted' ? <IconCheck size={18} /> : <IconX size={18} />}
-            </ThemeIcon>
-            <Text size="xs" fw={500}>
+        <div style={{ display: 'flex', justifyContent: 'center', padding: '40px 0' }}>
+          <div style={{ textAlign: 'center' }}>
+            <div className="pixel-font" style={{ color: statusColor, fontSize: 16, marginBottom: 8 }}>
+              {status.toUpperCase()}
+            </div>
+            <div style={{ color: 'var(--text-primary)', fontSize: 12 }}>
               {status === 'Accepted'
-                ? 'All test cases passed!'
-                : `${passedCount}/${totalCount} test cases passed`}
-            </Text>
-          </Stack>
-        </Group>
+                ? 'ALL TEST CASES PASSED'
+                : `${passedCount}/${totalCount} TEST CASES PASSED`}
+            </div>
+          </div>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 }

@@ -265,28 +265,26 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
 
   // ── Timer Bar ─────────────────────────────────────────────────
   const bar = (
-    <div ref={triggerRef} className={styles.bar}>
+    <div ref={triggerRef} className={`pixel-border-sm ${styles.bar}`} style={{ background: 'var(--bg-raised)' }}>
       <div className={styles.modeTabs}>
         <button
-          className={`${styles.modeTab} ${mode === 'timer' ? styles.modeTabActiveTimer : ''}`}
+          className={`pixel-font ${styles.modeTab} ${mode === 'timer' ? styles.modeTabActiveTimer : ''}`}
           onClick={() => switchMode('timer')}
           disabled={isLocked}
         >
-          Timer
+          TIMER
         </button>
         <div className={styles.modeDivider} />
         <button
-          className={`${styles.modeTab} ${mode === 'mixer' ? styles.modeTabActiveMixer : ''}`}
+          className={`pixel-font ${styles.modeTab} ${mode === 'mixer' ? styles.modeTabActiveMixer : ''}`}
           onClick={() => switchMode('mixer')}
           disabled={isLocked}
         >
-          Mixer
+          MIXER
         </button>
         <div className={styles.modeDivider} />
         <button
-          className={
-            isFinished ? styles.timeFinished : isActive ? styles.timeActive : styles.timeIdle
-          }
+          className={`pixel-font ${isFinished ? styles.timeFinished : isActive ? styles.timeActive : styles.timeIdle}`}
           onClick={openConfig}
           disabled={isLocked}
         >
@@ -298,28 +296,26 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
         <div className={styles.actions}>
           {isRunning && (
             <button
-              className={styles.actionBtn}
-              style={{ background: 'rgba(252,196,25,0.10)', color: colors.warning[500] }}
+              className={`pixel-font pixel-btn-ghost-sm`}
               onClick={handlePause}
             >
-              Pause
+              PAUSE
             </button>
           )}
           {isPaused && (
             <button
-              className={styles.actionBtn}
-              style={{ background: 'rgba(32,201,151,0.10)', color: colors.primary[500] }}
+              className={`pixel-font pixel-btn-ghost-sm`}
+              style={{ color: '#fff' }}
               onClick={handleStart}
             >
-              Resume
+              RESUME
             </button>
           )}
           <button
-            className={styles.actionBtn}
-            style={{ background: 'rgba(250,82,82,0.10)', color: colors.danger[500] }}
+            className={`pixel-font pixel-btn-sm`}
             onClick={handleReset}
           >
-            Reset
+            RESET
           </button>
         </div>
       )}

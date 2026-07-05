@@ -6,12 +6,12 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
     <div className={classes.wrapper}>
       <div className={classes.form}>
-        <h1 className={classes.title}>Welcome back</h1>
-        <p className={classes.subtitle}>Sign in to continue practicing</p>
+        <h1 className={`pixel-font ${classes.title}`}>AUTHENTICATE</h1>
+        <p className={classes.subtitle}>&gt; ESTABLISH CONNECTION</p>
 
         <SocialSignIn />
 
-        <div className={classes.divider}>or</div>
+        <div className={`pixel-font ${classes.divider}`}>OR</div>
 
         {children}
       </div>

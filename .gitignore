@@ -145,5 +145,5 @@ the-intui-*.json
 .vercel
 .env*.local
 
-
 data/*
+qgen/*

@@ -26,6 +26,13 @@ function makeQueryClient() {
   });
 }
 
+function withoutAuthSession(clientState: any) {
+  if (!clientState?.queries) return;
+  clientState.queries = clientState.queries.filter(
+    (q: any) => q.queryKey?.[0] !== 'auth-session'
+  );
+}
+
 function restoreFromStorage(queryClient: QueryClient): boolean {
   try {
     const raw = localStorage.getItem(PERSIST_KEY);
@@ -35,6 +42,7 @@ function restoreFromStorage(queryClient: QueryClient): boolean {
     if (stored.buster !== 'v1') return false;
     if (Date.now() - stored.timestamp > STATIC_CACHE_MAX_AGE) return false;
 
+    withoutAuthSession(stored.clientState);
     hydrate(queryClient, stored.clientState);
     return true;
   } catch {
@@ -67,6 +75,10 @@ export default function TanstackQueryProvider({ children }: { children: React.Re
       storage: window.localStorage,
       key: PERSIST_KEY,
       throttleTime: 1000,
+      serialize: (data) => {
+        withoutAuthSession(data.clientState);
+        return JSON.stringify(data);
+      },
     });
 
     persistQueryClient({
