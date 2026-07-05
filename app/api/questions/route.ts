@@ -1,22 +1,18 @@
-import { NextRequest, NextResponse } from "next/server";
-import { prisma } from "@/prisma/db";
+import { NextRequest, NextResponse } from 'next/server';
+import { prisma } from '@/prisma/db';
 
-export async function GET(
-  req: NextRequest,
-  res : NextResponse
-) {
-  
+export async function GET(req: NextRequest, res: NextResponse) {
   const questionObject = await prisma.question.findMany({
     orderBy: {
       displayOrder: 'asc',
     },
-    include:{
+    include: {
       topics: {
-        include:{
-          topic : true
-        }
-      }
-    }
+        include: {
+          topic: true,
+        },
+      },
+    },
   });
   return NextResponse.json(questionObject);
 }

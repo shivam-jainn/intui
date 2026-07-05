@@ -1,7 +1,7 @@
-"use client";
+'use client';
 
-import React from "react";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
+import React from 'react';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
 
 const Skeleton = ({ className }: { className?: string }) => (
   <div className={`animate-pulse bg-gray-700/50 rounded-md ${className}`} />
@@ -35,7 +35,7 @@ const PlaygroundSkeleton = () => {
           </div>
         </Panel>
 
-        <PanelResizeHandle style={{ width: "0.5rem" }} className="bg-transparent" />
+        <PanelResizeHandle style={{ width: '0.5rem' }} className="bg-transparent" />
 
         {/* Right Panel: Editor & Tests */}
         <Panel>
@@ -54,7 +54,7 @@ const PlaygroundSkeleton = () => {
               </div>
             </Panel>
 
-            <PanelResizeHandle style={{ height: "0.5rem" }} className="bg-transparent" />
+            <PanelResizeHandle style={{ height: '0.5rem' }} className="bg-transparent" />
 
             {/* Test Results Area */}
             <Panel defaultSize={30} minSize={20} maxSize={40}>

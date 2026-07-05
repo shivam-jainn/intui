@@ -1,6 +1,6 @@
 import { ReactNode } from 'react';
-import classes from './auth.module.css';
 import SocialSignIn from '@/components/Auth/SocialSignIn';
+import classes from './auth.module.css';
 
 export default function AuthLayout({ children }: { children: ReactNode }) {
   return (
@@ -18,4 +18,3 @@ export default function AuthLayout({ children }: { children: ReactNode }) {
     </div>
   );
 }
-

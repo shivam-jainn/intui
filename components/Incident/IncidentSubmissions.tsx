@@ -1,17 +1,7 @@
-"use client";
+'use client';
 
-import {
-  Box,
-  Card,
-  Code,
-  Group,
-  ScrollArea,
-  Stack,
-  Text,
-  ThemeIcon,
-  Badge,
-} from "@mantine/core";
-import { IconClock, IconDeviceDesktop, IconCheck, IconX } from "@tabler/icons-react";
+import { IconCheck, IconClock, IconDeviceDesktop, IconX } from '@tabler/icons-react';
+import { Badge, Box, Card, Code, Group, ScrollArea, Stack, Text, ThemeIcon } from '@mantine/core';
 
 interface IncidentSubmission {
   id: number;
@@ -45,8 +35,8 @@ export default function IncidentSubmissions({
           p="xl"
           ta="center"
           style={{
-            border: "1px dashed var(--mantine-color-dark-4)",
-            borderRadius: "var(--mantine-radius-md)",
+            border: '1px dashed var(--mantine-color-dark-4)',
+            borderRadius: 'var(--mantine-radius-md)',
           }}
         >
           <Text c="dimmed" size="sm">
@@ -66,8 +56,8 @@ export default function IncidentSubmissions({
             padding="md"
             radius="md"
             style={{
-              border: `1px solid ${submission.status === "Accepted" ? "var(--mantine-color-green-6)" : "var(--mantine-color-dark-4)"}`,
-              background: "var(--mantine-color-dark-7)",
+              border: `1px solid ${submission.status === 'Accepted' ? 'var(--mantine-color-green-6)' : 'var(--mantine-color-dark-4)'}`,
+              background: 'var(--mantine-color-dark-7)',
             }}
           >
             <Group justify="space-between" mb="xs">
@@ -75,19 +65,11 @@ export default function IncidentSubmissions({
                 <ThemeIcon
                   size="sm"
                   variant="light"
-                  color={submission.status === "Accepted" ? "green" : "red"}
+                  color={submission.status === 'Accepted' ? 'green' : 'red'}
                 >
-                  {submission.status === "Accepted" ? (
-                    <IconCheck size={14} />
-                  ) : (
-                    <IconX size={14} />
-                  )}
+                  {submission.status === 'Accepted' ? <IconCheck size={14} /> : <IconX size={14} />}
                 </ThemeIcon>
-                <Text
-                  size="sm"
-                  fw={600}
-                  c={submission.status === "Accepted" ? "green" : "red"}
-                >
+                <Text size="sm" fw={600} c={submission.status === 'Accepted' ? 'green' : 'red'}>
                   {submission.status}
                 </Text>
               </Group>
@@ -100,22 +82,22 @@ export default function IncidentSubmissions({
               p="xs"
               mb="xs"
               style={{
-                background: "var(--mantine-color-dark-8)",
-                borderRadius: "var(--mantine-radius-sm)",
+                background: 'var(--mantine-color-dark-8)',
+                borderRadius: 'var(--mantine-radius-sm)',
                 maxHeight: 120,
-                overflow: "auto",
+                overflow: 'auto',
               }}
             >
               <Code
                 block
                 style={{
                   fontSize: 11,
-                  background: "transparent",
-                  color: "var(--mantine-color-gray-3)",
+                  background: 'transparent',
+                  color: 'var(--mantine-color-gray-3)',
                 }}
               >
                 {submission.code.slice(0, 300)}
-                {submission.code.length > 300 ? "..." : ""}
+                {submission.code.length > 300 ? '...' : ''}
               </Code>
             </Box>
 
@@ -123,9 +105,7 @@ export default function IncidentSubmissions({
               <Group gap={4}>
                 <IconClock size={14} color="var(--mantine-color-dimmed)" />
                 <Text size="xs" c="dimmed">
-                  {submission.timeTaken !== null
-                    ? `${submission.timeTaken.toFixed(2)}s`
-                    : "N/A"}
+                  {submission.timeTaken !== null ? `${submission.timeTaken.toFixed(2)}s` : 'N/A'}
                 </Text>
               </Group>
               <Group gap={4}>
@@ -133,7 +113,7 @@ export default function IncidentSubmissions({
                 <Text size="xs" c="dimmed">
                   {submission.spaceTaken !== null
                     ? `${submission.spaceTaken.toFixed(1)} MB`
-                    : "N/A"}
+                    : 'N/A'}
                 </Text>
               </Group>
             </Group>

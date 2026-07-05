@@ -1,14 +1,14 @@
-"use client";
+'use client';
 
-import React from "react";
-import { createPortal } from "react-dom";
-import { Modal, Group, Stack, Text, Button, Title, Code } from "@mantine/core";
-import { colors } from "@/lib/theme/colors";
-import styles from "./Timer.module.css";
+import React from 'react';
+import { createPortal } from 'react-dom';
+import { Button, Code, Group, Modal, Stack, Text, Title } from '@mantine/core';
+import { colors } from '@/lib/theme/colors';
+import styles from './Timer.module.css';
 
-export type TimerMode = "timer" | "mixer";
-export type TimerStatus = "idle" | "running" | "paused" | "finished";
-export type MixerDifficulty = "easy" | "medium" | "hard";
+export type TimerMode = 'timer' | 'mixer';
+export type TimerStatus = 'idle' | 'running' | 'paused' | 'finished';
+export type MixerDifficulty = 'easy' | 'medium' | 'hard';
 
 export interface TimerProps {
   onTimerEnd?: () => void;
@@ -21,7 +21,7 @@ export interface TimerHandle {
 }
 
 function formatTime(s: number) {
-  return `${String(Math.floor(s / 60)).padStart(2, "0")}:${String(s % 60).padStart(2, "0")}`;
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
 }
 
 const DIFF_HEX: Record<MixerDifficulty, string> = {
@@ -31,9 +31,9 @@ const DIFF_HEX: Record<MixerDifficulty, string> = {
 };
 
 const DIFF_BG: Record<MixerDifficulty, string> = {
-  easy: "rgba(32,201,151,0.10)",
-  medium: "rgba(252,196,25,0.10)",
-  hard: "rgba(250,82,82,0.10)",
+  easy: 'rgba(32,201,151,0.10)',
+  medium: 'rgba(252,196,25,0.10)',
+  hard: 'rgba(250,82,82,0.10)',
 };
 
 const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
@@ -41,14 +41,14 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   ref
 ) {
   // ── State ─────────────────────────────────────────────────────
-  const [mode, setMode] = React.useState<TimerMode>("timer");
-  const [status, setStatus] = React.useState<TimerStatus>("idle");
+  const [mode, setMode] = React.useState<TimerMode>('timer');
+  const [status, setStatus] = React.useState<TimerStatus>('idle');
   const [seconds, setSeconds] = React.useState(0);
-  const [difficulty, setDifficulty] = React.useState<MixerDifficulty>("medium");
+  const [difficulty, setDifficulty] = React.useState<MixerDifficulty>('medium');
   const [inputMin, setInputMin] = React.useState(0);
   const [inputSec, setInputSec] = React.useState(0);
   const [stopwatch, setStopwatch] = React.useState(false);
-  const [popup, setPopup] = React.useState<"config" | "verify" | "penalty" | null>(null);
+  const [popup, setPopup] = React.useState<'config' | 'verify' | 'penalty' | null>(null);
   const [copied, setCopied] = React.useState(false);
   const [runId, setRunId] = React.useState<string | null>(null);
   const [penaltyVerified, setPenaltyVerified] = React.useState(false);
@@ -60,16 +60,13 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   const triggerRef = React.useRef<HTMLDivElement>(null);
   const [popupPos, setPopupPos] = React.useState({ top: 0, left: 0 });
 
-  const baseUrl =
-    typeof window !== "undefined"
-      ? window.location.origin
-      : "http://localhost:3001";
+  const baseUrl = typeof window !== 'undefined' ? window.location.origin : 'http://localhost:3001';
 
   // ── Derived ───────────────────────────────────────────────────
-  const isIdle = status === "idle";
-  const isFinished = status === "finished";
-  const isRunning = status === "running";
-  const isPaused = status === "paused";
+  const isIdle = status === 'idle';
+  const isFinished = status === 'finished';
+  const isRunning = status === 'running';
+  const isPaused = status === 'paused';
   const isActive = isRunning || isPaused;
   const isLocked = isActive || isFinished;
 
@@ -80,7 +77,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
       setSeconds((p) => {
         if (stopwatch) return p + 1;
         if (p <= 1) {
-          setStatus("finished");
+          setStatus('finished');
           onTimerEnd?.();
           return 0;
         }
@@ -92,7 +89,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
 
   // ── Popup positioning ─────────────────────────────────────────
   React.useEffect(() => {
-    if (popup !== "config") return;
+    if (popup !== 'config') return;
     const update = () => {
       if (triggerRef.current) {
         const r = triggerRef.current.getBoundingClientRect();
@@ -100,67 +97,67 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
       }
     };
     update();
-    window.addEventListener("scroll", update, true);
-    window.addEventListener("resize", update);
+    window.addEventListener('scroll', update, true);
+    window.addEventListener('resize', update);
     return () => {
-      window.removeEventListener("scroll", update, true);
-      window.removeEventListener("resize", update);
+      window.removeEventListener('scroll', update, true);
+      window.removeEventListener('resize', update);
     };
   }, [popup]);
 
   // ── Check local verification on mount ─────────────────────────
   React.useEffect(() => {
-    const v = localStorage.getItem("intui_verified");
-    setVerified(v === "true");
-    const seen = localStorage.getItem("intui_intro_seen");
+    const v = localStorage.getItem('intui_verified');
+    setVerified(v === 'true');
+    const seen = localStorage.getItem('intui_intro_seen');
     if (!seen) setShowIntro(true);
   }, []);
 
   // ── Actions ───────────────────────────────────────────────────
   const openConfig = () => {
     if (isLocked) return;
-    setPopup(popup === "config" ? null : "config");
+    setPopup(popup === 'config' ? null : 'config');
   };
 
   const switchMode = (m: TimerMode) => {
     if (isLocked) return;
     if (m === mode) {
-      setPopup(popup === "config" ? null : "config");
+      setPopup(popup === 'config' ? null : 'config');
       return;
     }
     setMode(m);
-    setPopup("config");
+    setPopup('config');
   };
 
   const handleStart = () => {
     if (isPaused) {
-      setStatus("running");
+      setStatus('running');
       setPopup(null);
       return;
     }
     const total = stopwatch ? 0 : inputMin * 60 + inputSec;
     if (!stopwatch && total === 0) return;
 
-    if (mode === "mixer" && !verified) {
-      setPopup("verify");
+    if (mode === 'mixer' && !verified) {
+      setPopup('verify');
       return;
     }
 
     setSeconds(total);
-    setStatus("running");
+    setStatus('running');
     setPopup(null);
 
-    if (mode === "mixer") {
+    if (mode === 'mixer') {
       startMixerRun(total);
     }
   };
 
   const startMixerRun = async (duration: number) => {
     try {
-      const res = await fetch("/api/mixermode/start", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: "local", difficulty, duration }),
+      const res = await fetch('/api/mixermode/start', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ userId: 'local', difficulty, duration }),
       });
       const data = await res.json();
       if (data.runId) {
@@ -168,20 +165,20 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
         onMixerStart?.(difficulty, duration);
       }
     } catch (e) {
-      console.error("Failed to start mixer run", e);
+      console.error('Failed to start mixer run', e);
     }
   };
 
   const submitMixerRun = async () => {
     if (!runId) return;
     try {
-      await fetch("/api/mixermode/submit", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ runId, userId: "local-user" }),
+      await fetch('/api/mixermode/submit', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ runId, userId: 'local-user' }),
       });
     } catch (e) {
-      console.error("Failed to submit mixer run", e);
+      console.error('Failed to submit mixer run', e);
     }
   };
 
@@ -190,10 +187,10 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
     submitMixerRun,
   }));
 
-  const handlePause = () => setStatus("paused");
+  const handlePause = () => setStatus('paused');
 
   const handleReset = () => {
-    setStatus("idle");
+    setStatus('idle');
     setSeconds(0);
     setInputMin(0);
     setInputSec(0);
@@ -221,12 +218,12 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
       const data = await res.json();
       if (data.verified) {
         setVerified(true);
-        localStorage.setItem("intui_verified", "true");
+        localStorage.setItem('intui_verified', 'true');
       } else {
-        alert("Device not verified yet. Please run the script first.");
+        alert('Device not verified yet. Please run the script first.');
       }
     } catch {
-      alert("Failed to verify. Please try again.");
+      alert('Failed to verify. Please try again.');
     }
   };
 
@@ -236,9 +233,9 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
     try {
       if (runId) {
         const res = await fetch(`/api/mixermode/penalty-verify/${runId}`, {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ uuid: "client-check" }),
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ uuid: 'client-check' }),
         });
         const data = await res.json();
         if (data.verified) {
@@ -250,19 +247,19 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           }, 1500);
           return;
         }
-        setPenaltyError(data.error || "Not yet verified — run the script first.");
+        setPenaltyError(data.error || 'Not yet verified — run the script first.');
       }
       setVerifying(false);
     } catch {
-      setPenaltyError("Network error — is the server running?");
+      setPenaltyError('Network error — is the server running?');
       setVerifying(false);
     }
   };
 
   // ── Trigger penalty popup ─────────────────────────────────────
   React.useEffect(() => {
-    if (isFinished && mode === "mixer") {
-      setPopup("penalty");
+    if (isFinished && mode === 'mixer') {
+      setPopup('penalty');
     }
   }, [isFinished, mode]);
 
@@ -271,16 +268,16 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
     <div ref={triggerRef} className={styles.bar}>
       <div className={styles.modeTabs}>
         <button
-          className={`${styles.modeTab} ${mode === "timer" ? styles.modeTabActiveTimer : ""}`}
-          onClick={() => switchMode("timer")}
+          className={`${styles.modeTab} ${mode === 'timer' ? styles.modeTabActiveTimer : ''}`}
+          onClick={() => switchMode('timer')}
           disabled={isLocked}
         >
           Timer
         </button>
         <div className={styles.modeDivider} />
         <button
-          className={`${styles.modeTab} ${mode === "mixer" ? styles.modeTabActiveMixer : ""}`}
-          onClick={() => switchMode("mixer")}
+          className={`${styles.modeTab} ${mode === 'mixer' ? styles.modeTabActiveMixer : ''}`}
+          onClick={() => switchMode('mixer')}
           disabled={isLocked}
         >
           Mixer
@@ -288,11 +285,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
         <div className={styles.modeDivider} />
         <button
           className={
-            isFinished
-              ? styles.timeFinished
-              : isActive
-                ? styles.timeActive
-                : styles.timeIdle
+            isFinished ? styles.timeFinished : isActive ? styles.timeActive : styles.timeIdle
           }
           onClick={openConfig}
           disabled={isLocked}
@@ -306,7 +299,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           {isRunning && (
             <button
               className={styles.actionBtn}
-              style={{ background: "rgba(252,196,25,0.10)", color: colors.warning[500] }}
+              style={{ background: 'rgba(252,196,25,0.10)', color: colors.warning[500] }}
               onClick={handlePause}
             >
               Pause
@@ -315,7 +308,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           {isPaused && (
             <button
               className={styles.actionBtn}
-              style={{ background: "rgba(32,201,151,0.10)", color: colors.primary[500] }}
+              style={{ background: 'rgba(32,201,151,0.10)', color: colors.primary[500] }}
               onClick={handleStart}
             >
               Resume
@@ -323,7 +316,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           )}
           <button
             className={styles.actionBtn}
-            style={{ background: "rgba(250,82,82,0.10)", color: colors.danger[500] }}
+            style={{ background: 'rgba(250,82,82,0.10)', color: colors.danger[500] }}
             onClick={handleReset}
           >
             Reset
@@ -335,7 +328,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
 
   // ── Config Popup (positioned near trigger bar) ────────────────
   const configPopup =
-    popup === "config"
+    popup === 'config'
       ? createPortal(
           <div className={styles.configOverlay} onClick={() => setPopup(null)}>
             <div
@@ -344,23 +337,23 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
               onClick={(e) => e.stopPropagation()}
             >
               <Text size="xs" fw={700} tt="uppercase" c="dimmed" style={{ letterSpacing: 1 }}>
-                {mode === "timer" ? "Timer Setup" : "Mixer Setup"}
+                {mode === 'timer' ? 'Timer Setup' : 'Mixer Setup'}
               </Text>
 
-              {mode === "timer" && (
+              {mode === 'timer' && (
                 <div className={styles.toggleGroup}>
                   <button
-                    className={`${styles.toggleBtn} ${!stopwatch ? styles.toggleBtnActive : ""}`}
+                    className={`${styles.toggleBtn} ${!stopwatch ? styles.toggleBtnActive : ''}`}
                     onClick={() => setStopwatch(false)}
                   >
                     Countdown
                   </button>
                   <button
-                    className={`${styles.toggleBtn} ${stopwatch ? styles.toggleBtnActive : ""}`}
+                    className={`${styles.toggleBtn} ${stopwatch ? styles.toggleBtnActive : ''}`}
                     onClick={() => {
                       setStopwatch(true);
                       setPopup(null);
-                      setStatus("running");
+                      setStatus('running');
                       setSeconds(0);
                     }}
                   >
@@ -369,24 +362,22 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                 </div>
               )}
 
-              {mode === "mixer" && (
+              {mode === 'mixer' && (
                 <div className={styles.diffGrid}>
-                  {(["easy", "medium", "hard"] as MixerDifficulty[]).map(
-                    (d) => (
-                      <button
-                        key={d}
-                        onClick={() => setDifficulty(d)}
-                        className={styles.diffBtn}
-                        style={
-                          difficulty === d
-                            ? { borderColor: DIFF_HEX[d], background: DIFF_BG[d], color: DIFF_HEX[d] }
-                            : {}
-                        }
-                      >
-                        {d}
-                      </button>
-                    )
-                  )}
+                  {(['easy', 'medium', 'hard'] as MixerDifficulty[]).map((d) => (
+                    <button
+                      key={d}
+                      onClick={() => setDifficulty(d)}
+                      className={styles.diffBtn}
+                      style={
+                        difficulty === d
+                          ? { borderColor: DIFF_HEX[d], background: DIFF_BG[d], color: DIFF_HEX[d] }
+                          : {}
+                      }
+                    >
+                      {d}
+                    </button>
+                  ))}
                 </div>
               )}
 
@@ -416,10 +407,10 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                 onClick={handleStart}
                 fullWidth
                 size="md"
-                color={mode === "mixer" ? "red" : "primary"}
+                color={mode === 'mixer' ? 'red' : 'primary'}
                 disabled={!stopwatch && inputMin === 0 && inputSec === 0}
               >
-                {stopwatch ? "Start Stopwatch" : "Start"}
+                {stopwatch ? 'Start Stopwatch' : 'Start'}
               </Button>
 
               <Button onClick={() => setPopup(null)} variant="default" fullWidth size="sm">
@@ -434,7 +425,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   // ── Verify Modal (centered, blocking) ─────────────────────────
   const verifyModal = (
     <Modal
-      opened={popup === "verify"}
+      opened={popup === 'verify'}
       onClose={() => setPopup(null)}
       title="Device Verification"
       size="md"
@@ -449,21 +440,26 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
 
         <div className={styles.codeWrapper}>
           <span className={styles.codeLabel}># Run in terminal:</span>
-          <div style={{ position: "relative" }}>
+          <div style={{ position: 'relative' }}>
             <Code
               block
-              style={{ fontSize: 12, padding: "14px 80px 14px 16px", wordBreak: "break-all", lineHeight: 1.7 }}
+              style={{
+                fontSize: 12,
+                padding: '14px 80px 14px 16px',
+                wordBreak: 'break-all',
+                lineHeight: 1.7,
+              }}
             >
               {verifyCurl}
             </Code>
             <Button
               size="compact-xs"
-              variant={copied ? "filled" : "default"}
-              color={copied ? "green" : undefined}
+              variant={copied ? 'filled' : 'default'}
+              color={copied ? 'green' : undefined}
               onClick={() => copyCurl(verifyCurl)}
-              style={{ position: "absolute", top: 10, right: 10 }}
+              style={{ position: 'absolute', top: 10, right: 10 }}
             >
-              {copied ? "Copied!" : "Copy"}
+              {copied ? 'Copied!' : 'Copy'}
             </Button>
           </div>
         </div>
@@ -482,7 +478,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   // ── Penalty Modal (centered, blocking, can't close) ───────────
   const penaltyModal = (
     <Modal
-      opened={popup === "penalty"}
+      opened={popup === 'penalty'}
       onClose={() => {}}
       withCloseButton={false}
       closeOnClickOutside={false}
@@ -496,22 +492,28 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
       {penaltyVerified ? (
         <Stack align="center" gap="md" py={32}>
           <div className={styles.iconSuccess}>✓</div>
-          <Title order={3} c="primary.5">Penalty Accepted</Title>
-          <Text size="md" c="dimmed">You may now continue coding.</Text>
+          <Title order={3} c="primary.5">
+            Penalty Accepted
+          </Title>
+          <Text size="md" c="dimmed">
+            You may now continue coding.
+          </Text>
         </Stack>
       ) : (
         <div className={styles.penaltyBody}>
           <div className={styles.iconDanger}>⏱</div>
 
           <div>
-            <Title order={3} mb={4}>Time&apos;s Up</Title>
+            <Title order={3} mb={4}>
+              Time&apos;s Up
+            </Title>
             <Text size="sm" c="dimmed" style={{ lineHeight: 1.6 }}>
               You failed to submit before the timer ended.
               <br />
-              Accept your{" "}
+              Accept your{' '}
               <Text component="span" style={{ color: DIFF_HEX[difficulty], fontWeight: 600 }}>
                 {difficulty}
-              </Text>{" "}
+              </Text>{' '}
               penalty to continue.
             </Text>
           </div>
@@ -520,11 +522,15 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           <div className={styles.stepFlow}>
             {/* Step 1: Device Verification */}
             <div className={`${styles.step} ${verified ? styles.stepDone : styles.stepActive}`}>
-              <div className={`${styles.stepNum} ${verified ? styles.stepNumDone : styles.stepNumActive}`}>
-                {verified ? "✓" : "1"}
+              <div
+                className={`${styles.stepNum} ${verified ? styles.stepNumDone : styles.stepNumActive}`}
+              >
+                {verified ? '✓' : '1'}
               </div>
               <div className={styles.stepContent}>
-                <Text size="sm" fw={600} mb={4}>Verify Device</Text>
+                <Text size="sm" fw={600} mb={4}>
+                  Verify Device
+                </Text>
                 {!verified ? (
                   <>
                     <Text size="xs" c="dimmed" mb={8}>
@@ -532,21 +538,26 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                     </Text>
                     <div className={styles.codeWrapper}>
                       <span className={styles.codeLabel}># Run in terminal:</span>
-                      <div style={{ position: "relative" }}>
+                      <div style={{ position: 'relative' }}>
                         <Code
                           block
-                          style={{ fontSize: 11, padding: "10px 70px 10px 12px", wordBreak: "break-all", lineHeight: 1.6 }}
+                          style={{
+                            fontSize: 11,
+                            padding: '10px 70px 10px 12px',
+                            wordBreak: 'break-all',
+                            lineHeight: 1.6,
+                          }}
                         >
                           {verifyCurl}
                         </Code>
                         <Button
                           size="compact-xs"
-                          variant={copied ? "filled" : "default"}
-                          color={copied ? "green" : undefined}
+                          variant={copied ? 'filled' : 'default'}
+                          color={copied ? 'green' : undefined}
                           onClick={() => copyCurl(verifyCurl)}
-                          style={{ position: "absolute", top: 7, right: 7 }}
+                          style={{ position: 'absolute', top: 7, right: 7 }}
                         >
-                          {copied ? "Copied!" : "Copy"}
+                          {copied ? 'Copied!' : 'Copy'}
                         </Button>
                       </div>
                     </div>
@@ -555,18 +566,20 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                     </Button>
                   </>
                 ) : (
-                  <Text size="xs" c="green.5">✓ Device verified</Text>
+                  <Text size="xs" c="green.5">
+                    ✓ Device verified
+                  </Text>
                 )}
               </div>
             </div>
 
             {/* Step 2: Accept Penalty */}
-            <div className={`${styles.step} ${verified ? styles.stepActive : ""}`}>
-              <div className={`${styles.stepNum} ${verified ? styles.stepNumActive : ""}`}>
-                2
-              </div>
+            <div className={`${styles.step} ${verified ? styles.stepActive : ''}`}>
+              <div className={`${styles.stepNum} ${verified ? styles.stepNumActive : ''}`}>2</div>
               <div className={styles.stepContent}>
-                <Text size="sm" fw={600} mb={4}>Accept Penalty</Text>
+                <Text size="sm" fw={600} mb={4}>
+                  Accept Penalty
+                </Text>
                 {verified ? (
                   <>
                     <Text size="xs" c="dimmed" mb={8}>
@@ -574,27 +587,34 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                     </Text>
                     <div className={styles.codeWrapper}>
                       <span className={styles.codeLabel}># RUN IN YOUR TERMINAL:</span>
-                      <div style={{ position: "relative" }}>
+                      <div style={{ position: 'relative' }}>
                         <Code
                           block
-                          style={{ fontSize: 11, padding: "10px 70px 10px 12px", wordBreak: "break-all", lineHeight: 1.6 }}
+                          style={{
+                            fontSize: 11,
+                            padding: '10px 70px 10px 12px',
+                            wordBreak: 'break-all',
+                            lineHeight: 1.6,
+                          }}
                         >
                           {penaltyCurl}
                         </Code>
                         <Button
                           size="compact-xs"
-                          variant={copied ? "filled" : "default"}
-                          color={copied ? "green" : undefined}
+                          variant={copied ? 'filled' : 'default'}
+                          color={copied ? 'green' : undefined}
                           onClick={() => copyCurl(penaltyCurl)}
-                          style={{ position: "absolute", top: 7, right: 7 }}
+                          style={{ position: 'absolute', top: 7, right: 7 }}
                         >
-                          {copied ? "Copied!" : "Copy"}
+                          {copied ? 'Copied!' : 'Copy'}
                         </Button>
                       </div>
                     </div>
                   </>
                 ) : (
-                  <Text size="xs" c="dimmed">Complete device verification first.</Text>
+                  <Text size="xs" c="dimmed">
+                    Complete device verification first.
+                  </Text>
                 )}
               </div>
             </div>
@@ -605,7 +625,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           {verified && (
             <>
               <Button onClick={checkPenalty} loading={verifying} fullWidth size="md">
-                {verifying ? "Checking..." : "Verify My Penalty"}
+                {verifying ? 'Checking...' : 'Verify My Penalty'}
               </Button>
               <Text className={styles.hint}>
                 Run the script above, then click verify.
@@ -634,18 +654,25 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
       overlayProps={{ backgroundOpacity: 0.65, blur: 12 }}
     >
       <div className={styles.introBody}>
-        <div style={{ textAlign: "center" }}>
-          <Title order={2} mb={4}>Welcome to Intui</Title>
-          <Text size="sm" c="dimmed">Two modes to sharpen your skills.</Text>
+        <div style={{ textAlign: 'center' }}>
+          <Title order={2} mb={4}>
+            Welcome to Intui
+          </Title>
+          <Text size="sm" c="dimmed">
+            Two modes to sharpen your skills.
+          </Text>
         </div>
 
         <div className={styles.modeCardTimer}>
           <Group gap="md" wrap="nowrap">
             <div className={styles.iconBoxTimer}>⏱</div>
             <div>
-              <Text size="sm" fw={700} c="primary.4" mb={4}>Timer</Text>
+              <Text size="sm" fw={700} c="primary.4" mb={4}>
+                Timer
+              </Text>
               <Text size="xs" c="dimmed" style={{ lineHeight: 1.6 }}>
-                Set a countdown or run a stopwatch. Track how fast you solve problems. No consequences — just you vs the clock.
+                Set a countdown or run a stopwatch. Track how fast you solve problems. No
+                consequences — just you vs the clock.
               </Text>
             </div>
           </Group>
@@ -655,24 +682,50 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           <Group gap="md" wrap="nowrap" mb="md">
             <div className={styles.iconBoxMixer}>🔥</div>
             <div>
-              <Text size="sm" fw={700} c="red.4" mb={4}>Mixer</Text>
+              <Text size="sm" fw={700} c="red.4" mb={4}>
+                Mixer
+              </Text>
               <Text size="xs" c="dimmed" style={{ lineHeight: 1.6 }}>
-                Timed challenge with real stakes. Pick a difficulty, beat the clock. Fail to submit in time and you must accept a penalty to keep coding.
+                Timed challenge with real stakes. Pick a difficulty, beat the clock. Fail to submit
+                in time and you must accept a penalty to keep coding.
               </Text>
             </div>
           </Group>
 
           <Stack gap={8}>
             {[
-              { color: colors.primary[500], bg: "rgba(32,201,151,0.08)", label: "Easy", desc: "Your desktop wallpaper gets changed to a random image. Harmless but annoying." },
-              { color: colors.warning[500], bg: "rgba(252,196,25,0.08)", label: "Medium", desc: "Prank aliases injected into your shell config. Commands like ls, cd, rm will behave differently." },
-              { color: colors.danger[500], bg: "rgba(250,82,82,0.08)", label: "Hard", desc: "5000 dummy files, folder maze on desktop, rickroll tabs, notification spam, and full system chaos." },
+              {
+                color: colors.primary[500],
+                bg: 'rgba(32,201,151,0.08)',
+                label: 'Easy',
+                desc: 'Your desktop wallpaper gets changed to a random image. Harmless but annoying.',
+              },
+              {
+                color: colors.warning[500],
+                bg: 'rgba(252,196,25,0.08)',
+                label: 'Medium',
+                desc: 'Prank aliases injected into your shell config. Commands like ls, cd, rm will behave differently.',
+              },
+              {
+                color: colors.danger[500],
+                bg: 'rgba(250,82,82,0.08)',
+                label: 'Hard',
+                desc: '5000 dummy files, folder maze on desktop, rickroll tabs, notification spam, and full system chaos.',
+              },
             ].map((item) => (
-              <div key={item.label} className={styles.diffRow} style={{ background: item.bg, borderColor: `${item.color}20` }}>
+              <div
+                key={item.label}
+                className={styles.diffRow}
+                style={{ background: item.bg, borderColor: `${item.color}20` }}
+              >
                 <div className={styles.diffDot} style={{ background: item.color }} />
                 <Text size="xs">
-                  <Text component="span" fw={700} c={item.color}>{item.label}</Text>
-                  <Text component="span" ml={6} c="dimmed">{item.desc}</Text>
+                  <Text component="span" fw={700} c={item.color}>
+                    {item.label}
+                  </Text>
+                  <Text component="span" ml={6} c="dimmed">
+                    {item.desc}
+                  </Text>
                 </Text>
               </div>
             ))}
@@ -681,13 +734,14 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
           <Text size="xs" c="dimmed" ta="center" mt="xs" style={{ lineHeight: 1.5 }}>
             First use requires one-time device verification via terminal.
             <br />
-            Skip a penalty? You get shadowbanned. Only a friend&apos;s referral can unlock your account.
+            Skip a penalty? You get shadowbanned. Only a friend&apos;s referral can unlock your
+            account.
           </Text>
         </div>
 
         <Button
           onClick={() => {
-            localStorage.setItem("intui_intro_seen", "true");
+            localStorage.setItem('intui_intro_seen', 'true');
             setShowIntro(false);
           }}
           fullWidth

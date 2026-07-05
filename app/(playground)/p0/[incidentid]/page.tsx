@@ -1,124 +1,73 @@
-"use client";
+'use client';
 
-import React, { useEffect, useState } from "react";
-import { PanelGroup, Panel, PanelResizeHandle } from "react-resizable-panels";
-import { Box, Loader, Center, Text, Group } from "@mantine/core";
-import { useAtom } from "jotai";
+import React, { useEffect } from 'react';
+import { useAtom } from 'jotai';
+import { Panel, PanelGroup, PanelResizeHandle } from 'react-resizable-panels';
+import { Box, Center, Group, Loader, Text } from '@mantine/core';
+import AIChatPanel from '@/components/Incident/AIChatPanel';
+import FileTree from '@/components/Incident/FileTree';
+import IncidentPanel from '@/components/Incident/IncidentPanel';
+import IncidentRunBar from '@/components/Incident/IncidentRunBar';
+import IncidentSubmissions from '@/components/Incident/IncidentSubmissions';
+import IncidentTestResults from '@/components/Incident/IncidentTestResults';
+import MultiFileEditor from '@/components/Incident/MultiFileEditor';
 import {
   activeFilePathAtom,
   fileContentsAtom,
   incidentFilesAtom,
-} from "@/contexts/IncidentContext";
+} from '@/contexts/IncidentContext';
+import { useIncidentFiles } from '@/lib/hooks/useIncidentFiles';
+import { useIncidentSubmissions } from '@/lib/hooks/useIncidentSubmissions';
 
-import IncidentPanel from "@/components/Incident/IncidentPanel";
-import FileTree from "@/components/Incident/FileTree";
-import MultiFileEditor from "@/components/Incident/MultiFileEditor";
-import AIChatPanel from "@/components/Incident/AIChatPanel";
-import IncidentRunBar from "@/components/Incident/IncidentRunBar";
-import IncidentTestResults from "@/components/Incident/IncidentTestResults";
-import IncidentSubmissions from "@/components/Incident/IncidentSubmissions";
-import type { IncidentFile } from "@/app/api/incident/[incidentid]/files/route";
-
-interface IncidentSubmission {
-  id: number;
-  code: string;
-  language: string;
-  status: string;
-  timeTaken: number | null;
-  spaceTaken: number | null;
-  createdAt: string;
-}
-
-interface IncidentData {
-  report: string;
-  files: IncidentFile[];
-  availableLanguages: string[];
-  entryFile: string;
-}
-
-export default function IncidentPlaygroundPage({
-  params,
-}: {
-  params: { incidentid: string };
-}) {
+export default function IncidentPlaygroundPage({ params }: { params: { incidentid: string } }) {
   const incidentId = params.incidentid;
 
-  const [incidentData, setIncidentData] = useState<IncidentData | null>(null);
-  const [submissions, setSubmissions] = useState<IncidentSubmission[]>([]);
-  const [language, setLanguage] = useState("python");
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
-  const [leftTab, setLeftTab] = useState<"description" | "files" | "submissions">("description");
+  const [language, setLanguage] = React.useState('python');
+  const [leftTab, setLeftTab] = React.useState<'description' | 'files' | 'submissions'>(
+    'description'
+  );
 
   const [, setFiles] = useAtom(incidentFilesAtom);
   const [, setActiveFile] = useAtom(activeFilePathAtom);
   const [, setFileContents] = useAtom(fileContentsAtom);
 
-  async function fetchIncident(lang: string) {
-    setLoading(true);
-    setError(null);
-    try {
-      const res = await fetch(
-        `/api/incident/${encodeURIComponent(incidentId)}/files?language=${lang}`
-      );
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.message || `HTTP ${res.status}`);
-      }
-      const data: IncidentData = await res.json();
-      setIncidentData(data);
-      setFiles(data.files);
+  const {
+    data: incidentData,
+    isLoading: filesLoading,
+    error: filesError,
+  } = useIncidentFiles(incidentId, language);
 
-      const initContents: Record<string, string> = {};
-      for (const f of data.files) {
-        initContents[f.path] = f.content;
-      }
-      setFileContents(initContents);
-
-      if (data.entryFile) {
-        setActiveFile(data.entryFile);
-      } else if (data.files.length > 0) {
-        setActiveFile(data.files[0].path);
-      }
-    } catch (err: any) {
-      setError(err.message || "Failed to load incident");
-    } finally {
-      setLoading(false);
-    }
-  }
-
-  async function fetchSubmissions() {
-    try {
-      const res = await fetch(
-        `/api/incident/${encodeURIComponent(incidentId)}/submissions`
-      );
-      if (res.ok) {
-        const data = await res.json();
-        setSubmissions(data);
-      }
-    } catch {
-      // Silently fail - submissions are optional
-    }
-  }
+  const { data: submissions } = useIncidentSubmissions(incidentId);
 
   useEffect(() => {
-    fetchIncident(language);
-    fetchSubmissions();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [incidentId, language]);
+    if (!incidentData) return;
+    setFiles(incidentData.files);
 
-  if (loading) {
+    const initContents: Record<string, string> = {};
+    for (const f of incidentData.files) {
+      initContents[f.path] = f.content;
+    }
+    setFileContents(initContents);
+
+    if (incidentData.entryFile) {
+      setActiveFile(incidentData.entryFile);
+    } else if (incidentData.files.length > 0) {
+      setActiveFile(incidentData.files[0].path);
+    }
+  }, [incidentData, setFiles, setFileContents, setActiveFile]);
+
+  if (filesLoading) {
     return (
-      <Center style={{ height: "calc(100vh - 80px)" }}>
+      <Center style={{ height: 'calc(100vh - 80px)' }}>
         <Loader size="lg" color="blue" />
       </Center>
     );
   }
 
-  if (error || !incidentData) {
+  if (filesError || !incidentData) {
     return (
-      <Center style={{ height: "calc(100vh - 80px)" }}>
-        <Text c="red">{error || "Incident not found"}</Text>
+      <Center style={{ height: 'calc(100vh - 80px)' }}>
+        <Text c="red">{(filesError as any)?.message || 'Incident not found'}</Text>
       </Center>
     );
   }
@@ -126,10 +75,10 @@ export default function IncidentPlaygroundPage({
   return (
     <Box
       style={{
-        height: "calc(100vh - 80px)",
-        overflow: "hidden",
-        display: "flex",
-        flexDirection: "column",
+        height: 'calc(100vh - 80px)',
+        overflow: 'hidden',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
       <PanelGroup direction="horizontal">
@@ -137,35 +86,32 @@ export default function IncidentPlaygroundPage({
         <Panel defaultSize={22} minSize={15} maxSize={35}>
           <Box
             style={{
-              height: "100%",
-              display: "flex",
-              flexDirection: "column",
-              borderRight: "1px solid var(--mantine-color-dark-5)",
+              height: '100%',
+              display: 'flex',
+              flexDirection: 'column',
+              borderRight: '1px solid var(--mantine-color-dark-5)',
             }}
           >
-            <Group
-              gap={0}
-              style={{ borderBottom: "1px solid var(--mantine-color-dark-5)" }}
-            >
-              {(["description", "files", "submissions"] as const).map((tab) => (
+            <Group gap={0} style={{ borderBottom: '1px solid var(--mantine-color-dark-5)' }}>
+              {(['description', 'files', 'submissions'] as const).map((tab) => (
                 <Box
                   key={tab}
                   px="md"
                   py={8}
                   onClick={() => setLeftTab(tab)}
                   style={{
-                    cursor: "pointer",
+                    cursor: 'pointer',
                     fontSize: 12,
                     fontWeight: leftTab === tab ? 600 : 400,
                     color:
                       leftTab === tab
-                        ? "var(--mantine-color-white)"
-                        : "var(--mantine-color-dimmed)",
+                        ? 'var(--mantine-color-white)'
+                        : 'var(--mantine-color-dimmed)',
                     borderBottom:
                       leftTab === tab
-                        ? "2px solid var(--mantine-color-blue-5)"
-                        : "2px solid transparent",
-                    textTransform: "capitalize",
+                        ? '2px solid var(--mantine-color-blue-5)'
+                        : '2px solid transparent',
+                    textTransform: 'capitalize',
                   }}
                 >
                   {tab}
@@ -173,16 +119,13 @@ export default function IncidentPlaygroundPage({
               ))}
             </Group>
 
-            <Box style={{ flex: 1, overflow: "hidden" }}>
-              {leftTab === "description" ? (
-                <IncidentPanel
-                  report={incidentData.report}
-                  incidentName={incidentId}
-                />
-              ) : leftTab === "files" ? (
+            <Box style={{ flex: 1, overflow: 'hidden' }}>
+              {leftTab === 'description' ? (
+                <IncidentPanel report={incidentData.report} incidentName={incidentId} />
+              ) : leftTab === 'files' ? (
                 <FileTree />
               ) : (
-                <IncidentSubmissions submissions={submissions} />
+                <IncidentSubmissions submissions={submissions ?? []} />
               )}
             </Box>
           </Box>
@@ -190,9 +133,9 @@ export default function IncidentPlaygroundPage({
 
         <PanelResizeHandle
           style={{
-            width: "4px",
-            background: "var(--mantine-color-dark-5)",
-            cursor: "col-resize",
+            width: '4px',
+            background: 'var(--mantine-color-dark-5)',
+            cursor: 'col-resize',
           }}
         />
 
@@ -202,9 +145,9 @@ export default function IncidentPlaygroundPage({
             <Panel minSize={50}>
               <Box
                 style={{
-                  height: "100%",
-                  display: "flex",
-                  flexDirection: "column",
+                  height: '100%',
+                  display: 'flex',
+                  flexDirection: 'column',
                 }}
               >
                 <IncidentRunBar
@@ -214,7 +157,7 @@ export default function IncidentPlaygroundPage({
                   availableLanguages={incidentData.availableLanguages}
                   entryFile={incidentData.entryFile}
                 />
-                <Box style={{ flex: 1, overflow: "hidden" }}>
+                <Box style={{ flex: 1, overflow: 'hidden' }}>
                   <MultiFileEditor />
                 </Box>
               </Box>
@@ -222,24 +165,24 @@ export default function IncidentPlaygroundPage({
 
             <PanelResizeHandle
               style={{
-                height: "4px",
-                background: "var(--mantine-color-dark-5)",
-                cursor: "row-resize",
+                height: '4px',
+                background: 'var(--mantine-color-dark-5)',
+                cursor: 'row-resize',
               }}
             />
 
             <Panel defaultSize={28} minSize={15} maxSize={50}>
               <Box
                 style={{
-                  height: "100%",
-                  borderTop: "1px solid var(--mantine-color-dark-5)",
+                  height: '100%',
+                  borderTop: '1px solid var(--mantine-color-dark-5)',
                 }}
               >
                 <Box
                   px="md"
                   py={6}
                   style={{
-                    borderBottom: "1px solid var(--mantine-color-dark-5)",
+                    borderBottom: '1px solid var(--mantine-color-dark-5)',
                   }}
                 >
                   <Text size="xs" fw={600} c="dimmed">
@@ -254,9 +197,9 @@ export default function IncidentPlaygroundPage({
 
         <PanelResizeHandle
           style={{
-            width: "4px",
-            background: "var(--mantine-color-dark-5)",
-            cursor: "col-resize",
+            width: '4px',
+            background: 'var(--mantine-color-dark-5)',
+            cursor: 'col-resize',
           }}
         />
 
@@ -264,14 +207,11 @@ export default function IncidentPlaygroundPage({
         <Panel defaultSize={26} minSize={18} maxSize={40}>
           <Box
             style={{
-              height: "100%",
-              borderLeft: "1px solid var(--mantine-color-dark-5)",
+              height: '100%',
+              borderLeft: '1px solid var(--mantine-color-dark-5)',
             }}
           >
-            <AIChatPanel
-              incidentName={incidentId}
-              incidentReport={incidentData.report}
-            />
+            <AIChatPanel incidentName={incidentId} incidentReport={incidentData.report} />
           </Box>
         </Panel>
       </PanelGroup>

@@ -1,6 +1,6 @@
 import React, { type ReactNode } from 'react';
-import { redirect } from 'next/navigation';
 import { headers } from 'next/headers';
+import { redirect } from 'next/navigation';
 import { auth } from '@/lib/auth';
 
 export default async function P0Layout({ children }: { children: ReactNode }) {

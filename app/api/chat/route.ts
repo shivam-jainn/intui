@@ -1,5 +1,5 @@
-import { NextRequest } from "next/server";
-import { POST as aiChatPOST, runtime } from "../ai/chat/route";
+import { NextRequest } from 'next/server';
+import { POST as aiChatPOST, runtime } from '../ai/chat/route';
 
 export { runtime };
 

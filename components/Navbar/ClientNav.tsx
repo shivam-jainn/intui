@@ -1,13 +1,13 @@
 'use client';
 
-import { Skeleton } from '@mantine/core';
-import Link from 'next/link';
-import Intui from './Intui';
-import classes from './Navbar.module.css';
-import { usePathname, useRouter } from 'next/navigation';
-import { useSession } from '@/lib/auth-client';
 import React from 'react';
+import Link from 'next/link';
+import { usePathname, useRouter } from 'next/navigation';
+import { Skeleton } from '@mantine/core';
+import { useCachedSession } from '@/lib/hooks/useSession';
+import Intui from './Intui';
 import Profile from './Profile';
+import classes from './Navbar.module.css';
 
 interface ClientNavbarProps {
   initialSession: any;
@@ -16,7 +16,7 @@ interface ClientNavbarProps {
 export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const router = useRouter();
   const pathname = usePathname();
-  const { data, isPending } = useSession();
+  const { data, isPending } = useCachedSession();
 
   const currentSession = isPending ? initialSession : data;
   const isLoggedIn = currentSession?.user != null;

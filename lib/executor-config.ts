@@ -1,4 +1,3 @@
-
 export interface ExecutorConfig {
   url: string;
   incidentUrl: string;
@@ -12,9 +11,9 @@ class ExecutorService {
 
   private constructor() {
     // Check if we are in development. Next.js sets this, but let's be robust
-    const isDevelopment = process.env.NODE_ENV === "development" || !process.env.NODE_ENV;
-    const localUrl = "http://127.0.0.1:8080/execute";
-    const localIncidentUrl = "http://127.0.0.1:8080/incident";
+    const isDevelopment = process.env.NODE_ENV === 'development' || !process.env.NODE_ENV;
+    const localUrl = 'http://127.0.0.1:8080/execute';
+    const localIncidentUrl = 'http://127.0.0.1:8080/incident';
     const gcrHost = process.env.GCR_Host;
 
     this.config = {
@@ -45,7 +44,7 @@ class ExecutorService {
     if (!process.env.GCR_Host) {
       return {
         valid: false,
-        message: "Configuration error: GCR Host is not defined for production environment.",
+        message: 'Configuration error: GCR Host is not defined for production environment.',
       };
     }
     return { valid: true };

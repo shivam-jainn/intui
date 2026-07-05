@@ -3,14 +3,17 @@
 import React from 'react';
 import { Avatar, Button, Popover, Stack, Text } from '@mantine/core';
 import { signOut } from '@/lib/auth-client';
+import { useInvalidateSession } from '@/lib/hooks/useSession';
 
 export default function Profile({ avatar, name }: { avatar: string; name?: string }) {
   const [opened, setOpened] = React.useState(false);
   const [isSigningOut, setIsSigningOut] = React.useState(false);
+  const invalidateSession = useInvalidateSession();
 
   const handleSignOut = async () => {
     setIsSigningOut(true);
     await signOut();
+    invalidateSession();
     setIsSigningOut(false);
   };
 

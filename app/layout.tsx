@@ -4,13 +4,16 @@ import React from 'react';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { Navbar } from '@/components/Navbar/Navbar';
 import { theme } from '../theme';
+
 import './globals.css';
 import '@mantine/dates/styles.css';
+
 import TanstackQueryProvider from './TanstackQueryProvider';
 
 export const metadata = {
   title: 'Intui – interactive coding playground',
-  description: 'Your rubber duck for interview prep and learning – code, submit, and iterate in real time.',
+  description:
+    'Your rubber duck for interview prep and learning – code, submit, and iterate in real time.',
   icons: {
     icon: '/prismduck.png',
     shortcut: '/prismduck.png',
