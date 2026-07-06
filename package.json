@@ -60,6 +60,7 @@
     "framer-motion": "^12.42.2",
     "google-auth-library": "^9.15.1",
     "highlight.js": "^11.11.1",
+    "html2canvas": "^1.4.1",
     "jotai": "^2.13.1",
     "katex": "^0.16.22",
     "lucide-react": "^0.475.0",

@@ -177,7 +177,7 @@ const Landing: React.FC = () => {
           </motion.h1>
 
           <motion.p initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.3 }} className={styles.heroSubtitle}>
-            Master DSA. Debug P0s. Survive the Gauntlet.
+            Master production debugging . Debug P0 incidents . Survive the Mixers.
           </motion.p>
         </Container>
 

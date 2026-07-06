@@ -1,8 +1,8 @@
 'use client';
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
-import { Container, Title, Text, Group, Stack, Center, Progress, SimpleGrid, Paper } from '@mantine/core';
+import { Container, Title, Text, Group, Stack, Center, Progress, SimpleGrid, Paper, Modal, Button, ActionIcon } from '@mantine/core';
 import { DuckBadge } from '@/components/DuckBadge';
 import { BadgeType } from '@prisma/client';
 import { authClient } from '@/lib/auth-client';
@@ -11,6 +11,7 @@ import PixelLoader from '@/components/PixelLoader';
 const STREAK_MILESTONES = [1, 3, 5, 10, 15, 30, 60, 90, 120, 150, 180, 270, 365];
 
 export default function AchievementsPage() {
+  const [selectedBadge, setSelectedBadge] = useState<any | null>(null);
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   
   const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({
@@ -69,6 +70,65 @@ export default function AchievementsPage() {
   const progressPercent = currentStreak >= 365 
     ? 100 
     : ((currentStreak - previousMilestone) / (nextMilestone - previousMilestone)) * 100;
+
+  const handleShare = async () => {
+    try {
+      const badgeName = selectedBadge?.customLabel || selectedBadge?.badgeType.replace(/_/g, ' ');
+      const text = `I just unlocked the [${badgeName}] badge on Intui! 🦆\n\nCan you beat my streak?`;
+      const url = `${window.location.origin}/share/badge/${selectedBadge?.badgeType}`;
+
+      // Fetch the generated OG image as a Blob
+      const res = await fetch(`/api/og/badge?type=${selectedBadge?.badgeType}`);
+      const blob = await res.blob();
+      const file = new File([blob], 'achievement.png', { type: 'image/png' });
+
+      if (navigator.canShare && navigator.canShare({ files: [file] })) {
+        await navigator.share({
+          title: 'Intui Achievement',
+          text: text,
+          url: url,
+          files: [file],
+        });
+      } else if (navigator.share) {
+        // Fallback to sharing just the URL if files aren't supported
+        await navigator.share({
+          title: 'Intui Achievement',
+          text: text,
+          url: url,
+        });
+      } else {
+        // Fallback to clipboard
+        navigator.clipboard.writeText(`${text} ${url}`);
+        alert('Copied link to clipboard!');
+      }
+    } catch (err) {
+      console.error('Error sharing:', err);
+    }
+  };
+
+  const handleDownload = async () => {
+    try {
+      const res = await fetch(`/api/og/badge?type=${selectedBadge?.badgeType}`);
+      const blob = await res.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `${selectedBadge?.badgeType || 'badge'}-achievement.png`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      a.remove();
+    } catch (err) {
+      console.error('Error downloading:', err);
+    }
+  };
+
+  const shareToTwitter = () => {
+    const badgeName = selectedBadge?.customLabel || selectedBadge?.badgeType.replace(/_/g, ' ');
+    const url = `${window.location.origin}/share/badge/${selectedBadge?.badgeType}`;
+    const text = encodeURIComponent(`I just unlocked the [${badgeName}] badge on Intui! 🦆\n\nCan you beat my streak?`);
+    window.open(`https://twitter.com/intent/tweet?text=${text}&url=${encodeURIComponent(url)}`, '_blank');
+  };
 
   return (
     <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: 'clamp(2rem, 5vw, 4rem) 1rem' }}>
@@ -139,6 +199,7 @@ export default function AchievementsPage() {
                       <Paper
                         key={b.badgeType + (b.customLabel || '')}
                         className="pixel-border"
+                        onClick={() => setSelectedBadge(b)}
                         style={{ 
                           padding: '1.5rem 1rem', 
                           background: 'var(--bg-inset)',
@@ -147,14 +208,14 @@ export default function AchievementsPage() {
                           alignItems: 'center',
                           gap: '1rem',
                           transition: 'transform 0.2s ease, box-shadow 0.2s ease',
-                          cursor: 'default',
+                          cursor: 'pointer',
                         }}
                         onMouseEnter={(e) => {
-                          e.currentTarget.style.transform = 'translateY(-5px)';
-                          e.currentTarget.style.boxShadow = '0 8px 0 var(--border-subtle)';
+                          e.currentTarget.style.transform = 'translateY(-5px) scale(1.02)';
+                          e.currentTarget.style.boxShadow = '0 8px 0 var(--border-subtle), 0 15px 30px rgba(0,0,0,0.2)';
                         }}
                         onMouseLeave={(e) => {
-                          e.currentTarget.style.transform = 'translateY(0)';
+                          e.currentTarget.style.transform = 'translateY(0) scale(1)';
                           e.currentTarget.style.boxShadow = 'none';
                         }}
                       >
@@ -190,6 +251,145 @@ export default function AchievementsPage() {
           )}
         </Stack>
       </Container>
+      
+      {/* BADGE DETAILS MODAL */}
+      <Modal
+        opened={!!selectedBadge}
+        onClose={() => setSelectedBadge(null)}
+        withCloseButton={false}
+        centered
+        size="md"
+        overlayProps={{
+          backgroundOpacity: 0.85,
+          blur: 10,
+        }}
+        styles={{
+          content: {
+            background: 'transparent',
+            boxShadow: 'none',
+          }
+        }}
+      >
+        {selectedBadge && (
+          <Stack align="center" gap="xl">
+            {/* HOLOGRAPHIC CARD */}
+            <div 
+              className="pixel-border"
+              style={{
+                background: 'linear-gradient(135deg, var(--surface-default) 0%, var(--surface-raised) 100%)',
+                padding: '3rem',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                width: '100%',
+                position: 'relative',
+                overflow: 'hidden',
+                boxShadow: '0 20px 50px rgba(0,0,0,0.5), inset 0 0 0 4px var(--primary-red)',
+                animation: 'float 6s ease-in-out infinite'
+              }}
+            >
+              {/* Shine effect overlay */}
+              <div style={{
+                position: 'absolute',
+                top: '-50%',
+                left: '-50%',
+                width: '200%',
+                height: '200%',
+                background: 'linear-gradient(to right, rgba(255,255,255,0) 0%, rgba(255,255,255,0.1) 50%, rgba(255,255,255,0) 100%)',
+                transform: 'rotate(30deg)',
+                animation: 'shine 4s linear infinite',
+                pointerEvents: 'none',
+              }} />
+
+              <Title className="pixel-font" c="var(--text-secondary)" size="sm" mb="xl" style={{ letterSpacing: '2px' }}>
+                INTUI COLLECTIBLE
+              </Title>
+
+              <div style={{ 
+                background: 'var(--bg-base)', 
+                padding: '2rem', 
+                borderRadius: '50%',
+                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
+                marginBottom: '2rem'
+              }}>
+                <DuckBadge
+                  badgeType={selectedBadge.badgeType as BadgeType}
+                  size={120}
+                  customColor={selectedBadge.customColor}
+                  customAccessory={selectedBadge.customAccessory}
+                  customLabel={selectedBadge.customLabel}
+                />
+              </div>
+
+              <Title className="pixel-font" c="var(--primary-red)" ta="center" size="h2" mb="sm">
+                {selectedBadge.customLabel || selectedBadge.badgeType.replace(/_/g, ' ')}
+              </Title>
+              
+              <Text className="pixel-font" c="dimmed" ta="center" size="sm">
+                EARNED BY {session?.user?.name?.toUpperCase() || 'AGENT'}
+              </Text>
+            </div>
+
+            <Group w="100%" grow>
+              <button 
+                className="pixel-btn" 
+                onClick={shareToTwitter}
+                style={{ 
+                  background: '#1DA1F2', 
+                  color: 'white', 
+                  borderColor: '#1a91da',
+                  padding: '1rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: '0.5rem'
+                }}
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                </svg>
+                SHARE ON X
+              </button>
+              <button 
+                className="pixel-btn-ghost" 
+                onClick={handleShare}
+                style={{ padding: '1rem' }}
+              >
+                NATIVE SHARE
+              </button>
+            </Group>
+
+            <button 
+              className="pixel-btn-ghost" 
+              onClick={handleDownload}
+              style={{ width: '100%', padding: '0.5rem', marginTop: '-1rem' }}
+            >
+              DOWNLOAD IMAGE
+            </button>
+            
+            <button 
+              className="pixel-btn-ghost" 
+              onClick={() => setSelectedBadge(null)}
+              style={{ fontSize: '0.8rem', opacity: 0.7 }}
+            >
+              CLOSE
+            </button>
+          </Stack>
+        )}
+      </Modal>
+
+      <style dangerouslySetInnerHTML={{__html: `
+        @keyframes float {
+          0% { transform: translateY(0px) rotate(0deg); }
+          50% { transform: translateY(-10px) rotate(1deg); }
+          100% { transform: translateY(0px) rotate(0deg); }
+        }
+        @keyframes shine {
+          0% { transform: translateX(-100%) rotate(30deg); }
+          20% { transform: translateX(100%) rotate(30deg); }
+          100% { transform: translateX(100%) rotate(30deg); }
+        }
+      `}} />
     </div>
   );
 }
