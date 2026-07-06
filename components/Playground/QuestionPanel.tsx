@@ -201,7 +201,7 @@ export default function QuestionPanel({
                   <Accordion.Panel>
                     <Group>
                       {topics.map((element, index) => (
-                        <Badge key={index}>{element.topic.name}</Badge>
+                        <Badge key={index} color='red'>{element.topic.name}</Badge>
                       ))}
                     </Group>
                   </Accordion.Panel>

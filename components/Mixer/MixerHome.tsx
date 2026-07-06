@@ -173,9 +173,6 @@ export default function MixerHome() {
               {/* ── User Progress Header (Sleek Inline Status) ── */}
               {profileData && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', opacity: 0.85, paddingBottom: 4 }}>
-                  <Text className="pixel-font" style={{ fontSize: 10, color: 'var(--text-muted)' }}>
-                    &gt; OPERATIVE STATUS: <span style={{ color: 'var(--primary-orange)' }}>ACTIVE</span>
-                  </Text>
                   {profileData.badges && profileData.badges.length > 0 && (
                     <Group gap="xs">
                       {profileData.badges.map((b: any) => (
