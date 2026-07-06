@@ -158,7 +158,12 @@ export async function GET(request: Request) {
               alignItems: 'center'
             }}
           >
-            <div style={{ position: 'relative', display: 'flex' }}>
+            <div style={{ 
+              position: 'relative', 
+              display: 'flex', 
+              width: 10 * scale * 2, 
+              height: 10 * scale * 2 
+            }}>
               {/* Render Duck using divs since it's pixel art and reliable in Satori */}
               {pixels.map((row, y) =>
                 row.map((col, x) => (
