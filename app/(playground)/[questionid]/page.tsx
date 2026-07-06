@@ -11,6 +11,7 @@ import { useQuestionDesc } from '@/lib/hooks/useQuestionDesc';
 import { useQuestionTestCases } from '@/lib/hooks/useQuestionTestCases';
 import { useAtom } from 'jotai';
 import { timerDefaultConfigAtom } from '@/contexts/TimerAtom';
+import DesktopWarning from '@/components/DesktopWarning';
 
 interface Submission {
   id: number;
@@ -133,6 +134,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
 
   return (
     <div style={{ height: 'calc(100vh - 80px)', overflow: 'hidden' }}>
+      <DesktopWarning />
       <PanelGroup direction="horizontal">
         <Panel>
           <QuestionPanel

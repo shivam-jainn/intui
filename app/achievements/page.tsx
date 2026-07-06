@@ -33,7 +33,7 @@ export default function AchievementsPage() {
 
   if (isLoading) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: '4rem 0' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: 'clamp(2rem, 5vw, 4rem) 1rem' }}>
         <Center py={100}>
           <Stack align="center" gap="md">
             <PixelLoader text="SYNCING ACCOLADES..." />
@@ -45,7 +45,7 @@ export default function AchievementsPage() {
 
   if (!session?.user) {
     return (
-      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: '4rem 0' }}>
+      <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: 'clamp(2rem, 5vw, 4rem) 1rem' }}>
         <Container size="md">
           <Paper className="pixel-border" style={{ padding: '4rem 2rem', background: 'var(--surface-default)', textAlign: 'center' }}>
             <Title className="pixel-font" c="var(--primary-red)" mb="md">ACCESS DENIED</Title>
@@ -71,7 +71,7 @@ export default function AchievementsPage() {
     : ((currentStreak - previousMilestone) / (nextMilestone - previousMilestone)) * 100;
 
   return (
-    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: '4rem 0' }}>
+    <div style={{ minHeight: '100vh', background: 'var(--bg-base)', padding: 'clamp(2rem, 5vw, 4rem) 1rem' }}>
       <Container size="md">
         <Stack gap="xl">
           {/* HEADER */}

@@ -96,6 +96,7 @@ const isQuestionPage =
               alignItems: 'center',
               gap: '0.5rem',
               flexShrink: 0,
+              marginLeft: 'auto',
             }}
           >
             {/* Auth Section */}
@@ -114,20 +115,20 @@ const isQuestionPage =
                   <Profile avatar={currentSession.user.image} />
                 </div>
               ) : (
-                <div style={{ display: 'flex', gap: '8px' }}>
+                <div style={{ display: 'flex', gap: '4px' }}>
                   <button
                     type="button"
-                    className={`pixel-btn-ghost ${classes.mobileBtn}`}
+                    className="pixel-btn-ghost-sm"
                     onClick={() => router.push('/signin')}
-                    style={{ fontSize: '0.6rem', padding: '0.5rem' }}
+                    style={{ whiteSpace: 'nowrap' }}
                   >
                     Log in
                   </button>
                   <button
                     type="button"
-                    className={`pixel-btn ${classes.mobileBtn}`}
+                    className="pixel-btn-sm"
                     onClick={() => router.push('/signup')}
-                    style={{ fontSize: '0.6rem', padding: '0.5rem' }}
+                    style={{ whiteSpace: 'nowrap' }}
                   >
                     Sign up
                   </button>

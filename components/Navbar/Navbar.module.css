@@ -23,8 +23,8 @@
   height: 64px;
   display: flex;
   align-items: center;
+  justify-content: space-between;
   padding: 0 2rem;
-  gap: 0;
   transition: border-color 0.3s ease, background 0.3s ease;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.9);
 }
@@ -61,8 +61,9 @@
   gap: 1.5rem;
 }
 
-@media (max-width: 640px) {
+@media (max-width: 768px) {
   .navLinks { display: none; }
+  .header { padding: 0 1rem; }
 }
 
 .link {
@@ -118,7 +119,7 @@
 
 /* ── Burger ──────────────────────────────────────────── */
 
-@media (min-width: 641px) {
+@media (min-width: 769px) {
   .burger { display: none !important; }
 }
 

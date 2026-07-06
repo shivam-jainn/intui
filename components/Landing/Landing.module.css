@@ -597,6 +597,12 @@
     width: 100%;
   }
 
+  .heroSection {
+    min-height: calc(100vh - 80px);
+    height: auto;
+    padding-bottom: 2rem;
+  }
+
   .glowLeft, .glowRight {
     width: 300px;
     height: 300px;
@@ -614,19 +620,21 @@
   }
 
   .duckFloatWrapper {
-    top: 50%; 
+    position: relative;
+    top: auto;
+    left: auto;
+    margin: 2rem auto;
     width: 200px;
     height: 200px;
-    margin-left: -100px;
-    margin-top: -100px;
   }
 
   .ctaRow {
-    bottom: 3rem;
+    position: relative;
+    bottom: auto;
     flex-direction: column;
     width: 90%;
     gap: 1rem;
-    margin: 0 auto;
+    margin: 1rem auto 2rem;
   }
 
   .btnPrimary, .btnGhost {
@@ -678,6 +686,12 @@
     max-width: 100%;
     justify-self: center;
     padding: 1.5rem;
+  }
+
+  .glassyHeader {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 0.75rem;
   }
 
   .massiveFooterBrand {

@@ -20,6 +20,7 @@ import {
 import { useIncidentFiles } from '@/lib/hooks/useIncidentFiles';
 import { useIncidentSubmissions } from '@/lib/hooks/useIncidentSubmissions';
 import { timerDefaultConfigAtom } from '@/contexts/TimerAtom';
+import DesktopWarning from '@/components/DesktopWarning';
 
 export default function IncidentPlaygroundPage({ params }: { params: { incidentid: string } }) {
   const incidentId = params.incidentid;
@@ -89,6 +90,7 @@ export default function IncidentPlaygroundPage({ params }: { params: { incidenti
         flexDirection: 'column',
       }}
     >
+      <DesktopWarning />
       <PanelGroup direction="horizontal">
         {/* Left panel: description + file tree + submissions */}
         <Panel defaultSize={22} minSize={15} maxSize={35}>
