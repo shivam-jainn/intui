@@ -279,7 +279,7 @@
 
 .diffBtn {
   flex: 1;
-  padding: 14px 4px;
+  padding: 12px 4px;
   border-radius: 12px;
   font-size: 12px;
   font-weight: 700;
@@ -288,8 +288,13 @@
   cursor: pointer;
   transition: all 0.2s ease;
   border: 1px solid rgba(255, 255, 255, 0.1);
-  background: rgba(255, 255, 255, 0.03);
-  color: var(--text-secondary);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--text-primary);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
 }
 
 .diffBtn:hover {

@@ -159,3 +159,33 @@ input[type="number"] {
     0 1px 0 0 var(--blood-dark);
   image-rendering: pixelated;
 }
+
+@keyframes pixelDotBlink {
+  0%, 33% { background: var(--primary-red); border-color: var(--primary-red); box-shadow: 0 0 8px var(--primary-red); }
+  33.01%, 100% { background: var(--bg-raised); border-color: var(--border-default); box-shadow: none; }
+}
+
+.pixel-dot {
+  width: 16px;
+  height: 16px;
+  background: var(--bg-raised);
+  border: 2px solid var(--border-default);
+  animation: pixelDotBlink 1.2s infinite;
+}
+
+@keyframes pixelPulse {
+  0%, 100% { opacity: 1; background: var(--bg-raised); }
+  50% { opacity: 0.5; background: var(--border-subtle); }
+}
+
+.pixel-skeleton {
+  animation: pixelPulse 1s steps(4, end) infinite;
+  border: 2px solid var(--border-default);
+  background: var(--bg-raised);
+  box-shadow: 
+    -2px 0 0 0 var(--bg-base),
+    2px 0 0 0 var(--bg-base),
+    0 -2px 0 0 var(--bg-base),
+    0 2px 0 0 var(--bg-base);
+  image-rendering: pixelated;
+}

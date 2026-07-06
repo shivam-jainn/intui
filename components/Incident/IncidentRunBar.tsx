@@ -12,6 +12,7 @@ import {
   incidentResultAtom,
   incidentRunningAtom,
 } from '@/contexts/IncidentContext';
+import { timerStatusAtom } from '@/contexts/TimerAtom';
 import { useQueryClient } from '@tanstack/react-query';
 
 interface IncidentRunBarProps {
@@ -37,6 +38,7 @@ export default function IncidentRunBar({
   const [running, setRunning] = useAtom(incidentRunningAtom);
   const [error, setError] = useState<string | null>(null);
   const queryClient = useQueryClient();
+  const [timerStatus] = useAtom(timerStatusAtom);
 
   // The entry file to submit is the active editable file, fallback to declared entryFile
   function getSubmitCode(): { code: string; filePath: string } {
@@ -141,8 +143,9 @@ export default function IncidentRunBar({
         <button
           onClick={handleRun}
           className="pixel-font pixel-btn-sm"
-          disabled={!language || running}
+          disabled={!language || running || timerStatus === 'idle'}
           style={{ height: '32px', fontSize: '12px' }}
+          title={timerStatus === 'idle' ? 'Please start a timer first' : ''}
         >
           {running ? 'RUNNING...' : 'RUN TESTS'}
         </button>

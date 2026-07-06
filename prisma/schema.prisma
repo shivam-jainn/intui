@@ -15,8 +15,21 @@ enum Difficulty {
 
 enum BadgeType {
   STREAK_1
+  STREAK_3
   STREAK_5
   STREAK_10
+  STREAK_15
+  STREAK_30
+  STREAK_60
+  STREAK_90
+  STREAK_120
+  STREAK_150
+  STREAK_180
+  STREAK_270
+  STREAK_365
+  FIRST_LOGIN
+  DAILY_LOGIN
+  MIXER_AWARD
   SPEED_P0_15M
   SPEED_P0_10M
   SPEED_P0_5M
@@ -234,12 +247,15 @@ model IncidentSubmission {
 }
 
 model UserBadge {
-  id        Int       @id @default(autoincrement())
-  userId    String
-  badgeType BadgeType
-  earnedAt  DateTime  @default(now())
-  user      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id              Int       @id @default(autoincrement())
+  userId          String
+  badgeType       BadgeType
+  earnedAt        DateTime  @default(now())
+  customColor     String?
+  customAccessory String?
+  customLabel     String?
+  user            User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 
-  @@unique([userId, badgeType])
+  @@unique([userId, badgeType, customLabel])
   @@map("user_badge")
 }

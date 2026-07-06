@@ -2,6 +2,9 @@
 
 import React from 'react';
 import { createPortal } from 'react-dom';
+import { useAtom } from 'jotai';
+import { Smile, Flame, Skull } from 'lucide-react';
+import { timerStatusAtom, timerModeAtom, timerDefaultConfigAtom } from '@/contexts/TimerAtom';
 import { colors } from '@/lib/theme/colors';
 import styles from './Timer.module.css';
 
@@ -16,7 +19,7 @@ export interface TimerProps {
 
 export interface TimerHandle {
   getMixerRunId: () => string | null;
-  submitMixerRun: () => Promise<void>;
+  submitMixerRun: (questionSlug?: string) => Promise<void>;
 }
 
 function formatTime(s: number) {
@@ -40,8 +43,10 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   ref
 ) {
   // ── State ─────────────────────────────────────────────────────
-  const [mode, setMode] = React.useState<TimerMode>('timer');
-  const [status, setStatus] = React.useState<TimerStatus>('idle');
+  const [mode, setMode] = useAtom(timerModeAtom);
+  const [status, setStatus] = useAtom(timerStatusAtom);
+  const [defaultConfig] = useAtom(timerDefaultConfigAtom);
+
   const [seconds, setSeconds] = React.useState(0);
   const [difficulty, setDifficulty] = React.useState<MixerDifficulty>('medium');
   const [inputMin, setInputMin] = React.useState(0);
@@ -112,6 +117,23 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
     if (!seen) setShowIntro(true);
   }, []);
 
+  // ── Apply Defaults ────────────────────────────────────────────
+  React.useEffect(() => {
+    if (defaultConfig.type === 'question') {
+      const diff = defaultConfig.difficulty;
+      if (diff === 'easy') setInputMin(15);
+      else if (diff === 'medium') setInputMin(30);
+      else if (diff === 'hard') setInputMin(60);
+      else setInputMin(30);
+      setInputSec(0);
+      if (diff) setDifficulty(diff);
+    } else if (defaultConfig.type === 'incident') {
+      setInputMin(defaultConfig.slaMinutes || 30);
+      setInputSec(0);
+      // Removed restriction preventing users from changing timing/stopwatch
+    }
+  }, [defaultConfig]);
+
   // ── Actions ───────────────────────────────────────────────────
   const openConfig = () => {
     if (isLocked) return;
@@ -168,13 +190,13 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
     }
   };
 
-  const submitMixerRun = async () => {
+  const submitMixerRun = async (questionSlug?: string) => {
     if (!runId) return;
     try {
       await fetch('/api/mixermode/submit', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ runId, userId: 'local-user' }),
+        body: JSON.stringify({ runId, userId: 'local-user', questionSlug }),
       });
     } catch (e) {
       console.error('Failed to submit mixer run', e);
@@ -351,20 +373,24 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
 
               {mode === 'mixer' && (
                 <div className={styles.diffGrid}>
-                  {(['easy', 'medium', 'hard'] as MixerDifficulty[]).map((d) => (
-                    <button
-                      key={d}
-                      onClick={() => setDifficulty(d)}
-                      className={styles.diffBtn}
-                      style={
-                        difficulty === d
-                          ? { borderColor: DIFF_HEX[d], background: DIFF_BG[d], color: DIFF_HEX[d] }
-                          : {}
-                      }
-                    >
-                      {d}
-                    </button>
-                  ))}
+                  {(['easy', 'medium', 'hard'] as MixerDifficulty[]).map((d) => {
+                    const Icon = d === 'easy' ? Smile : d === 'medium' ? Flame : Skull;
+                    return (
+                      <button
+                        key={d}
+                        onClick={() => setDifficulty(d)}
+                        className={styles.diffBtn}
+                        style={
+                          difficulty === d
+                            ? { borderColor: DIFF_HEX[d], background: DIFF_BG[d], color: DIFF_HEX[d] }
+                            : {}
+                        }
+                      >
+                        <Icon size={24} style={{ strokeWidth: 2 }} />
+                        <span>{d}</span>
+                      </button>
+                    );
+                  })}
                 </div>
               )}
 

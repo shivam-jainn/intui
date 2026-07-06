@@ -19,12 +19,14 @@ import {
 } from '@/contexts/IncidentContext';
 import { useIncidentFiles } from '@/lib/hooks/useIncidentFiles';
 import { useIncidentSubmissions } from '@/lib/hooks/useIncidentSubmissions';
+import { timerDefaultConfigAtom } from '@/contexts/TimerAtom';
 
 export default function IncidentPlaygroundPage({ params }: { params: { incidentid: string } }) {
   const incidentId = params.incidentid;
 
   const [language, setLanguage] = React.useState('python');
   const [leftTab, setLeftTab] = useAtom(incidentLeftTabAtom);
+  const [, setTimerConfig] = useAtom(timerDefaultConfigAtom);
 
   const [, setFiles] = useAtom(incidentFilesAtom);
   const [, setActiveFile] = useAtom(activeFilePathAtom);
@@ -53,7 +55,12 @@ export default function IncidentPlaygroundPage({ params }: { params: { incidenti
     } else if (incidentData.files.length > 0) {
       setActiveFile(incidentData.files[0].path);
     }
-  }, [incidentData, setFiles, setFileContents, setActiveFile]);
+    
+    // Assuming SLA might be part of incidentData, let's say 45 mins default for now or read from report
+    // Need to parse SLA or default to 60. Wait, SLA should be provided.
+    // Since we don't know the exact property, we use 60 as default or read incidentData.sla
+    setTimerConfig({ type: 'incident', slaMinutes: (incidentData as any).slaMinutes ?? (incidentData as any).sla ?? 60 });
+  }, [incidentData, setFiles, setFileContents, setActiveFile, setTimerConfig]);
 
   if (filesLoading) {
     return (

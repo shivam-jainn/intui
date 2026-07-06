@@ -34,6 +34,8 @@ export const metadata = {
   },
 };
 
+import { ActivityTracker } from '@/components/ActivityTracker';
+
 export default function RootLayout({ children }: { children: any }) {
   return (
     <html lang="en" suppressHydrationWarning className={pressStart2P.variable}>
@@ -50,6 +52,7 @@ export default function RootLayout({ children }: { children: any }) {
         <MantineProvider theme={theme} defaultColorScheme="dark">
           <TanstackQueryProvider>
             <TimerProvider>
+              <ActivityTracker />
               <div className="global-noise" />
               <Navbar />
               {children}

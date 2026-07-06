@@ -20,6 +20,7 @@ import Timer, { TimerHandle } from '@/components/Timer/Timer';
 import { useTimerContext } from '@/components/Timer/TimerContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { questionTabAtom } from '@/contexts/TestCardContext';
+import { timerStatusAtom } from '@/contexts/TimerAtom';
 
 interface CodeEditorProps {
   questionSlug: string;
@@ -35,6 +36,7 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
   const [, setQuestionTab] = useAtom(questionTabAtom);
   const { timerRef } = useTimerContext();
   const queryClient = useQueryClient();
+  const [timerStatus] = useAtom(timerStatusAtom);
 
   const { data: driver, error: driverError } = useDriverCode(
     decodeURIComponent(questionSlug),
@@ -141,7 +143,7 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
 
       queryClient.invalidateQueries({ queryKey: ['question', decodeURIComponent(questionSlug)] });
 
-      await timerRef.current?.submitMixerRun();
+      await timerRef.current?.submitMixerRun(questionSlug);
     } catch (error: any) {
       setUiError(
         'Unable to connect to the submission server. Check your internet connection and try again.'
@@ -237,8 +239,31 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
         style={{
           flexGrow: 1,
           overflowY: 'auto',
+          position: 'relative',
         }}
       >
+        {timerStatus === 'idle' && (
+          <div
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              zIndex: 10,
+              background: 'rgba(0, 0, 0, 0.7)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 16,
+              color: 'var(--text-primary)',
+            }}
+          >
+            <div style={{ fontSize: 18, fontWeight: 'bold' }}>Timer Required</div>
+            <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
+              Use either Timer or Mixer to begin. Choose Mixer for higher stakes!
+            </div>
+          </div>
+        )}
         <CodeMirror
           value={storedCode}
           extensions={[getLanguageExtension()]}

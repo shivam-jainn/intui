@@ -9,6 +9,8 @@ import RunAndSubmissionBar from '@/components/Playground/TestCard';
 import { useQuestion } from '@/lib/hooks/useQuestion';
 import { useQuestionDesc } from '@/lib/hooks/useQuestionDesc';
 import { useQuestionTestCases } from '@/lib/hooks/useQuestionTestCases';
+import { useAtom } from 'jotai';
+import { timerDefaultConfigAtom } from '@/contexts/TimerAtom';
 
 interface Submission {
   id: number;
@@ -30,6 +32,7 @@ function enrichSubmissions(submissions: Submission[]): Submission[] {
 
 export default function Page({ params }: { params: { questionid: string } }) {
   const questionId = decodeURIComponent(params.questionid);
+  const [, setTimerConfig] = useAtom(timerDefaultConfigAtom);
 
   const {
     data: apiResponse,
@@ -56,7 +59,7 @@ export default function Page({ params }: { params: { questionid: string } }) {
     if (!apiResponse || !questionDescription) return null;
     return {
       name: apiResponse.name,
-      difficulty: apiResponse.difficulty,
+      difficulty: apiResponse.difficulty as 'easy' | 'medium' | 'hard',
       description: questionDescription.question_description,
       testCases: testCases ?? [],
       companies: (apiResponse as any).companies ?? [],
@@ -64,6 +67,12 @@ export default function Page({ params }: { params: { questionid: string } }) {
       submissions: enrichSubmissions(apiResponse.Submission ?? []),
     };
   }, [apiResponse, questionDescription, testCases]);
+
+  React.useEffect(() => {
+    if (questionData) {
+      setTimerConfig({ type: 'question', difficulty: questionData.difficulty });
+    }
+  }, [questionData, setTimerConfig]);
 
   if (loading) {
     return <PlaygroundSkeleton />;

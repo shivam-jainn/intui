@@ -23,9 +23,23 @@ export default function ClientNavbar({ initialSession }: ClientNavbarProps) {
   const { data, isPending } = useCachedSession();
   const { timerRef } = useTimerContext();
 
+  const excludedRoutes = new Set([
+  '/',
+  '/p0',
+  '/achievements',
+  '/leaderboard',
+  '/profile',
+  '/signin',
+  '/signup',
+]);
 
-  const isQuestionPage =
-  /^\/(?!p0$)[^/]+$/.test(pathname) || /^\/p0\/[^/]+$/.test(pathname);
+const isQuestionPage =
+  !excludedRoutes.has(pathname) &&
+  (
+    /^\/[^/]+$/.test(pathname) ||
+    /^\/p0\/[^/]+$/.test(pathname)
+  );
+
 
   const currentSession = isPending ? initialSession : data;
   const isLoggedIn = currentSession?.user != null;

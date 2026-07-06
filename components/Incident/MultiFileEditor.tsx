@@ -15,6 +15,7 @@ import {
   fileContentsAtom,
   incidentFilesAtom,
 } from '@/contexts/IncidentContext';
+import { timerStatusAtom } from '@/contexts/TimerAtom';
 
 const readonlyExtension = EditorView.editable.of(false);
 
@@ -33,6 +34,7 @@ export default function MultiFileEditor() {
   const [files] = useAtom(incidentFilesAtom);
   const [activeFile, setActiveFile] = useAtom(activeFilePathAtom);
   const [fileContents, setFileContents] = useAtom(fileContentsAtom);
+  const [timerStatus] = useAtom(timerStatusAtom);
 
   // Track which files are open as tabs (preserves order and allows close)
   const [openTabs, setOpenTabs] = useState<string[]>([]);
@@ -153,7 +155,29 @@ export default function MultiFileEditor() {
       </ScrollArea>
 
       {/* Editor */}
-      <Box style={{ flex: 1, overflow: 'auto' }}>
+      <Box style={{ flex: 1, overflow: 'auto', position: 'relative' }}>
+        {timerStatus === 'idle' && (
+          <Box
+            style={{
+              position: 'absolute',
+              top: 0, left: 0, right: 0, bottom: 0,
+              zIndex: 10,
+              background: 'rgba(0, 0, 0, 0.7)',
+              backdropFilter: 'blur(4px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              flexDirection: 'column',
+              gap: 16,
+              color: 'var(--mantine-color-white)',
+            }}
+          >
+            <Text size="lg" fw={700}>Timer Required</Text>
+            <Text size="sm" c="dimmed">
+              Use either Timer or Mixer to begin. Choose Mixer for higher stakes!
+            </Text>
+          </Box>
+        )}
         <CodeMirror
           key={activeFile}
           value={currentContent}
