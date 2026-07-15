@@ -18,24 +18,24 @@
 
 export const colors = {
   bg: {
-    base: '#0a0a0f',
-    raised: '#111118',
-    overlay: '#18181f',
+    base: '#191919',
+    raised: '#202020',
+    overlay: '#222222',
   },
   surface: {
-    default: '#16161e',
-    hover: '#1c1c26',
-    active: '#22222e',
+    default: '#2a2a2a',
+    hover: '#323232',
+    active: '#3c3c3c',
   },
   border: {
-    subtle: '#1e1e2a',
-    default: '#2a2a3a',
-    strong: '#3a3a4e',
+    subtle: '#2e2e2e',
+    default: '#3e3e3e',
+    strong: '#4e4e4e',
   },
   text: {
-    primary: '#e4e4ef',
-    secondary: '#8888a0',
-    muted: '#55556a',
+    primary: '#ffffff',
+    secondary: '#a3a3a3',
+    muted: '#6b6b6b',
   },
   primary: {
     50: '#e6fcf5',

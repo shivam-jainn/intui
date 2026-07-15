@@ -43,18 +43,48 @@ export default function SocialSignIn() {
     <div style={{ display: 'flex', flexDirection: 'column', gap: '1rem', position: 'relative', zIndex: 2 }}>
       <button 
         type="button" 
-        className="pixel-btn-ghost" 
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', width: '100%', fontSize: '0.6rem' }} 
-        onClick={() => signIn('github')}
+        style={{ 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', width: '100%', 
+          padding: '1rem', background: 'transparent', color: '#fff', border: '1px solid var(--border-default)', 
+          borderRadius: '6px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', textTransform: 'uppercase',
+          letterSpacing: '0.05em', transition: 'all 0.2s'
+        }} 
+        onClick={(e) => {
+          e.currentTarget.style.background = 'var(--surface-hover)';
+          signIn('github');
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'var(--surface-hover)';
+          e.currentTarget.style.borderColor = '#fff';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.borderColor = 'var(--border-default)';
+        }}
       >
         <GithubIcon />
         GitHub
       </button>
       <button 
         type="button" 
-        className="pixel-btn-ghost" 
-        style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.6rem', width: '100%', fontSize: '0.6rem' }} 
-        onClick={() => signIn('google')}
+        style={{ 
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '0.75rem', width: '100%', 
+          padding: '1rem', background: 'transparent', color: '#fff', border: '1px solid var(--border-default)', 
+          borderRadius: '6px', fontSize: '1rem', fontWeight: 'bold', cursor: 'pointer', textTransform: 'uppercase',
+          letterSpacing: '0.05em', transition: 'all 0.2s'
+        }} 
+        onClick={(e) => {
+          e.currentTarget.style.background = 'var(--surface-hover)';
+          signIn('google');
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.background = 'var(--surface-hover)';
+          e.currentTarget.style.borderColor = '#fff';
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.background = 'transparent';
+          e.currentTarget.style.borderColor = 'var(--border-default)';
+        }}
       >
         <GoogleIcon />
         Google

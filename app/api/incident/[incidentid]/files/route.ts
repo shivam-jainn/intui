@@ -13,6 +13,7 @@ export interface IncidentData {
   files: IncidentFile[];
   availableLanguages: string[];
   entryFile: string;
+  slaMinutes?: number;
 }
 
 interface IncidentManifest {
@@ -77,10 +78,32 @@ export async function GET(
   const fallbackEntryFile = files.find((file) => !file.readonly)?.path ?? files[0]?.path ?? '';
   const entryFile = manifest.entryFileByLanguage?.[activeLang] ?? fallbackEntryFile;
 
+  let slaMinutes = 60;
+  try {
+    const metadataBuffer = await storage.download(`incidents/${incidentid}/metadata.json`);
+    const metadata = JSON.parse(metadataBuffer.toString('utf8'));
+    if (metadata && typeof metadata.slaMinutes === 'number') {
+      slaMinutes = metadata.slaMinutes;
+    } else if (metadata && typeof metadata.sla === 'number') {
+      slaMinutes = metadata.sla;
+    }
+  } catch {
+    try {
+      const incidentJsonBuffer = await storage.download(`incidents/${incidentid}/incident.json`);
+      const incidentJson = JSON.parse(incidentJsonBuffer.toString('utf8'));
+      if (incidentJson && typeof incidentJson.slaMinutes === 'number') {
+        slaMinutes = incidentJson.slaMinutes;
+      } else if (incidentJson && typeof incidentJson.sla === 'number') {
+        slaMinutes = incidentJson.sla;
+      }
+    } catch {}
+  }
+
   return NextResponse.json({
     report: manifest.report,
     files,
     availableLanguages,
     entryFile,
+    slaMinutes,
   } satisfies IncidentData);
 }

@@ -134,6 +134,8 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  position: relative;
+  z-index: 10;
 }
 
 .heroSubtitle {
@@ -175,7 +177,7 @@
   z-index: 2;
 }
 
-.btnPrimary {
+.btnTerminal {
   padding: 1rem 2.5rem;
   background: var(--primary-red);
   color: #fff;
@@ -189,10 +191,15 @@
   transition: all 0.2s ease;
 }
 
-.btnGhost {
+.btnTerminal:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 20px rgba(230, 30, 30, 0.3);
+}
+
+.btnTerminalGhost {
   padding: 1rem 2.5rem;
   background: transparent;
-  color: var(--text-primary);
+  color: #fff;
   border: 1px solid var(--border-default);
   border-radius: 6px;
   font-weight: 700;
@@ -204,11 +211,17 @@
   transition: all 0.2s ease;
 }
 
+.btnTerminalGhost:hover {
+  background: var(--surface-default);
+  border-color: #fff;
+  transform: translateY(-2px);
+}
+
 /* ── Emergency Marquee ─────────────────────────────────── */
 .marqueeContainer {
   width: 100%;
   background: var(--primary-red);
-  color: #000;
+  color: #fff;
   overflow: hidden;
   padding: 0.5rem 0;
   border-top: 1px solid rgba(255, 255, 255, 0.2);
@@ -326,7 +339,7 @@
   border-radius: 12px;
   padding: 3rem 2.5rem;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
   transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
@@ -338,6 +351,13 @@
   justify-content: center;
   margin-bottom: 2rem;
   box-shadow: 0 10px 20px rgba(0,0,0,0.6);
+  background: transparent !important;
+  border: none;
+}
+
+.featureIconWrapper svg {
+  stroke: #fff !important;
+  fill: #fff !important;
 }
 
 .featureTitle {
@@ -350,9 +370,87 @@
   line-height: 1.6;
 }
 
+/* ── P0 Incident Loop ──────────────────────────────────── */
+.p0LoopSection {
+  padding: 6rem 0;
+  background: var(--bg-base);
+  position: relative;
+}
+
+.p0LoopGrid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr;
+  gap: 4rem;
+  align-items: center;
+}
+
+.p0Card {
+  background: var(--surface-default);
+  border: 1px solid var(--border-subtle);
+  border-radius: 12px;
+  padding: 2rem;
+  position: relative;
+  overflow: visible;
+}
+
+.p0Card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; width: 4px; height: 100%;
+  background: var(--primary-red);
+}
+
+.p0StepHeader {
+  font-family: monospace;
+  color: var(--primary-red);
+  font-weight: bold;
+  letter-spacing: 0.1em;
+  margin-bottom: 1rem;
+}
+
+.p0StepTitle {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 0.5rem;
+}
+
+/* ── Mixer Mode Block ──────────────────────────────────── */
+.mixerWarningBlock {
+  background: repeating-linear-gradient(
+    -45deg,
+    #1a1a1a,
+    #1a1a1a 20px,
+    #2a0000 20px,
+    #2a0000 40px
+  );
+  border: 2px solid var(--primary-red);
+  border-radius: 12px;
+  padding: 3rem;
+  position: relative;
+  overflow: visible;
+  margin-top: 4rem;
+  box-shadow: 0 10px 40px rgba(230, 30, 30, 0.2);
+}
+
+.mixerWarningHeader {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  color: var(--primary-red);
+  font-size: 2rem;
+  font-weight: 900;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  margin-bottom: 1rem;
+}
+
+/* Badges have been moved to components/UI/Sticker.module.css */
+
+
 /* ── Footer Section ────────────────────────────────────── */
 .footerSection {
-  background: var(--bg-overlay);
+  background: var(--bg-base);
   position: relative;
   overflow: hidden;
   padding-top: 1px; 
@@ -436,19 +534,17 @@
 
 /* P0 Glassy Terminal Card */
 .p0GlassyCard {
-  background: rgba(17, 5, 5, 0.4);
-  backdrop-filter: blur(16px);
-  -webkit-backdrop-filter: blur(16px);
+  background: var(--surface-default);
   border: 1px solid var(--border-default);
   border-top: 1px solid rgba(230, 30, 30, 0.3);
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8), inset 0 0 40px rgba(102, 0, 0, 0.2);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.8);
   width: 100%;
   max-width: 480px;
   justify-self: end;
   position: relative;
-  overflow: hidden;
+  overflow: visible;
 }
 
 .p0GlassyCard::after {
@@ -489,7 +585,6 @@
   background: var(--primary-red);
   border-radius: 50%;
   box-shadow: 0 0 10px var(--primary-red);
-  animation: blink 1s infinite;
 }
 
 .glassyTime {
@@ -509,6 +604,7 @@
   font-size: 0.85rem;
   line-height: 1.8;
   margin: 0;
+  color: #fff;
 }
 
 .terminalMuted {
@@ -518,8 +614,6 @@
 .terminalAlert {
   color: var(--primary-red);
   font-weight: bold;
-  animation: glitch-skew 3s infinite;
-  display: inline-block;
 }
 
 .terminalCursor {
@@ -553,25 +647,45 @@
   overflow: hidden;
   display: flex;
   justify-content: center;
-  align-items: flex-end;
-  border-top: 1px solid var(--border-subtle);
-  padding-top: 2rem;
-  position: relative;
-  z-index: 1;
+  align-items: center;
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 100%;
+  z-index: 0;
+  opacity: 0.2;
 }
 
 .massiveFooterBrand {
-  font-size: 24vw; 
+  font-size: clamp(8rem, 25vw, 30rem); 
   font-weight: 900;
-  line-height: 0.75;
+  line-height: 0.8;
   letter-spacing: -0.05em;
-  color: var(--bg-raised); 
-  -webkit-text-stroke: 1px var(--border-default);
+  color: transparent; 
+  -webkit-text-stroke: 2px rgba(255, 255, 255, 0.1);
   text-transform: uppercase;
   margin: 0;
   padding: 0;
   user-select: none;
-  text-shadow: 0 -20px 40px rgba(0,0,0,0.5);
+  white-space: nowrap;
+}
+
+.massiveBrandContainer {
+  width: 100vw;
+  position: relative;
+  left: 50%;
+  right: 50%;
+  margin-left: -50vw;
+  margin-right: -50vw;
+  background: var(--bg-base);
+  text-align: center;
+  overflow: hidden;
+  padding: 6rem 0;
+  border-top: 1px solid var(--border-subtle);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 
 /* ── Mobile & Tablet Responsiveness ────────────────────── */
@@ -637,9 +751,10 @@
     margin: 1rem auto 2rem;
   }
 
-  .btnPrimary, .btnGhost {
+  .btnTerminal, .btnTerminalGhost {
     width: 100%;
     padding: 1.15rem; 
+    justify-content: center;
   }
 
   .statsRow {

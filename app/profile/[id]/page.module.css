@@ -1,0 +1,88 @@
+.scrapbookContainer {
+  min-height: 100vh;
+  background-color: #f4ecd8;
+  background-image: 
+    linear-gradient(90deg, rgba(200,0,0,.05) 1px, transparent 1px),
+    linear-gradient(rgba(0,0,200,.05) 1px, transparent 1px);
+  background-size: 20px 20px;
+  padding: 40px 20px;
+  font-family: 'Comic Sans MS', cursive, sans-serif;
+}
+
+.pageBackground {
+  max-width: 1000px;
+  margin: 0 auto;
+  background: #fffdf5;
+  box-shadow: 
+    0 4px 6px rgba(0,0,0,0.1), 
+    inset 0 0 40px rgba(150, 100, 50, 0.1);
+  border-radius: 4px;
+  padding: 40px;
+  border-left: 2px solid #ccc;
+  border-right: 2px solid #ccc;
+}
+
+.header {
+  text-align: center;
+  margin-bottom: 40px;
+  border-bottom: 2px dashed #d1c8b0;
+  padding-bottom: 20px;
+}
+
+.title {
+  font-size: 3rem;
+  color: #5c4b37;
+  text-shadow: 1px 1px 0px rgba(255,255,255,0.8);
+  font-family: 'Marker Felt', fantasy, sans-serif;
+}
+
+.subtitle {
+  font-style: italic;
+}
+
+.polaroid {
+  background: white;
+  padding: 20px 20px 40px 20px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.15);
+  transform: rotate(-2deg);
+  max-width: 300px;
+  border: 1px solid #eee;
+}
+
+.stickersBoard {
+  flex: 1;
+  min-width: 300px;
+  background: rgba(255, 255, 255, 0.4);
+  border: 1px solid rgba(0,0,0,0.05);
+  border-radius: 12px;
+  padding: 20px;
+}
+
+.stickersTitle {
+  font-family: 'Marker Felt', fantasy, sans-serif;
+  color: #d35400;
+  margin-bottom: 20px;
+}
+
+.stickersGrid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 20px;
+  justify-content: center;
+  align-items: center;
+}
+
+.stickerWrapper {
+  transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  filter: drop-shadow(0 5px 5px rgba(0,0,0,0.2));
+  cursor: grab;
+}
+
+.stickerWrapper:active {
+  cursor: grabbing;
+}
+
+.stickerWrapper:hover {
+  transform: scale(1.1) rotate(0deg) !important;
+  z-index: 10;
+}

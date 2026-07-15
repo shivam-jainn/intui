@@ -4,19 +4,12 @@ import React from 'react';
 import { ColorSchemeScript, MantineProvider } from '@mantine/core';
 import { Navbar } from '@/components/Navbar/Navbar';
 import { theme } from '../theme';
-import { Press_Start_2P } from 'next/font/google';
 
 import './globals.css';
 import '@mantine/dates/styles.css';
 
 import TanstackQueryProvider from './TanstackQueryProvider';
 import { TimerProvider } from '@/components/Timer/TimerContext';
-
-const pressStart2P = Press_Start_2P({
-  weight: '400',
-  subsets: ['latin'],
-  variable: '--font-press-start',
-});
 
 export const metadata = {
   title: 'Intui – interactive coding playground',
@@ -38,7 +31,7 @@ import { ActivityTracker } from '@/components/ActivityTracker';
 
 export default function RootLayout({ children }: { children: any }) {
   return (
-    <html lang="en" suppressHydrationWarning className={pressStart2P.variable}>
+    <html lang="en" suppressHydrationWarning>
       <head>
         <ColorSchemeScript defaultColorScheme="dark" />
         <link rel="icon" type="image/png" sizes="32x32" href="/prismduck.png" />
@@ -53,7 +46,6 @@ export default function RootLayout({ children }: { children: any }) {
           <TanstackQueryProvider>
             <TimerProvider>
               <ActivityTracker />
-              <div className="global-noise" />
               <Navbar />
               {children}
             </TimerProvider>

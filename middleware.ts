@@ -42,8 +42,28 @@ export async function middleware(request: NextRequest) {
     return NextResponse.next();
   }
 
+  // Landing page never redirects, so bypass session verification entirely
+  if (pathname === '/') {
+    return NextResponse.next();
+  }
+
+  const cookieHeader = request.headers.get('cookie') ?? '';
+  const hasSessionCookie =
+    cookieHeader.includes('better-auth.session_token') ||
+    cookieHeader.includes('__secure-better-auth.session_token');
+
+  const publicRoutes = ['/signin', '/signup'];
+
+  if (!hasSessionCookie) {
+    // No session cookie exists, user is definitely logged out
+    if (!publicRoutes.includes(pathname)) {
+      return NextResponse.redirect(new URL('/signin', request.url));
+    }
+    return NextResponse.next();
+  }
+
+  // Session cookie exists, verify session validity
   const validSession = await hasValidSession(request);
-  const publicRoutes = ['/', '/signin', '/signup'];
 
   if (!validSession) {
     // If not signed in, only allow public routes

@@ -617,3 +617,16 @@
   font-weight: 700;
   margin-right: 6px;
 }
+
+.incidentLabel {
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  color: #fff;
+  background: linear-gradient(135deg, #fa5252, #e03131);
+  padding: 4px 10px;
+  border-radius: 999px;
+  box-shadow: 0 2px 8px rgba(250, 82, 82, 0.3);
+  text-transform: uppercase;
+  user-select: none;
+}

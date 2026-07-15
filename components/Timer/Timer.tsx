@@ -4,7 +4,7 @@ import React from 'react';
 import { createPortal } from 'react-dom';
 import { useAtom } from 'jotai';
 import { Smile, Flame, Skull } from 'lucide-react';
-import { timerStatusAtom, timerModeAtom, timerDefaultConfigAtom } from '@/contexts/TimerAtom';
+import { timerStatusAtom, timerModeAtom, timerPopupAtom, timerDefaultConfigAtom } from '@/contexts/TimerAtom';
 import { colors } from '@/lib/theme/colors';
 import styles from './Timer.module.css';
 
@@ -49,10 +49,10 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
 
   const [seconds, setSeconds] = React.useState(0);
   const [difficulty, setDifficulty] = React.useState<MixerDifficulty>('medium');
-  const [inputMin, setInputMin] = React.useState(0);
+  const [inputMin, setInputMin] = React.useState(30);
   const [inputSec, setInputSec] = React.useState(0);
   const [stopwatch, setStopwatch] = React.useState(false);
-  const [popup, setPopup] = React.useState<'config' | 'verify' | 'penalty' | null>(null);
+  const [popup, setPopup] = useAtom(timerPopupAtom);
   const [copied, setCopied] = React.useState(false);
   const [runId, setRunId] = React.useState<string | null>(null);
   const [penaltyVerified, setPenaltyVerified] = React.useState(false);
@@ -128,9 +128,16 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
       setInputSec(0);
       if (diff) setDifficulty(diff);
     } else if (defaultConfig.type === 'incident') {
-      setInputMin(defaultConfig.slaMinutes || 30);
+      const mins = defaultConfig.slaMinutes || 30;
+      setInputMin(mins);
       setInputSec(0);
-      // Removed restriction preventing users from changing timing/stopwatch
+      if (mins <= 15) {
+        setDifficulty('easy');
+      } else if (mins <= 30) {
+        setDifficulty('medium');
+      } else {
+        setDifficulty('hard');
+      }
     }
   }, [defaultConfig]);
 
@@ -145,6 +152,9 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
     if (m === mode) {
       setPopup(popup === 'config' ? null : 'config');
       return;
+    }
+    if (m === 'mixer') {
+      setStopwatch(false);
     }
     setMode(m);
     setPopup('config');
@@ -213,7 +223,7 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   const handleReset = () => {
     setStatus('idle');
     setSeconds(0);
-    setInputMin(0);
+    setInputMin(defaultConfig.type === 'incident' ? (defaultConfig.slaMinutes || 30) : 0);
     setInputSec(0);
     setStopwatch(false);
     setRunId(null);
@@ -290,22 +300,31 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
   const bar = (
     <div ref={triggerRef} className={barClass}>
       <div className={styles.modeTabs}>
-        <button
-          className={`${styles.modeTab} ${mode === 'timer' ? styles.modeTabActiveTimer : ''}`}
-          onClick={() => switchMode('timer')}
-          disabled={isLocked}
-        >
-          TIMER
-        </button>
-        <div className={styles.modeDivider} />
-        <button
-          className={`${styles.modeTab} ${mode === 'mixer' ? styles.modeTabActiveMixer : ''}`}
-          onClick={() => switchMode('mixer')}
-          disabled={isLocked}
-        >
-          MIXER
-        </button>
-        <div className={styles.modeDivider} />
+        {defaultConfig.type === 'incident' ? (
+          <>
+            <span className={styles.incidentLabel}>P0 SLA</span>
+            <div className={styles.modeDivider} />
+          </>
+        ) : (
+          <>
+            <button
+              className={`${styles.modeTab} ${mode === 'timer' ? styles.modeTabActiveTimer : ''}`}
+              onClick={() => switchMode('timer')}
+              disabled={isLocked}
+            >
+              TIMER
+            </button>
+            <div className={styles.modeDivider} />
+            <button
+              className={`${styles.modeTab} ${mode === 'mixer' ? styles.modeTabActiveMixer : ''}`}
+              onClick={() => switchMode('mixer')}
+              disabled={isLocked}
+            >
+              MIXER
+            </button>
+            <div className={styles.modeDivider} />
+          </>
+        )}
         <button
           className={`${isFinished ? styles.timeFinished : isActive ? styles.timeActive : styles.timeIdle}`}
           onClick={openConfig}
@@ -346,10 +365,10 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
               onClick={(e) => e.stopPropagation()}
             >
               <div style={{ textAlign: 'center', color: 'var(--text-secondary)', fontSize: 12, fontWeight: 700, letterSpacing: 1, textTransform: 'uppercase' }}>
-                {mode === 'timer' ? 'Timer Setup' : 'Mixer Setup'}
+                {defaultConfig.type === 'incident' ? 'SLA Mixer Setup' : mode === 'timer' ? 'Timer Setup' : 'Mixer Setup'}
               </div>
 
-              {mode === 'timer' && (
+              {mode === 'timer' && defaultConfig.type !== 'incident' && (
                 <div className={styles.toggleGroup}>
                   <button
                     className={`${styles.toggleBtn} ${!stopwatch ? styles.toggleBtnActive : ''}`}
@@ -361,9 +380,6 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                     className={`${styles.toggleBtn} ${stopwatch ? styles.toggleBtnActive : ''}`}
                     onClick={() => {
                       setStopwatch(true);
-                      setPopup(null);
-                      setStatus('running');
-                      setSeconds(0);
                     }}
                   >
                     Stopwatch
@@ -378,7 +394,21 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                     return (
                       <button
                         key={d}
-                        onClick={() => setDifficulty(d)}
+                        onClick={() => {
+                          setDifficulty(d);
+                          if (defaultConfig.type !== 'incident') {
+                            if (d === 'easy') {
+                              setInputMin(15);
+                              setInputSec(0);
+                            } else if (d === 'medium') {
+                              setInputMin(30);
+                              setInputSec(0);
+                            } else if (d === 'hard') {
+                              setInputMin(60);
+                              setInputSec(0);
+                            }
+                          }
+                        }}
                         className={styles.diffBtn}
                         style={
                           difficulty === d
@@ -394,25 +424,37 @@ const Timer = React.forwardRef<TimerHandle, TimerProps>(function Timer(
                 </div>
               )}
 
-              {!stopwatch && (
+              {defaultConfig.type === 'incident' && (
+                <div style={{ textAlign: 'center', margin: '12px 0 4px 0', fontSize: 13, fontWeight: 700, color: 'var(--primary-red)' }}>
+                  SLA TIME: {inputMin} MIN{inputMin !== 1 ? 'S' : ''} (LOCKED)
+                </div>
+              )}
+
+              {defaultConfig.type !== 'incident' && !stopwatch && (
                 <div className={styles.timeRow}>
-                  <input
-                    type="number"
-                    min={0}
-                    max={99}
-                    value={inputMin}
-                    onChange={(e) => setInputMin(Math.max(0, +e.target.value))}
-                    className={`${styles.numInput} ${mode === 'mixer' ? styles.numInputMixer : ''}`}
-                  />
-                  <span className={styles.colon}>:</span>
-                  <input
-                    type="number"
-                    min={0}
-                    max={59}
-                    value={inputSec}
-                    onChange={(e) => setInputSec(Math.min(59, Math.max(0, +e.target.value)))}
-                    className={`${styles.numInput} ${mode === 'mixer' ? styles.numInputMixer : ''}`}
-                  />
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="number"
+                      min={0}
+                      max={99}
+                      value={inputMin}
+                      onChange={(e) => setInputMin(Math.max(0, +e.target.value))}
+                      className={`${styles.numInput} ${mode === 'mixer' ? styles.numInputMixer : ''}`}
+                    />
+                    <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: 0.5 }}>MINUTES</span>
+                  </div>
+                  <span className={styles.colon} style={{ transform: 'translateY(-10px)' }}>:</span>
+                  <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 6 }}>
+                    <input
+                      type="number"
+                      min={0}
+                      max={59}
+                      value={inputSec}
+                      onChange={(e) => setInputSec(Math.min(59, Math.max(0, +e.target.value)))}
+                      className={`${styles.numInput} ${mode === 'mixer' ? styles.numInputMixer : ''}`}
+                    />
+                    <span style={{ fontSize: 10, color: 'var(--text-secondary)', fontWeight: 700, letterSpacing: 0.5 }}>SECONDS</span>
+                  </div>
                 </div>
               )}
 

@@ -10,20 +10,8 @@ import styles from './Landing.module.css';
 
 const FEATURES = [
   {
-    title: 'P0 Incidents',
-    description:
-      'LLD+DSA timed incident response simulation. Hone your production debugging skills in a high-pressure "War Room" environment.',
-    gradient: `linear-gradient(135deg, var(--primary-red) 0%, var(--blood-dark) 100%)`,
-    icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
-        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
-      </svg>
-    ),
-  },
-  {
-    title: 'DSA Questions',
-    description:
-      'Master Data Structures and Algorithms through curated, pattern-based questions. Build intuition to perform flawlessly under interview pressure.',
+    title: 'DSA Playground',
+    description: 'A modern, zero-latency environment for traditional algorithm mastery.',
     gradient: `linear-gradient(135deg, var(--primary-orange) 0%, var(--primary-red) 100%)`,
     icon: (
       <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
@@ -32,16 +20,15 @@ const FEATURES = [
     ),
   },
   {
-    title: 'Mixer Mode (Hardcore)',
-    description:
-      'A timed gauntlet mixing Easy, Med, and Hard tiers. High stakes: fail the SLA, and face system penalties—from a forced wallpaper change to bricking your PC.',
-    gradient: `linear-gradient(135deg, #FF3D00 0%, #8A1C00 100%)`,
+    title: 'AI BYOK (Bring Your Own Key)',
+    description: 'Unrestricted AI pairing. Plug in your own API keys for an un-throttled intelligent copilot.',
+    gradient: `linear-gradient(135deg, #111 0%, #333 100%)`,
     icon: (
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="white">
-        <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm0 10.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V6.3l7-3.11v8.8z"/>
+      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
+        <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
       </svg>
     ),
-  },
+  }
 ];
 
 const STATS = [
@@ -167,6 +154,8 @@ const Landing: React.FC = () => {
             SYSTEM OFFLINE OR ASCEND
           </motion.div>
 
+          {/* Minimal space below badge */}
+
           <motion.h1 
             initial={{ opacity: 0, scale: 0.9, filter: 'blur(10px)' }}
             animate={{ opacity: 1, scale: 1, filter: 'blur(0px)' }}
@@ -188,11 +177,11 @@ const Landing: React.FC = () => {
 
         {/* CTA Buttons */}
         <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.5 }} className={styles.ctaRow}>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => router.push('/signup')} type="button" className={styles.btnPrimary}>
-            Enter the Fire
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={() => router.push('/signup')} type="button" className={styles.btnTerminal}>
+            &gt; Initialize Sandbox
           </motion.button>
-          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={scrollToFeatures} type="button" className={styles.btnGhost}>
-            Why Intui?
+          <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.95 }} onClick={scrollToFeatures} type="button" className={styles.btnTerminalGhost}>
+            [ View Logs ]
           </motion.button>
         </motion.div>
       </section>
@@ -225,34 +214,72 @@ const Landing: React.FC = () => {
         </Container>
       </div>
 
-      {/* ── Features ──────────────────────────────────────── */}
-      <section id="whyus" ref={featuresRef} className={styles.featuresSection}>
+      {/* ── The Concept Explained (P0 Loop & Game Modes) ── */}
+      <section id="whyus" ref={featuresRef} className={styles.p0LoopSection}>
         <Container size="lg">
           <Box mb={72} style={{ textAlign: 'center', position: 'relative', zIndex: 2 }}>
             <motion.div variants={containerVariants} initial="hidden" animate={featuresControls}>
               <motion.div variants={itemVariants}>
-                <Text className={styles.sectionEyebrow}>The Arsenal</Text>
+                <Text className={styles.sectionEyebrow}>The Mechanics</Text>
               </motion.div>
               <motion.div variants={itemVariants}>
-                <Text component="h2" className={styles.sectionTitle}>BUILT DIFFERENT.</Text>
+                <Text component="h2" className={styles.sectionTitle}>THE P0 INCIDENT LOOP.</Text>
               </motion.div>
               <motion.div variants={itemVariants}>
-                <Text className={styles.sectionSubtitle}>Train your intuition or risk your system uptime. No safety nets.</Text>
+                <Text className={styles.sectionSubtitle}>Solve LLD + DSA under extreme, simulated pressure to keep the system alive.</Text>
               </motion.div>
             </motion.div>
           </Box>
 
-          <motion.div className={styles.bentoGrid} variants={containerVariants} initial="hidden" animate={featuresControls}>
-            {FEATURES.map((f) => (
-              <motion.div key={f.title} variants={itemVariants} whileHover={{ y: -10, borderColor: 'var(--primary-red)' }} whileTap={{ scale: 0.98 }} className={styles.featureCard}>
-                <div className={styles.featureIconWrapper} style={{ background: f.gradient }}>
-                  {f.icon}
-                </div>
-                <Text fw={800} size="xl" className={styles.featureTitle} mb={8}>{f.title}</Text>
-                <Text size="md" className={styles.featureDesc}>{f.description}</Text>
-              </motion.div>
-            ))}
+          <motion.div variants={containerVariants} initial="hidden" animate={featuresControls} className={styles.p0LoopGrid}>
+            <motion.div variants={itemVariants} className={styles.p0Card}>
+              <div className={styles.p0StepHeader}>// STEP_01</div>
+              <div className={styles.p0StepTitle}>2 Bugs</div>
+              <Text className={styles.featureDesc}>Identify and patch edge-case logical bugs in production code.</Text>
+              
+              {/* Removed sticker */}
+            </motion.div>
+
+            <motion.div variants={itemVariants} className={styles.p0Card}>
+              <div className={styles.p0StepHeader}>// STEP_02</div>
+              <div className={styles.p0StepTitle}>1 Optimization Problem</div>
+              <Text className={styles.featureDesc}>Fix runtime complexity and memory leaks before the SLA expires.</Text>
+            </motion.div>
           </motion.div>
+
+          {/* Game Modes Breakdown */}
+          <motion.div variants={containerVariants} initial="hidden" animate={featuresControls} style={{ marginTop: '6rem' }}>
+            <motion.div variants={itemVariants} className={styles.mixerWarningBlock}>
+              <div className={styles.mixerWarningHeader}>
+                <span className={styles.statusDotRed} style={{ width: '12px', height: '12px' }} />
+                MIXER MODE: HARDCORE
+              </div>
+              <Text size="lg" style={{ color: '#ffaaaa', marginBottom: '1.5rem', fontWeight: 600 }}>
+                Proceed at your own risk.
+              </Text>
+              <Text size="md" className={styles.featureDesc}>
+                Mixer mode introduces destructive real-world penalties. Fail the SLA, and the simulation executes system-level penalties (e.g., executing a simulated <code>rm -rf /</code> or forced wallpaper changes on your local environment).
+              </Text>
+              
+              {/* Removed warning sticker */}
+            </motion.div>
+          </motion.div>
+
+          {/* Feature Highlights (Secondary) */}
+          <Box mt={100}>
+            <Text className={styles.sectionEyebrow} style={{ textAlign: 'center', marginBottom: '2rem' }}>Platform Pillars</Text>
+            <motion.div className={styles.bentoGrid} variants={containerVariants} initial="hidden" animate={featuresControls} style={{ gridTemplateColumns: '1fr 1fr' }}>
+              {FEATURES.map((f) => (
+                <motion.div key={f.title} variants={itemVariants} whileHover={{ y: -5, borderColor: 'var(--border-strong)', boxShadow: '12px 12px 0 var(--border-strong)' }} whileTap={{ scale: 0.98 }} className={styles.featureCard}>
+                  <div className={styles.featureIconWrapper}>
+                    {f.icon}
+                  </div>
+                  <Text fw={800} size="xl" className={styles.featureTitle} mb={8}>{f.title}</Text>
+                  <Text size="md" className={styles.featureDesc}>{f.description}</Text>
+                </motion.div>
+              ))}
+            </motion.div>
+          </Box>
         </Container>
       </section>
 
@@ -286,6 +313,14 @@ const Landing: React.FC = () => {
 
             {/* Right Side: P0 Terminal Monitor */}
             <motion.div initial={{ opacity: 0, x: 30 }} whileInView={{ opacity: 1, x: 0 }} viewport={{ once: true }} transition={{ delay: 0.2 }} className={styles.p0GlassyCard}>
+              
+              <div style={{ position: 'absolute', top: '10px', left: '10px', width: '6px', height: '6px', borderRadius: '50%', background: '#444', boxShadow: 'inset 0 1px 1px #888, 0 1px 1px #000' }} />
+              <div style={{ position: 'absolute', top: '10px', right: '10px', width: '6px', height: '6px', borderRadius: '50%', background: '#444', boxShadow: 'inset 0 1px 1px #888, 0 1px 1px #000' }} />
+              <div style={{ position: 'absolute', bottom: '10px', left: '10px', width: '6px', height: '6px', borderRadius: '50%', background: '#444', boxShadow: 'inset 0 1px 1px #888, 0 1px 1px #000' }} />
+              <div style={{ position: 'absolute', bottom: '10px', right: '10px', width: '6px', height: '6px', borderRadius: '50%', background: '#444', boxShadow: 'inset 0 1px 1px #888, 0 1px 1px #000' }} />
+
+              {/* Removed stickers */}
+
               <div className={styles.glassyHeader}>
                 <div className={styles.glassyTitle}>
                   <span className={styles.statusDotRed} />
@@ -305,13 +340,14 @@ const Landing: React.FC = () => {
 
               <div className={styles.glassyFooter}>
                 <motion.button 
-                  whileHover={{ backgroundColor: 'var(--primary-orange)' }} 
+                  whileHover={{ backgroundColor: 'rgba(255, 50, 50, 0.2)' }} 
                   whileTap={{ scale: 0.95 }} 
                   onClick={() => router.push('/signup')} 
                   type="button" 
-                  className={styles.btnSecondary}
+                  className={styles.btnTerminal}
+                  style={{ color: 'var(--primary-red)', borderColor: 'var(--primary-red)' }}
                 >
-                  INITIATE SEQUENCE
+                  [ INITIATE SEQUENCE ]
                 </motion.button>
               </div>
             </motion.div>
@@ -319,19 +355,25 @@ const Landing: React.FC = () => {
           </div>
         </Container>
 
-        {/* Massive Brand Edge-to-Edge */}
-        <div className={styles.massiveFooterBrandWrapper}>
-          <motion.div 
-            initial={{ opacity: 0, y: 50 }} 
-            whileInView={{ opacity: 1, y: 0 }} 
-            viewport={{ once: true }} 
-            transition={{ delay: 0.3, duration: 0.8 }} 
-            className={styles.massiveFooterBrand}
-          >
-            INTUI
-          </motion.div>
-        </div>
+        {/* Footer links go here */}
       </footer>
+      
+      {/* Massive Brand Footer Block */}
+      <section className={styles.massiveBrandContainer}>
+        <motion.div
+          initial={{ opacity: 0, y: 50 }} 
+          whileInView={{ opacity: 1, y: 0 }} 
+          viewport={{ once: true }} 
+          transition={{ delay: 0.3, duration: 0.8 }} 
+          style={{ position: 'relative' }}
+        >
+          <Text className={styles.massiveFooterBrand}>
+            INTUI
+          </Text>
+
+          {/* Removed footer stickers */}
+        </motion.div>
+      </section>
     </div>
   );
 };

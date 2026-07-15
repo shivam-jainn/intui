@@ -24,5 +24,6 @@ export function useIncidents() {
     queryKey: ['incidents'],
     queryFn: fetchIncidents,
     staleTime: 5 * 60 * 1000,
+    gcTime: 30 * 60 * 1000,
   });
 }

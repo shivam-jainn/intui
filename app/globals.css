@@ -1,22 +1,27 @@
 :root {
-  /* Spiked Realm / Dashboard / Brutalist Grain Aesthetic */
-  --bg-base: #0a0303; 
-  --bg-raised: #110505;
-  --bg-overlay: #0d0404;
-  --surface-default: #170707;
-  --surface-hover: #1f0808;
-  --border-subtle: #2d0e0e;
-  --border-default: #4a1515;
+  /* Dark Mode Aesthetic */
+  --bg-base: #0a0a0a; 
+  --bg-raised: #111111;
+  --bg-overlay: #151515;
+  --surface-default: #1c1c1c;
+  --surface-hover: #2a2a2a;
+  --border-subtle: #2e2e2e;
+  --border-default: #3e3e3e;
+  --border-strong: #555555;
   
-  --text-primary: #fff2f2;
-  --text-secondary: #b38b8b;
-  --text-muted: #735151;
+  --text-primary: #ffffff;
+  --text-secondary: #a3a3a3;
+  --text-muted: #6b6b6b;
   
-  /* Core Palette */
-  --blood-dark: #660000;
+  /* Vibrant Palette */
+  --blood-dark: #8b0000;
   --primary-red: #E61E1E;
   --primary-orange: #FF5A00;
+  --retro-navy: #1e3a8a;
+  --retro-mustard: #eab308;
+  --retro-green: #22c55e;
 }
+
 
 html {
   overflow-x: hidden;
@@ -55,109 +60,114 @@ input[type="number"] {
   -moz-appearance: textfield;
 }
 
-/* Global Noise Overlay */
+/* Global Noise Overlay for Dark Grit */
 .global-noise {
   position: fixed;
   top: 0; left: 0; right: 0; bottom: 0;
   pointer-events: none;
   z-index: 9999;
-  opacity: 0.03;
+  opacity: 0.05;
+  mix-blend-mode: screen;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.8' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E");
 }
 
-/* 8-bit utilities */
+/* Clean Minimal & Rounded Utilities */
 .pixel-font {
-  font-family: var(--font-press-start), monospace !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  letter-spacing: -0.01em;
 }
 
 .pixel-border {
-  border: 2px solid var(--primary-red);
-  box-shadow: 
-    -2px 0 0 0 var(--blood-dark),
-    2px 0 0 0 var(--blood-dark),
-    0 -2px 0 0 var(--blood-dark),
-    0 2px 0 0 var(--blood-dark);
-  image-rendering: pixelated;
+  border: 1px solid var(--border-default);
+  border-radius: 20px;
+  background: var(--surface-default);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
 }
 
 .pixel-btn {
-  font-family: var(--font-press-start), monospace;
+  font-family: inherit;
   background: var(--primary-red);
   color: #fff;
-  border: 2px solid #fff;
-  padding: 0.35rem 0.75rem;
+  border: none;
+  padding: 0.7rem 1.6rem;
   font-size: 14px;
-  box-shadow: 
-    inset -2px -2px 0px 0px rgba(0,0,0,0.5),
-    2px 2px 0px 0px var(--blood-dark);
+  border-radius: 9999px;
   cursor: pointer;
-  transition: transform 0.1s;
-  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 14px rgba(230, 30, 30, 0.2);
+}
+
+.pixel-btn:hover {
+  opacity: 0.95;
+  transform: translateY(-1.5px);
+  box-shadow: 0 6px 20px rgba(230, 30, 30, 0.35);
 }
 
 .pixel-btn:active {
-  transform: translate(2px, 2px);
-  box-shadow: none;
+  transform: translateY(0.5px);
 }
 
 .pixel-btn-ghost {
-  font-family: var(--font-press-start), monospace;
+  font-family: inherit;
   background: transparent;
-  color: var(--primary-red);
-  border: 2px solid var(--primary-red);
-  padding: 0.35rem 0.75rem;
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  padding: 0.7rem 1.6rem;
   font-size: 14px;
+  border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
 
 .pixel-btn-ghost:hover {
-  background: rgba(230, 30, 30, 0.2);
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
 }
 
 .pixel-btn-sm {
-  font-family: var(--font-press-start), monospace;
+  font-family: inherit;
   background: var(--primary-red);
   color: #fff;
-  border: 1px solid #fff;
-  padding: 0.15rem 0.35rem;
-  font-size: 10px;
-  box-shadow: 
-    inset -1px -1px 0px 0px rgba(0,0,0,0.5),
-    1px 1px 0px 0px var(--blood-dark);
+  border: none;
+  padding: 0.45rem 1rem;
+  font-size: 12px;
+  border-radius: 9999px;
   cursor: pointer;
-  transition: transform 0.1s;
-  text-transform: uppercase;
+  font-weight: 600;
+  transition: all 0.2s ease;
 }
-.pixel-btn-sm:active {
-  transform: translate(1px, 1px);
-  box-shadow: none;
+
+.pixel-btn-sm:hover {
+  opacity: 0.95;
+  transform: translateY(-1px);
 }
 
 .pixel-btn-ghost-sm {
-  font-family: var(--font-press-start), monospace;
+  font-family: inherit;
   background: transparent;
-  color: var(--primary-red);
-  border: 1px solid var(--primary-red);
-  padding: 0.15rem 0.35rem;
-  font-size: 10px;
+  color: var(--text-primary);
+  border: 1px solid var(--border-default);
+  padding: 0.45rem 1rem;
+  font-size: 12px;
+  border-radius: 9999px;
   cursor: pointer;
-  transition: all 0.2s;
-  text-transform: uppercase;
+  font-weight: 500;
+  transition: all 0.2s ease;
 }
+
 .pixel-btn-ghost-sm:hover {
-  background: rgba(230, 30, 30, 0.2);
+  background: var(--surface-hover);
+  border-color: var(--border-strong);
 }
 
 .pixel-border-sm {
-  border: 1px solid var(--primary-red);
-  box-shadow: 
-    -1px 0 0 0 var(--blood-dark),
-    1px 0 0 0 var(--blood-dark),
-    0 -1px 0 0 var(--blood-dark),
-    0 1px 0 0 var(--blood-dark);
-  image-rendering: pixelated;
+  border: 1px solid var(--border-subtle);
+  border-radius: 14px;
 }
 
 @keyframes pixelDotBlink {
@@ -166,26 +176,51 @@ input[type="number"] {
 }
 
 .pixel-dot {
-  width: 16px;
-  height: 16px;
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
   background: var(--bg-raised);
   border: 2px solid var(--border-default);
   animation: pixelDotBlink 1.2s infinite;
 }
 
-@keyframes pixelPulse {
-  0%, 100% { opacity: 1; background: var(--bg-raised); }
-  50% { opacity: 0.5; background: var(--border-subtle); }
+@keyframes pixelShimmer {
+  0% {
+    background-position: 200% 0;
+  }
+  100% {
+    background-position: -200% 0;
+  }
 }
 
 .pixel-skeleton {
-  animation: pixelPulse 1s steps(4, end) infinite;
-  border: 2px solid var(--border-default);
-  background: var(--bg-raised);
-  box-shadow: 
-    -2px 0 0 0 var(--bg-base),
-    2px 0 0 0 var(--bg-base),
-    0 -2px 0 0 var(--bg-base),
-    0 2px 0 0 var(--bg-base);
-  image-rendering: pixelated;
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(
+    90deg,
+    var(--bg-raised) 25%,
+    var(--surface-hover) 37%,
+    var(--bg-raised) 63%
+  );
+  background-size: 200% 100%;
+  animation: pixelShimmer 1.6s infinite linear;
+  border-radius: 12px;
+  border: 1px solid rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 2px rgba(255, 255, 255, 0.01);
 }
+
+/* Retro Utilities */
+.vintage-border {
+  border: 1px solid var(--border-default);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+  border-radius: 12px;
+}
+
+.vintage-text {
+  font-family: 'Oswald', 'Impact', sans-serif;
+  text-transform: uppercase;
+  font-weight: 900;
+  letter-spacing: 0.02em;
+}
+
+/* Remove Fluted Glass */

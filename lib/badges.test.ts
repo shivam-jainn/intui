@@ -4,7 +4,7 @@ import { prisma } from '../prisma/db';
 
 jest.mock('../prisma/db', () => ({
   __esModule: true,
-  default: {
+  prisma: {
     user: {
       findUnique: jest.fn(),
       update: jest.fn(),

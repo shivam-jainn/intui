@@ -1,11 +1,11 @@
 'use client';
 
 import React, { useState } from 'react';
-import { useQuery } from '@tanstack/react-query';
 import { Container, Title, Text, Group, Stack, Center, Progress, SimpleGrid, Paper, Modal, Button, ActionIcon } from '@mantine/core';
 import { DuckBadge } from '@/components/DuckBadge';
 import { BadgeType } from '@prisma/client';
 import { authClient } from '@/lib/auth-client';
+import { useUserProfile } from '@/lib/hooks/useSession';
 import PixelLoader from '@/components/PixelLoader';
 
 const STREAK_MILESTONES = [1, 3, 5, 10, 15, 30, 60, 90, 120, 150, 180, 270, 365];
@@ -14,21 +14,7 @@ export default function AchievementsPage() {
   const [selectedBadge, setSelectedBadge] = useState<any | null>(null);
   const { data: session, isPending: sessionLoading } = authClient.useSession();
   
-  const { data: profileData, isLoading: profileLoading, error: profileError } = useQuery({
-    queryKey: ['userProfile'],
-    queryFn: async () => {
-      const res = await fetch('/api/user/profile');
-      if (!res.ok) {
-        let errText = 'Unknown error';
-        try {
-          errText = await res.text();
-        } catch(e) {}
-        throw new Error(`Failed to fetch profile: ${res.status} - ${errText}`);
-      }
-      return res.json();
-    },
-    enabled: !!session?.user, // Only run query if authenticated
-  });
+  const { data: profileData, isLoading: profileLoading, error: profileError } = useUserProfile();
 
   const isLoading = sessionLoading || profileLoading;
 
@@ -306,10 +292,6 @@ export default function AchievementsPage() {
               </Title>
 
               <div style={{ 
-                background: 'var(--bg-base)', 
-                padding: '2rem', 
-                borderRadius: '50%',
-                boxShadow: 'inset 0 0 20px rgba(0,0,0,0.5)',
                 marginBottom: '2rem'
               }}>
                 <DuckBadge

@@ -12,8 +12,8 @@ export default function Home() {
   if (isPending) {
     return (
       <div style={{ padding: '2rem', display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-        <div className="pixel-border animate-pulse" style={{ height: 400, background: 'var(--surface-default)' }} />
-        <div className="pixel-border animate-pulse" style={{ height: 200, background: 'var(--surface-default)' }} />
+        <div className="pixel-skeleton" style={{ height: 400 }} />
+        <div className="pixel-skeleton" style={{ height: 200 }} />
       </div>
     );
   }

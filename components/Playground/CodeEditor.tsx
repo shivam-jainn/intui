@@ -20,7 +20,7 @@ import Timer, { TimerHandle } from '@/components/Timer/Timer';
 import { useTimerContext } from '@/components/Timer/TimerContext';
 import { useQueryClient } from '@tanstack/react-query';
 import { questionTabAtom } from '@/contexts/TestCardContext';
-import { timerStatusAtom } from '@/contexts/TimerAtom';
+import { timerStatusAtom, timerModeAtom, timerPopupAtom } from '@/contexts/TimerAtom';
 
 interface CodeEditorProps {
   questionSlug: string;
@@ -37,6 +37,8 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
   const { timerRef } = useTimerContext();
   const queryClient = useQueryClient();
   const [timerStatus] = useAtom(timerStatusAtom);
+  const [, setTimerMode] = useAtom(timerModeAtom);
+  const [, setTimerPopup] = useAtom(timerPopupAtom);
 
   const { data: driver, error: driverError } = useDriverCode(
     decodeURIComponent(questionSlug),
@@ -248,19 +250,129 @@ const CodeEditor = ({ questionSlug }: CodeEditorProps) => {
               position: 'absolute',
               top: 0, left: 0, right: 0, bottom: 0,
               zIndex: 10,
-              background: 'rgba(0, 0, 0, 0.7)',
-              backdropFilter: 'blur(4px)',
+              background: 'rgba(10, 10, 15, 0.8)',
+              backdropFilter: 'blur(8px)',
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              flexDirection: 'column',
-              gap: 16,
-              color: 'var(--text-primary)',
+              padding: 24,
             }}
           >
-            <div style={{ fontSize: 18, fontWeight: 'bold' }}>Timer Required</div>
-            <div style={{ fontSize: 14, color: 'var(--text-secondary)' }}>
-              Use either Timer or Mixer to begin. Choose Mixer for higher stakes!
+            <div
+              style={{
+                maxWidth: 480,
+                width: '100%',
+                background: 'rgba(20, 20, 28, 0.65)',
+                border: '1px solid rgba(255, 255, 255, 0.08)',
+                borderRadius: 20,
+                padding: '32px 28px',
+                boxShadow: '0 20px 40px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.05)',
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                gap: 24,
+                textAlign: 'center',
+              }}
+            >
+              <div>
+                <div style={{ display: 'inline-flex', padding: '6px 14px', borderRadius: 99, background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.06)', fontSize: 10, fontWeight: 700, letterSpacing: 1.5, color: 'var(--text-secondary)', textTransform: 'uppercase', marginBottom: 12 }}>
+                  SESSION LOCKED
+                </div>
+                <h3 style={{ fontSize: 20, fontWeight: 800, color: '#fff', margin: 0, letterSpacing: -0.5 }}>
+                  Activation Required
+                </h3>
+                <p style={{ fontSize: 13, color: 'var(--text-secondary)', marginTop: 8, lineHeight: 1.5 }}>
+                  Select a mode to unlock the code editor and start the challenge.
+                </p>
+              </div>
+
+              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 16, width: '100%', textAlign: 'left' }}>
+                {/* Timer Card */}
+                <div
+                  style={{
+                    background: 'rgba(255, 255, 255, 0.01)',
+                    border: '1px solid rgba(255, 255, 255, 0.05)',
+                    borderRadius: 14,
+                    padding: 16,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 700, color: '#20c997', letterSpacing: 0.5 }}>
+                      ⏱ TIMER
+                    </div>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4, marginBlockEnd: 0 }}>
+                      Standard mode. Solve with a regular countdown. No system penalties.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setTimerMode('timer');
+                      setTimerPopup('config');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #20c997, #12b886)',
+                      color: '#fff',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Start Timer
+                  </button>
+                </div>
+
+                {/* Mixer Card */}
+                <div
+                  style={{
+                    background: 'rgba(250, 82, 82, 0.01)',
+                    border: '1px solid rgba(250, 82, 82, 0.15)',
+                    borderRadius: 14,
+                    padding: 16,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'space-between',
+                    gap: 16,
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 8, fontSize: 12, fontWeight: 700, color: '#fa5252', letterSpacing: 0.5 }}>
+                      🔥 MIXER
+                    </div>
+                    <p style={{ fontSize: 11, color: 'var(--text-secondary)', marginTop: 6, lineHeight: 1.4, marginBlockEnd: 0 }}>
+                      High stakes. Running out of time locks your workspace with a local penalty until verified.
+                    </p>
+                  </div>
+                  <button
+                    onClick={() => {
+                      setTimerMode('mixer');
+                      setTimerPopup('config');
+                    }}
+                    style={{
+                      width: '100%',
+                      padding: '8px 12px',
+                      borderRadius: 8,
+                      border: 'none',
+                      background: 'linear-gradient(135deg, #fa5252, #e03131)',
+                      color: '#fff',
+                      fontSize: 12,
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.2s',
+                    }}
+                  >
+                    Start Mixer
+                  </button>
+                </div>
+              </div>
             </div>
           </div>
         )}

@@ -66,7 +66,7 @@ export default function IncidentPlaygroundPage({ params }: { params: { incidenti
   if (filesLoading) {
     return (
       <Center style={{ height: 'calc(100vh - 80px)' }}>
-        <div className="pixel-border animate-pulse" style={{ padding: '20px 40px', background: 'var(--surface-default)' }}>
+        <div className="pixel-skeleton" style={{ padding: '20px 40px' }}>
           <Text className="pixel-font" style={{ color: 'var(--primary-red)' }}>LOADING DATABANKS...</Text>
         </div>
       </Center>

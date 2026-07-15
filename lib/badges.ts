@@ -3,6 +3,19 @@ import { prisma } from '../prisma/db';
 import { generateMixerBadge } from './badgeGenerator';
 
 export async function handleLoginActivity(userId: string): Promise<void> {
+  const user = await prisma.user.findUnique({
+    where: { id: userId },
+    select: { lastActivityAt: true },
+  });
+
+  if (user?.lastActivityAt) {
+    const diff = Date.now() - new Date(user.lastActivityAt).getTime();
+    if (diff < 5 * 60 * 1000) {
+      // 5 minutes
+      return;
+    }
+  }
+
   // 1. Award first time login badge
   await awardBadge(userId, BadgeType.FIRST_LOGIN);
 
@@ -26,19 +39,30 @@ export async function updateStreakAndCheckBadges(userId: string): Promise<void> 
 
   if (user.lastActivityAt) {
     const lastActivityDate = new Date(user.lastActivityAt);
-    
-    // Normalize to start of day for comparison
-    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const startOfLastActivity = new Date(lastActivityDate.getFullYear(), lastActivityDate.getMonth(), lastActivityDate.getDate());
-    
-    const diffTime = Math.abs(startOfToday.getTime() - startOfLastActivity.getTime());
-    const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 1) {
+    const diffHours = (now.getTime() - lastActivityDate.getTime()) / (1000 * 60 * 60);
+
+    // Normalize to start of day for incrementing comparison
+    const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+    const startOfLastActivity = new Date(
+      lastActivityDate.getFullYear(),
+      lastActivityDate.getMonth(),
+      lastActivityDate.getDate()
+    );
+
+    const diffDaysTime = Math.abs(startOfToday.getTime() - startOfLastActivity.getTime());
+    const diffDays = Math.ceil(diffDaysTime / (1000 * 60 * 60 * 24));
+
+    if (diffHours > 24) {
+      // Strict 24-hour limit exceeded, reset streak
+      currentStreak = 1;
+    } else if (diffDays === 1) {
+      // Within 24 hours and it's a new calendar day, increment streak
       currentStreak += 1;
     } else if (diffDays > 1) {
       currentStreak = 1;
     }
+    // If diffHours <= 24 and diffDays === 0, streak remains the same (same day login)
   } else {
     currentStreak = 1;
   }
@@ -71,7 +95,7 @@ async function awardBadge(
       userId_badgeType_customLabel: {
         userId,
         badgeType,
-        customLabel: customLabel || "",
+        customLabel: customLabel || '',
       },
     },
   });
@@ -83,7 +107,7 @@ async function awardBadge(
         badgeType,
         customColor: customColor || null,
         customAccessory: customAccessory || null,
-        customLabel: customLabel || "",
+        customLabel: customLabel || '',
       },
     });
   }

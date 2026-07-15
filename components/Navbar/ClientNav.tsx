@@ -4,13 +4,12 @@ import React from 'react';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 
-import { useCachedSession } from '@/lib/hooks/useSession';
+import { useCachedSession, useUserProfile } from '@/lib/hooks/useSession';
 import Intui from './Intui';
 import Profile from './Profile';
 import classes from './Navbar.module.css';
 import Timer from '@/components/Timer/Timer';
 import { useTimerContext } from '@/components/Timer/TimerContext';
-import { useQuery } from '@tanstack/react-query';
 import { Text } from '@mantine/core';
 
 interface ClientNavbarProps {
@@ -44,19 +43,7 @@ const isQuestionPage =
   const currentSession = isPending ? initialSession : data;
   const isLoggedIn = currentSession?.user != null;
 
-  const { data: profileData } = useQuery({
-    queryKey: ['userProfile'],
-    queryFn: async () => {
-      const res = await fetch('/api/user/profile');
-      if (!res.ok) {
-        const errorText = await res.text();
-        console.error("Profile Fetch Error:", errorText);
-        throw new Error('Failed to fetch profile: ' + errorText);
-      }
-      return res.json();
-    },
-    enabled: isLoggedIn,
-  });
+  const { data: profileData } = useUserProfile();
 
   const isActive = (href: string) => {
     if (href === '/') {
@@ -102,7 +89,7 @@ const isQuestionPage =
             {/* Auth Section */}
             <div className={classes.desktopAuthContainer}>
               {isPending ? (
-                <div className="pixel-border animate-pulse" style={{ height: 32, width: 120, background: 'var(--surface-default)' }} />
+                <div className="pixel-skeleton" style={{ height: 32, width: 120 }} />
               ) : isLoggedIn ? (
                 <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
                   {profileData && (

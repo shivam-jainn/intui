@@ -5,7 +5,6 @@ import { useRouter } from 'next/navigation';
 import { IconArrowRight, IconTerminal2, IconAlertOctagon } from '@tabler/icons-react';
 import { Center, Container, Group, Stack, Text, Title, SimpleGrid } from '@mantine/core';
 import { motion } from 'framer-motion';
-import { useQuery } from '@tanstack/react-query';
 import {
   Difficulty,
   DIFFICULTY_VALUES,
@@ -15,6 +14,7 @@ import {
 import { useQuestions } from '@/lib/hooks/useQuestions';
 import type { Question } from '@/lib/hooks/useQuestions';
 import { useIncidents } from '@/lib/hooks/useIncidents';
+import { useUserProfile } from '@/lib/hooks/useSession';
 import { colors } from '@/lib/theme/colors';
 import { DuckBadge } from '../DuckBadge';
 import { BadgeType } from '@prisma/client';
@@ -134,14 +134,7 @@ export default function MixerHome() {
     return rails;
   }, [difficultyFiltered, activeGenre]);
 
-  const { data: profileData } = useQuery({
-    queryKey: ['userProfile'],
-    queryFn: async () => {
-      const res = await fetch('/api/user/profile');
-      if (!res.ok) throw new Error('Failed to fetch profile');
-      return res.json();
-    },
-  });
+  const { data: profileData } = useUserProfile();
 
   return (
     <div className={styles.pageWrapper}>
@@ -151,7 +144,7 @@ export default function MixerHome() {
       <Container size="xl" className={styles.mainContainer}>
         {loading ? (
           <Center py={100}>
-            <div className="pixel-border animate-pulse" style={{ padding: '20px 40px', background: 'var(--surface-default)' }}>
+            <div className="pixel-skeleton" style={{ padding: '20px 40px' }}>
               <Text className="pixel-font" style={{ color: 'var(--primary-red)' }}>LOADING DATABANKS...</Text>
             </div>
           </Center>
@@ -392,7 +385,7 @@ export default function MixerHome() {
 
                     {loadingIncidents ? (
                       <Center py={60}>
-                        <div className="pixel-border animate-pulse" style={{ padding: '20px 40px', background: 'var(--surface-default)' }}>
+                        <div className="pixel-skeleton" style={{ padding: '20px 40px' }}>
                           <Text className="pixel-font" style={{ color: 'var(--primary-red)' }}>RETRIEVING LIVE TELEMETRY...</Text>
                         </div>
                       </Center>
